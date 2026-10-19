@@ -76,6 +76,7 @@ class _VendorPageState extends ConsumerState<VendorPage> {
   Widget _buildContent(VendorsData data) {
     const gap = SizedBox(height: AppSpacing.lg);
     final featured = _filter(data.featured);
+    final isSearching = _search.text.trim().isNotEmpty;
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(
@@ -86,7 +87,6 @@ class _VendorPageState extends ConsumerState<VendorPage> {
       ),
       children: [
         VendorsTopBar(
-          controller: _search,
           onNotifications: () => _soon('Notifikasi'),
           onChat: () => _soon('Pesan'),
         ),
@@ -98,53 +98,58 @@ class _VendorPageState extends ConsumerState<VendorPage> {
           onFilterTap: _soon,
         ),
         gap,
-        SectionHeader(
-          eyebrow: 'Kurasi Spesialis',
-          eyebrowColor: AppColors.primary,
-          title: 'Eksplorasi Kategori',
-          trailing: Text(
-            '${data.categories.length + data.quickCategories.length} Layanan',
-            style: const TextStyle(
-              color: AppColors.textSecondary,
-              fontSize: 13,
+        // Kategori hanya tampil di keadaan awal (belum mencari).
+        if (!isSearching) ...[
+          SectionHeader(
+            eyebrow: 'Kurasi Spesialis',
+            eyebrowColor: AppColors.primary,
+            title: 'Eksplorasi Kategori',
+            trailing: Text(
+              '${data.categories.length + data.quickCategories.length} Layanan',
+              style: const TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 13,
+              ),
             ),
           ),
-        ),
-        const SizedBox(height: 12),
-        CategoryGrid(
-          categories: data.categories,
-          onSelected: (c) => _search.text = c.label,
-        ),
-        const SizedBox(height: 12),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            children: [
-              for (final q in data.quickCategories)
-                Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: ActionChip(
-                    avatar: Icon(q.icon, size: 18, color: AppColors.primary),
-                    label: Text(q.label),
-                    onPressed: () => _search.text = q.label,
-                    backgroundColor: AppColors.surface,
-                    side: const BorderSide(color: AppColors.outline),
-                    shape: const StadiumBorder(),
-                  ),
-                ),
-            ],
+          const SizedBox(height: 12),
+          CategoryGrid(
+            categories: data.categories,
+            onSelected: (c) => _search.text = c.label,
           ),
-        ),
-        gap,
+          const SizedBox(height: 12),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                for (final q in data.quickCategories)
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: ActionChip(
+                      avatar: Icon(q.icon, size: 18, color: AppColors.primary),
+                      label: Text(q.label),
+                      onPressed: () => _search.text = q.label,
+                      backgroundColor: AppColors.surface,
+                      side: const BorderSide(color: AppColors.outline),
+                      shape: const StadiumBorder(),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          gap,
+        ],
         // Klaim voucher = aksi yang butuh login: router mengarahkan tamu ke Login.
         VendorsPromoBanner(onClaim: () => context.push(AppRoutes.cart)),
         gap,
         SectionHeader(
-          eyebrow: 'Pilihan Editor',
+          eyebrow: isSearching ? 'Hasil Pencarian' : 'Pilihan Editor',
           eyebrowColor: AppColors.primary,
-          title: 'Featured Vendors of the Month',
-          actionLabel: 'Lihat Semua',
-          onAction: () => _search.clear(),
+          title: isSearching
+              ? '${featured.length} Vendor Ditemukan'
+              : 'Featured Vendors of the Month',
+          actionLabel: isSearching ? 'Hapus' : 'Lihat Semua',
+          onAction: _search.clear,
         ),
         const SizedBox(height: 12),
         if (featured.isEmpty)

@@ -1,16 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:w51/app/theme/app_colors.dart';
-import 'package:w51/core/widgets/search_field.dart';
+import 'package:w51/app/theme/app_typography.dart';
 
 class VendorsTopBar extends StatelessWidget {
   const VendorsTopBar({
-    required this.controller,
     required this.onNotifications,
     required this.onChat,
     super.key,
   });
 
-  final TextEditingController controller;
   final VoidCallback onNotifications;
   final VoidCallback onChat;
 
@@ -18,13 +16,7 @@ class VendorsTopBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Expanded(
-          child: AppSearchField(
-            controller: controller,
-            hint: 'Search venues, photographers...',
-            borderRadius: 999,
-          ),
-        ),
+        Expanded(child: Text('Vendors', style: AppTypography.heading(26))),
         IconButton(
           tooltip: 'Notifikasi',
           onPressed: onNotifications,
@@ -35,6 +27,7 @@ class VendorsTopBar extends StatelessWidget {
           onPressed: onChat,
           icon: const Icon(Icons.chat_bubble_outline_rounded),
         ),
+        const SizedBox(width: 4),
         const CircleAvatar(
           radius: 18,
           backgroundColor: AppColors.surfaceTint,

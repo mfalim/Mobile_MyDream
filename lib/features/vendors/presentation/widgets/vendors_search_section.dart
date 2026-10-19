@@ -24,8 +24,11 @@ class VendorsSearchSection extends StatelessWidget {
         AppSearchField(
           controller: controller,
           hint: 'Cari vendor, ballroom, atau tema...',
-          trailingIcon: Icons.tune,
-          onTrailingTap: () => onFilterTap('Filter'),
+          trailingIcon:
+              controller.text.isEmpty ? Icons.tune : Icons.close_rounded,
+          onTrailingTap: controller.text.isEmpty
+              ? () => onFilterTap('Filter')
+              : controller.clear,
         ),
         const SizedBox(height: 12),
         SingleChildScrollView(

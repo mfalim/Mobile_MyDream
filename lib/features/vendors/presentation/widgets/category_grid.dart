@@ -74,7 +74,7 @@ class _CategoryTile extends StatelessWidget {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: AppTypography.heading(
-                      19,
+                      16,
                     ).copyWith(color: Colors.white),
                   ),
                   const SizedBox(height: 2),
