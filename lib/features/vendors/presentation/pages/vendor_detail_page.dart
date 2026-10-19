@@ -17,6 +17,8 @@ import 'package:w51/features/vendors/presentation/widgets/vendor_booking_bar.dar
 import 'package:w51/features/vendors/presentation/widgets/vendor_gallery_header.dart';
 import 'package:w51/features/vendors/presentation/widgets/vendor_price_card.dart';
 import 'package:w51/features/vendors/presentation/widgets/vendor_provider_card.dart';
+import 'package:w51/features/cart/domain/entities/cart_item.dart';
+import 'package:w51/features/cart/presentation/providers/cart_provider.dart';
 
 class VendorDetailPage extends ConsumerStatefulWidget {
   const VendorDetailPage({required this.vendorId, super.key});
@@ -89,7 +91,10 @@ class _VendorDetailPageState extends ConsumerState<VendorDetailPage> {
           totalPrice: d.price,
           onChat: () => _soon('Chat vendor'),
           // Keranjang butuh login: router mengarahkan tamu ke Login dulu.
-          onBook: () => context.push(AppRoutes.cart),
+          onBook: () {
+            ref.read(cartProvider.notifier).add(CartItem.fromVendorDetail(d));
+            context.push(AppRoutes.cart);
+          },
         ),
       ),
     );

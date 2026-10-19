@@ -10,6 +10,7 @@ import '../../features/inspirations/presentation/pages/inspirations_page.dart';
 import '../../features/my_wedding/presentation/pages/profile_page.dart';
 import '../../features/vendors/presentation/pages/vendor_page.dart';
 import '../../features/vendors/presentation/pages/vendor_detail_page.dart';
+import '../../features/cart/presentation/pages/cart_page.dart';
 import 'app_shell.dart';
 import 'route_names.dart';
 
@@ -78,7 +79,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: AppRoutes.cart,
-        builder: (context, state) => const ComingSoonPage(title: 'Keranjang'),
+        builder: (context, state) => const CartPage(),
       ),
       GoRoute(
         path: AppRoutes.checkout,
