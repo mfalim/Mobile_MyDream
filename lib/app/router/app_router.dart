@@ -9,6 +9,7 @@ import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/inspirations/presentation/pages/inspirations_page.dart';
 import '../../features/my_wedding/presentation/pages/profile_page.dart';
 import '../../features/vendors/presentation/pages/vendor_page.dart';
+import '../../features/vendors/presentation/pages/vendor_detail_page.dart';
 import 'app_shell.dart';
 import 'route_names.dart';
 
@@ -86,6 +87,11 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.payment,
         builder: (context, state) => const ComingSoonPage(title: 'Pembayaran'),
+      ),
+      GoRoute(
+        path: AppRoutes.vendorDetail,
+        builder: (context, state) =>
+            VendorDetailPage(vendorId: state.pathParameters['id']!),
       ),
     ],
   );

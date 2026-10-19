@@ -8,3 +8,6 @@ String formatRupiah(int amount, {String prefix = 'IDR'}) {
   }
   return '$prefix $buffer';
 }
+
+/// 61865 -> "61.865"
+String formatNumber(int amount) => formatRupiah(amount, prefix: '').trim();

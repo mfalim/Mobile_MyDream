@@ -3,6 +3,8 @@ abstract final class AppRoutes {
   static const home = '/home';
   static const vendors = '/vendors';
   static const inspirations = '/inspirations';
+  static const vendorDetail = '/vendor/:id';
+  static String vendorDetailPath(String id) => '/vendor/$id';
   static const login = '/login';
 
   // Wajib login

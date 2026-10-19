@@ -165,7 +165,8 @@ class _VendorPageState extends ConsumerState<VendorPage> {
                 vendor: vendor,
                 onChat: () => _soon('Chat vendor'),
                 // Layar Vendor Details dibuat di langkah berikutnya.
-                onPricelist: () => _soon('Detail vendor'),
+                onPricelist: () =>
+                    context.push(AppRoutes.vendorDetailPath(vendor.id)),
               ),
             ),
         gap,
