@@ -1,29 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:w51/app/router/app_shell.dart';
-import 'package:w51/app/theme/app_theme.dart';
-import 'package:w51/features/auth/presentation/pages/login_page.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class MyApp extends StatefulWidget {
+import 'router/app_router.dart';
+import 'theme/app_theme.dart';
+
+class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
   @override
-  State<MyApp> createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp> {
-  bool _isLoggedIn = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'MyDream',
+  Widget build(BuildContext context, WidgetRef ref) {
+    return MaterialApp.router(
+      title: 'Aura Wedding',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
-      home: _isLoggedIn
-          ? const AppShell()
-          : LoginPage(
-              onLoginSuccess: () => setState(() => _isLoggedIn = true),
-            ),
+      routerConfig: ref.watch(routerProvider),
     );
   }
 }

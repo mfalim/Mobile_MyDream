@@ -14,9 +14,8 @@ class AppBottomNavigation extends StatelessWidget {
   static const _items = [
     (Icons.home_outlined, Icons.home_rounded, 'Home'),
     (Icons.storefront_outlined, Icons.storefront_rounded, 'Vendors'),
-    (Icons.shopping_bag_outlined, Icons.shopping_bag_rounded, 'Store'),
-    (Icons.favorite_border_rounded, Icons.favorite_rounded, 'Inspirations'),
-    (Icons.person_outline_rounded, Icons.person_rounded, 'Profile'),
+    (Icons.auto_awesome_outlined, Icons.auto_awesome, 'Inspirations'),
+    (Icons.favorite_border_rounded, Icons.favorite_rounded, 'My Wedding'),
   ];
 
   @override

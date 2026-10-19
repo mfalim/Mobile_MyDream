@@ -1,37 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:w51/app/theme/app_colors.dart';
+import 'package:w51/features/auth/presentation/providers/auth_provider.dart';
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key, required this.onLoginSuccess});
-
-  final VoidCallback onLoginSuccess;
+class LoginPage extends ConsumerStatefulWidget {
+  const LoginPage({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  ConsumerState<LoginPage> createState() => _LoginPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
-  static const _demoEmail = 'mfalim13@gmail.com';
-  static const _demoPassword = 'qwerty123';
-
+class _LoginPageState extends ConsumerState<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   bool _obscurePassword = true;
   String? _email;
-  String? _password;
   String? _loginError;
 
   void _submitForm() {
     if (!_formKey.currentState!.validate()) return;
-
     _formKey.currentState!.save();
-    if (_email?.trim().toLowerCase() != _demoEmail ||
-        _password != _demoPassword) {
-      setState(() => _loginError = 'Email atau kata sandi demo tidak cocok.');
-      return;
-    }
-
-    widget.onLoginSuccess();
+    // PROTOTYPE: login palsu. Router otomatis mengarahkan setelah status berubah.
+    ref.read(authProvider.notifier).signInDemo(email: _email?.trim());
   }
 
   @override
@@ -163,7 +153,6 @@ class _LoginPageState extends State<LoginPage> {
                           obscureText: _obscurePassword,
                           textInputAction: TextInputAction.done,
                           onFieldSubmitted: (_) => _submitForm(),
-                          onSaved: (value) => _password = value,
                           onChanged: (_) => _clearLoginError(),
                           decoration: _inputDecoration(
                             hintText: 'Masukkan kata sandi',
@@ -296,7 +285,8 @@ class _LoginPageState extends State<LoginPage> {
                           height: 50,
                           child: OutlinedButton.icon(
                             key: const ValueKey('google-login'),
-                            onPressed: widget.onLoginSuccess,
+                            onPressed: () =>
+                                ref.read(authProvider.notifier).signInDemo(),
                             icon: SvgPicture.asset(
                               'assets/images/google_g.svg',
                               key: const ValueKey('google-logo'),

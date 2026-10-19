@@ -1,36 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:w51/core/widgets/app_bottom_navigation.dart';
-import 'package:w51/features/inspirations/presentation/pages/inspirations_page.dart';
-import 'package:w51/features/home/presentation/pages/home_page.dart';
-import 'package:w51/features/package/presentation/store_page.dart';
-import 'package:w51/features/my_wedding/presentation/pages/profile_page.dart';
-import 'package:w51/features/vendors/presentation/pages/vendor_page.dart';
+import 'package:go_router/go_router.dart';
 
-class AppShell extends StatefulWidget {
-  const AppShell({super.key});
+import '../../core/widgets/app_bottom_navigation.dart';
 
-  @override
-  State<AppShell> createState() => _AppShellState();
-}
+class AppShell extends StatelessWidget {
+  const AppShell({required this.navigationShell, super.key});
 
-class _AppShellState extends State<AppShell> {
-  int _selectedIndex = 0;
-
-  static const _pages = [
-    HomePage(),
-    VendorPage(),
-    StorePage(),
-    InspirationsPage(),
-    ProfilePage(),
-  ];
+  final StatefulNavigationShell navigationShell;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(index: _selectedIndex, children: _pages),
+      body: navigationShell,
       bottomNavigationBar: AppBottomNavigation(
-        selectedIndex: _selectedIndex,
-        onItemSelected: (index) => setState(() => _selectedIndex = index),
+        selectedIndex: navigationShell.currentIndex,
+        onItemSelected: (index) => navigationShell.goBranch(
+          index,
+          initialLocation: index == navigationShell.currentIndex,
+        ),
       ),
     );
   }
