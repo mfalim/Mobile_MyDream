@@ -11,3 +11,36 @@ String formatRupiah(int amount, {String prefix = 'IDR'}) {
 
 /// 61865 -> "61.865"
 String formatNumber(int amount) => formatRupiah(amount, prefix: '').trim();
+
+const _dayNames = [
+  'Senin',
+  'Selasa',
+  'Rabu',
+  'Kamis',
+  'Jumat',
+  'Sabtu',
+  'Minggu',
+];
+
+const _monthNames = [
+  'Januari',
+  'Februari',
+  'Maret',
+  'April',
+  'Mei',
+  'Juni',
+  'Juli',
+  'Agustus',
+  'September',
+  'Oktober',
+  'November',
+  'Desember',
+];
+
+/// DateTime(2026, 10, 24) -> "Sabtu, 24 Oktober 2026"
+String formatDateId(DateTime d) =>
+    '${_dayNames[d.weekday - 1]}, ${d.day} ${_monthNames[d.month - 1]} ${d.year}';
+
+/// 15, 30 -> "15:30 WITA"
+String formatTimeWita(int hour, int minute) =>
+    '${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')} WITA';

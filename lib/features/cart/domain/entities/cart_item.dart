@@ -5,6 +5,7 @@ class CartItem {
     required this.vendorId,
     required this.providerName,
     required this.providerSubtitle,
+    required this.location,
     required this.packageTitle,
     required this.paxIncluded,
     required this.price,
@@ -22,6 +23,7 @@ class CartItem {
         vendorId: d.id,
         providerName: d.provider.name,
         providerSubtitle: 'Official Partner • ${d.location}',
+        location: d.location,
         packageTitle: '${d.name} - All Inclusive ${d.paxIncluded} Pax',
         paxIncluded: d.paxIncluded,
         price: d.price,
@@ -36,6 +38,7 @@ class CartItem {
   final String vendorId;
   final String providerName;
   final String providerSubtitle;
+  final String location;
   final String packageTitle;
   final int paxIncluded;
   final int price;
@@ -51,6 +54,7 @@ class CartItem {
         vendorId: vendorId,
         providerName: providerName,
         providerSubtitle: providerSubtitle,
+        location: location,
         packageTitle: packageTitle,
         paxIncluded: paxIncluded,
         price: price,

@@ -11,6 +11,7 @@ import '../../features/my_wedding/presentation/pages/profile_page.dart';
 import '../../features/vendors/presentation/pages/vendor_page.dart';
 import '../../features/vendors/presentation/pages/vendor_detail_page.dart';
 import '../../features/cart/presentation/pages/cart_page.dart';
+import '../../features/checkout/presentation/pages/checkout_page.dart';
 import 'app_shell.dart';
 import 'route_names.dart';
 
@@ -83,7 +84,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: AppRoutes.checkout,
-        builder: (context, state) => const ComingSoonPage(title: 'Checkout'),
+        builder: (context, state) => const CheckoutPage(),
       ),
       GoRoute(
         path: AppRoutes.payment,
