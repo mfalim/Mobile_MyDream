@@ -8,16 +8,20 @@ class SectionHeader extends StatelessWidget {
     required this.eyebrow,
     required this.title,
     this.eyebrowIcon,
+    this.eyebrowColor = AppColors.onGold,
     this.actionLabel,
     this.onAction,
+    this.trailing,
     super.key,
   });
 
   final String eyebrow;
   final String title;
   final IconData? eyebrowIcon;
+  final Color eyebrowColor;
   final String? actionLabel;
   final VoidCallback? onAction;
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
@@ -31,15 +35,14 @@ class SectionHeader extends StatelessWidget {
               Row(
                 children: [
                   if (eyebrowIcon != null) ...[
-                    Icon(eyebrowIcon, size: 14, color: AppColors.onGold),
+                    Icon(eyebrowIcon, size: 14, color: eyebrowColor),
                     const SizedBox(width: 6),
                   ],
                   Flexible(
                     child: Text(
                       eyebrow.toUpperCase(),
-                      style: AppTypography.eyebrow.copyWith(
-                        color: AppColors.onGold,
-                      ),
+                      style:
+                          AppTypography.eyebrow.copyWith(color: eyebrowColor),
                     ),
                   ),
                 ],
@@ -60,6 +63,11 @@ class SectionHeader extends StatelessWidget {
                 const Icon(Icons.arrow_forward, size: 16),
               ],
             ),
+          )
+        else if (trailing != null)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 4),
+            child: trailing,
           ),
       ],
     );
