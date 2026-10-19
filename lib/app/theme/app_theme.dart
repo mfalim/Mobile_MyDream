@@ -1,33 +1,59 @@
 import 'package:flutter/material.dart';
-import 'package:w51/app/theme/app_colors.dart';
+
+import 'app_colors.dart';
+import 'app_radius.dart';
+import 'app_typography.dart';
 
 abstract final class AppTheme {
-  static ThemeData get light => ThemeData(
-        useMaterial3: true,
-        scaffoldBackgroundColor: AppColors.canvas,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: AppColors.coral,
-          primary: AppColors.coralDark,
-          surface: AppColors.canvas,
+  static ThemeData get light {
+    final scheme = ColorScheme.fromSeed(
+      seedColor: AppColors.primary,
+      brightness: Brightness.light,
+    ).copyWith(
+      primary: AppColors.primary,
+      onPrimary: AppColors.onPrimary,
+      surface: AppColors.surface,
+      onSurface: AppColors.textPrimary,
+      error: AppColors.error,
+      outline: AppColors.outline,
+    );
+
+    return ThemeData(
+      useMaterial3: true,
+      colorScheme: scheme,
+      scaffoldBackgroundColor: AppColors.background,
+      textTheme: AppTypography.textTheme,
+      appBarTheme: const AppBarTheme(
+        backgroundColor: AppColors.background,
+        foregroundColor: AppColors.textPrimary,
+        elevation: 0,
+        centerTitle: false,
+      ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          backgroundColor: AppColors.primary,
+          foregroundColor: AppColors.onPrimary,
+          minimumSize: const Size.fromHeight(52),
+          shape: RoundedRectangleBorder(borderRadius: AppRadius.button),
+          textStyle: const TextStyle(fontWeight: FontWeight.w600),
         ),
-        appBarTheme: const AppBarTheme(
-          backgroundColor: AppColors.canvas,
-          foregroundColor: AppColors.ink,
-          elevation: 0,
-          centerTitle: false,
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: AppColors.primary,
+          minimumSize: const Size.fromHeight(52),
+          side: const BorderSide(color: AppColors.primary),
+          shape: RoundedRectangleBorder(borderRadius: AppRadius.button),
         ),
-        textTheme: const TextTheme(
-          headlineSmall: TextStyle(
-            color: AppColors.ink,
-            fontSize: 24,
-            fontWeight: FontWeight.w700,
-          ),
-          titleMedium: TextStyle(
-            color: AppColors.ink,
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ),
-          bodyMedium: TextStyle(color: AppColors.ink, fontSize: 14),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: AppColors.surfaceTint,
+        border: OutlineInputBorder(
+          borderRadius: AppRadius.button,
+          borderSide: BorderSide.none,
         ),
-      );
+      ),
+    );
+  }
 }

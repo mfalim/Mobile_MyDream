@@ -74,7 +74,7 @@ class _VendorSearchSectionState extends State<VendorSearchSection> {
   Widget _filter(String label, String value, List<String> options,
       ValueChanged<String> onSelected) {
     return DropdownButtonFormField<String>(
-      value: value,
+      initialValue: value,
       decoration: InputDecoration(
         labelText: label,
         contentPadding:
