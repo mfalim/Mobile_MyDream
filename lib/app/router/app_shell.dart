@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:w51/core/widgets/app_bottom_navigation.dart';
-import 'package:w51/features/booking/presentation/inspirations_page.dart';
-import 'package:w51/features/home/presentation/home_page.dart';
+import 'package:w51/features/inspirations/presentation/pages/inspirations_page.dart';
+import 'package:w51/features/home/presentation/pages/home_page.dart';
 import 'package:w51/features/package/presentation/store_page.dart';
-import 'package:w51/features/profile/presentation/profile_page.dart';
-import 'package:w51/features/vendor/presentation/vendor_page.dart';
+import 'package:w51/features/my_wedding/presentation/pages/profile_page.dart';
+import 'package:w51/features/vendors/presentation/pages/vendor_page.dart';
 
 class AppShell extends StatefulWidget {
   const AppShell({super.key});

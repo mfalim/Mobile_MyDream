@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:w51/app/theme/app_colors.dart';
-import 'package:w51/features/vendor/presentation/widgets/vendor_categories_section.dart';
-import 'package:w51/features/vendor/presentation/widgets/vendor_search_section.dart';
-import 'package:w51/features/vendor/presentation/widgets/vendor_top_bar.dart';
+import 'package:w51/features/vendors/presentation/widgets/vendor_categories_section.dart';
+import 'package:w51/features/vendors/presentation/widgets/vendor_search_section.dart';
+import 'package:w51/features/vendors/presentation/widgets/vendor_top_bar.dart';
 
 class VendorPage extends StatelessWidget {
   const VendorPage({super.key});
