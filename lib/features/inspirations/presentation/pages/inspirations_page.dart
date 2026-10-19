@@ -1,165 +1,191 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:w51/app/theme/app_colors.dart';
+import 'package:w51/app/theme/app_spacing.dart';
+import 'package:w51/app/theme/app_typography.dart';
+import 'package:w51/core/widgets/empty_state.dart';
+import 'package:w51/core/widgets/error_state.dart';
+import 'package:w51/features/inspirations/domain/entities/inspiration_entities.dart';
+import 'package:w51/features/inspirations/presentation/providers/inspirations_provider.dart';
+import 'package:w51/features/inspirations/presentation/widgets/inspiration_tabs.dart';
+import 'package:w51/features/inspirations/presentation/widgets/more_stories_list.dart';
+import 'package:w51/features/inspirations/presentation/widgets/story_body.dart';
+import 'package:w51/features/inspirations/presentation/widgets/story_engagement.dart';
+import 'package:w51/features/inspirations/presentation/widgets/story_gallery.dart';
+import 'package:w51/features/inspirations/presentation/widgets/story_header.dart';
+import 'package:w51/features/inspirations/presentation/widgets/story_tips.dart';
+import 'package:w51/features/inspirations/presentation/widgets/story_vendors.dart';
 
-class InspirationsPage extends StatefulWidget {
+class InspirationsPage extends ConsumerStatefulWidget {
   const InspirationsPage({super.key});
 
   @override
-  State<InspirationsPage> createState() => _InspirationsPageState();
+  ConsumerState<InspirationsPage> createState() => _InspirationsPageState();
 }
 
-class _InspirationsPageState extends State<InspirationsPage> {
-  String _category = 'Semua';
-  final Set<int> _saved = {};
+class _InspirationsPageState extends ConsumerState<InspirationsPage> {
+  // Status ini hanya di memori (prototype).
+  int _tab = 1; // 0 = Inspirasi & Tips, 1 = Real Weddings (sesuai Figma)
+  String? _category;
+  bool _liked = false;
+  bool _saved = false;
 
-  static const _ideas = [
-    ('Garden romance', 'Dekorasi', Icons.local_florist_outlined),
-    ('Intimate dinner', 'Resepsi', Icons.dinner_dining_outlined),
-    ('Soft classic', 'Busana', Icons.checkroom_outlined),
-    ('Golden hour', 'Fotografi', Icons.camera_alt_outlined),
-    ('White blooms', 'Dekorasi', Icons.spa_outlined),
-    ('Modern vows', 'Resepsi', Icons.favorite_border_rounded),
-  ];
+  void _soon(String feature) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text('$feature segera hadir.')));
+  }
+
+  Future<void> _pickCategory(List<String> categories) async {
+    final result = await showModalBottomSheet<String>(
+      context: context,
+      showDragHandle: true,
+      backgroundColor: AppColors.surface,
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Filter Kategori Cerita', style: AppTypography.heading(20)),
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  for (final c in ['', ...categories])
+                    ChoiceChip(
+                      label: Text(c.isEmpty ? 'Semua' : c),
+                      selected: (_category ?? '') == c,
+                      onSelected: (_) => Navigator.of(ctx).pop(c),
+                      selectedColor: AppColors.coral.withValues(alpha: 0.3),
+                      backgroundColor: AppColors.surfaceTint,
+                      side: BorderSide.none,
+                      shape: const StadiumBorder(),
+                    ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    if (result == null || !mounted) return;
+    setState(() => _category = result.isEmpty ? null : result);
+  }
 
   @override
   Widget build(BuildContext context) {
-    final visibleIdeas = _category == 'Semua'
-        ? _ideas
-        : _ideas.where((idea) => idea.$2 == _category).toList();
-
+    final data = ref.watch(inspirationsDataProvider);
     return SafeArea(
       bottom: false,
-      child: CustomScrollView(
-        slivers: [
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 22, 20, 4),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('IDEA BOARD',
-                      style: TextStyle(
-                          color: AppColors.coralDark,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 1.2)),
-                  const SizedBox(height: 6),
-                  const Text('Inspirations',
-                      style:
-                          TextStyle(fontSize: 24, fontWeight: FontWeight.w700)),
-                  const SizedBox(height: 6),
-                  const Text(
-                      'Kumpulkan ide untuk hari yang terasa seperti kamu.',
-                      style: TextStyle(color: AppColors.muted)),
-                  const SizedBox(height: 18),
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: [
-                        for (final category in const [
-                          'Semua',
-                          'Dekorasi',
-                          'Resepsi',
-                          'Busana',
-                          'Fotografi'
-                        ]) ...[
-                          Padding(
-                            padding: const EdgeInsets.only(right: 8),
-                            child: ChoiceChip(
-                              label: Text(category),
-                              selected: _category == category,
-                              onSelected: (_) =>
-                                  setState(() => _category = category),
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          SliverPadding(
-            padding: const EdgeInsets.fromLTRB(20, 10, 20, 24),
-            sliver: SliverGrid.builder(
-              itemCount: visibleIdeas.length,
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 16,
-                childAspectRatio: 0.78,
-              ),
-              itemBuilder: (context, index) {
-                final idea = visibleIdeas[index];
-                final saved = _saved.contains(index);
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: Stack(
-                        fit: StackFit.expand,
-                        children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(8),
-                            child: Container(
-                              color: index.isEven
-                                  ? const Color(0xFFE8EEE5)
-                                  : AppColors.blush,
-                              child: Center(
-                                child: Icon(idea.$3,
-                                    size: 42,
-                                    color: index.isEven
-                                        ? AppColors.sage
-                                        : AppColors.coralDark),
-                              ),
-                            ),
-                          ),
-                          Positioned(
-                            right: 8,
-                            top: 8,
-                            child: Material(
-                              color: Colors.white.withValues(alpha: 0.92),
-                              shape: const CircleBorder(),
-                              child: IconButton(
-                                visualDensity: VisualDensity.compact,
-                                tooltip:
-                                    saved ? 'Hapus simpanan' : 'Simpan ide',
-                                onPressed: () => setState(() {
-                                  if (saved) {
-                                    _saved.remove(index);
-                                  } else {
-                                    _saved.add(index);
-                                  }
-                                }),
-                                icon: Icon(
-                                  saved
-                                      ? Icons.bookmark_rounded
-                                      : Icons.bookmark_border_rounded,
-                                  color: AppColors.coralDark,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(idea.$1,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontWeight: FontWeight.w600)),
-                    const SizedBox(height: 3),
-                    Text(idea.$2,
-                        style: const TextStyle(
-                            color: AppColors.muted, fontSize: 12)),
-                  ],
-                );
-              },
-            ),
-          ),
-        ],
+      child: data.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (e, s) => ErrorState(
+          message: 'Cerita gagal dimuat.',
+          onRetry: () => ref.invalidate(inspirationsDataProvider),
+        ),
+        data: _buildContent,
       ),
+    );
+  }
+
+  Widget _buildContent(InspirationsData d) {
+    const gap = SizedBox(height: AppSpacing.lg);
+    final more = _category == null
+        ? d.more
+        : d.more.where((s) => s.category == _category).toList();
+    final story = d.story;
+
+    return Stack(
+      children: [
+        ListView(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.screenPadding,
+            AppSpacing.md,
+            AppSpacing.screenPadding,
+            96,
+          ),
+          children: [
+            InspirationTabs(
+              labels: const ['Inspirasi & Tips', 'Real Weddings'],
+              selected: _tab,
+              onChanged: (i) => setState(() => _tab = i),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            if (_tab == 0)
+              const Padding(
+                padding: EdgeInsets.only(top: 48),
+                child: EmptyState(
+                  message: 'Inspirasi & Tips segera hadir.',
+                  icon: Icons.auto_awesome_outlined,
+                ),
+              )
+            else ...[
+              StoryHeader(
+                story: story,
+                saved: _saved,
+                onSave: () => setState(() => _saved = !_saved),
+                onShare: () => _soon('Bagikan cerita'),
+              ),
+              const SizedBox(height: AppSpacing.md),
+              StoryBody(
+                stats: story.stats,
+                body: story.body,
+                quote: story.quote,
+              ),
+              gap,
+              StoryGallery(captions: story.photoCaptions),
+              gap,
+              StoryVendors(
+                title: story.vendorsTitle,
+                vendors: story.vendors,
+                onPortfolio: (v) => _soon('Portofolio ${v.name}'),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              StoryTips(title: story.tipsTitle, tips: story.tips),
+              const SizedBox(height: AppSpacing.md),
+              StoryEngagement(
+                likes: story.likes + (_liked ? 1 : 0),
+                reads: story.reads,
+                liked: _liked,
+                onLike: () => setState(() => _liked = !_liked),
+              ),
+              gap,
+              const Divider(color: AppColors.outline),
+              gap,
+              MoreStoriesList(
+                stories: more,
+                onOpen: (s) => _soon('Cerita "${s.category}"'),
+                onSeeAll: () => setState(() => _category = null),
+              ),
+            ],
+          ],
+        ),
+        if (_tab == 1)
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 16,
+            child: Center(
+              child: FilledButton.icon(
+                onPressed: () => _pickCategory(d.categories),
+                icon: const Icon(Icons.tune, size: 18),
+                label: Text(
+                  _category == null
+                      ? 'Filter Kategori Cerita'
+                      : 'Kategori: $_category',
+                ),
+                style: FilledButton.styleFrom(
+                  minimumSize: const Size(0, 48),
+                  padding: const EdgeInsets.symmetric(horizontal: 22),
+                  elevation: 3,
+                ),
+              ),
+            ),
+          ),
+      ],
     );
   }
 }
