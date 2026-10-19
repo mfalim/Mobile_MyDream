@@ -19,7 +19,7 @@ import 'package:w51/features/checkout/presentation/providers/checkout_provider.d
 import 'package:w51/features/checkout/presentation/widgets/checkout_bar.dart';
 import 'package:w51/features/checkout/presentation/widgets/checkout_package_card.dart';
 import 'package:w51/features/checkout/presentation/widgets/checkout_section.dart';
-import 'package:w51/features/checkout/presentation/widgets/checkout_step_header.dart';
+import 'package:w51/core/widgets/step_progress_header.dart';
 import 'package:w51/features/checkout/presentation/widgets/concept_selector.dart';
 import 'package:w51/features/checkout/presentation/widgets/deal_protection_card.dart';
 import 'package:w51/features/checkout/presentation/widgets/guest_tier_selector.dart';
@@ -195,7 +195,7 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
             )
           : Column(
               children: [
-                const CheckoutStepHeader(
+                const StepProgressHeader(
                   step: 1,
                   total: 2,
                   caption: 'Validasi Detail Acara',

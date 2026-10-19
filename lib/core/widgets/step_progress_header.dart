@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:w51/app/theme/app_colors.dart';
 import 'package:w51/app/theme/app_typography.dart';
 
-class CheckoutStepHeader extends StatelessWidget {
-  const CheckoutStepHeader({
+class StepProgressHeader extends StatelessWidget {
+  const StepProgressHeader({
     required this.step,
     required this.total,
     required this.caption,

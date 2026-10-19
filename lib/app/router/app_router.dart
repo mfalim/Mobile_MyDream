@@ -2,7 +2,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../core/widgets/coming_soon_page.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/home/presentation/pages/home_page.dart';
@@ -12,6 +11,7 @@ import '../../features/vendors/presentation/pages/vendor_page.dart';
 import '../../features/vendors/presentation/pages/vendor_detail_page.dart';
 import '../../features/cart/presentation/pages/cart_page.dart';
 import '../../features/checkout/presentation/pages/checkout_page.dart';
+import '../../features/payment/presentation/pages/payment_page.dart';
 import 'app_shell.dart';
 import 'route_names.dart';
 
@@ -88,7 +88,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: AppRoutes.payment,
-        builder: (context, state) => const ComingSoonPage(title: 'Pembayaran'),
+        builder: (context, state) => const PaymentPage(),
       ),
       GoRoute(
         path: AppRoutes.vendorDetail,
