@@ -158,17 +158,11 @@ class _VendorPageState extends ConsumerState<VendorPage> {
             icon: Icons.search_off,
           )
         else
-          for (final vendor in featured)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 16),
-              child: FeaturedVendorCard(
-                vendor: vendor,
-                onChat: () => _soon('Chat vendor'),
-                // Layar Vendor Details dibuat di langkah berikutnya.
-                onPricelist: () =>
-                    context.push(AppRoutes.vendorDetailPath(vendor.id)),
-              ),
-            ),
+          FeaturedVendorGrid(
+            vendors: featured,
+            onOpen: (v) => context.push(AppRoutes.vendorDetailPath(v.id)),
+            onChat: (_) => _soon('Chat vendor'),
+          ),
         gap,
         VendorsHelpBanner(onAsk: () => _soon('Konsultasi ahli')),
       ],
