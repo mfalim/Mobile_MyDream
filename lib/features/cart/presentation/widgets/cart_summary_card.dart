@@ -52,8 +52,8 @@ class CartSummaryCard extends StatelessWidget {
           _Line('Subtotal Item Terpilih', formatRupiah(subtotal)),
           _Line(
             'Potongan Kupon Promo',
-            '- ${formatRupiah(discount)}',
-            valueColor: AppColors.primary,
+            discount > 0 ? '- ${formatRupiah(discount)}' : '-',
+            valueColor: discount > 0 ? AppColors.primary : null,
           ),
           const _Line(
             'Biaya Layanan Escrow Concierge',

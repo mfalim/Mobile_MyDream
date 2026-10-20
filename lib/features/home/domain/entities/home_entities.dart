@@ -32,6 +32,7 @@ class ServiceCategory {
 class DealItem {
   const DealItem({
     required this.id,
+    required this.voucherCode,
     required this.title,
     required this.badge,
     required this.isDiscount,
@@ -44,6 +45,7 @@ class DealItem {
   });
 
   final String id;
+  final String voucherCode;
   final String title;
   final String badge;
   final bool isDiscount; // true = badge merah "Hemat", false = badge emas

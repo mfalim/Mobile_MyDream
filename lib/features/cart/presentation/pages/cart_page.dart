@@ -14,9 +14,14 @@ import 'package:w51/features/cart/presentation/widgets/cart_summary_card.dart';
 import 'package:w51/features/cart/presentation/widgets/cart_tab_switcher.dart';
 import 'package:w51/core/utils/formatters.dart';
 import 'package:w51/features/my_wedding/presentation/providers/wedding_date_provider.dart';
+import 'package:w51/features/cart/presentation/providers/voucher_provider.dart';
+import 'package:w51/features/cart/presentation/widgets/voucher_sheet.dart';
 
 class CartPage extends ConsumerStatefulWidget {
-  const CartPage({super.key});
+  const CartPage({this.claimCode, super.key});
+
+  /// Kode voucher yang langsung dipasang (dari tombol "Klaim Voucher").
+  final String? claimCode;
 
   @override
   ConsumerState<CartPage> createState() => _CartPageState();
@@ -27,10 +32,55 @@ class _CartPageState extends ConsumerState<CartPage> {
 
   int _tab = 0;
 
-  void _soon(String feature) {
+  @override
+  void initState() {
+    super.initState();
+    final code = widget.claimCode;
+    if (code != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _claim(code));
+    }
+  }
+
+  void _snack(String message) {
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text('$feature segera hadir.')));
+      ..showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  void _soon(String feature) => _snack('$feature segera hadir.');
+
+  Future<void> _claim(String code) async {
+    final vouchers = await ref.read(vouchersProvider.future);
+    if (!mounted) return;
+    final voucher = vouchers.where((v) => v.code == code).firstOrNull;
+    if (voucher == null) {
+      _snack('Voucher tidak ditemukan.');
+      return;
+    }
+    ref.read(cartProvider.notifier).selectVoucher(voucher);
+    final hasItems = ref.read(cartProvider).items.isNotEmpty;
+    _snack(
+      hasItems
+          ? 'Voucher ${voucher.code} dipasang.'
+          : 'Voucher ${voucher.code} siap dipakai. Pilih paket vendor untuk '
+              'menggunakannya.',
+    );
+  }
+
+  Future<void> _pickVoucher() async {
+    final vouchers = await ref.read(vouchersProvider.future);
+    if (!mounted) return;
+    final cart = ref.read(cartProvider);
+    final code = await showVoucherSheet(
+      context,
+      vouchers: vouchers,
+      selectedCode: cart.voucher?.code,
+      amount: cart.subtotal,
+    );
+    if (code == null || !mounted) return;
+    ref.read(cartProvider.notifier).selectVoucher(
+          code.isEmpty ? null : vouchers.firstWhere((v) => v.code == code),
+        );
   }
 
   void _back() {
@@ -127,9 +177,17 @@ class _CartPageState extends ConsumerState<CartPage> {
             EstimateCard(dateLabel: formatDateId(weddingDate)),
             const SizedBox(height: 12),
             VoucherTile(
-              code: cart.couponCode,
-              discount: cart.couponValue,
-              onTap: () => _soon('Pilih voucher'),
+              subtitle: switch (cart.voucher) {
+                null => 'Pilih voucher untuk hemat lebih banyak',
+                final v when cart.voucherNotEligible =>
+                  'Kupon ${v.code}: belanja minimal '
+                      '${formatRupiah(v.minSpend)} belum terpenuhi',
+                final v => "Kupon '${v.code}' dipasang "
+                    '(hemat ${formatRupiah(cart.discount)})',
+              },
+              subtitleColor:
+                  cart.voucherNotEligible ? AppColors.error : AppColors.primary,
+              onTap: _pickVoucher,
             ),
             const SizedBox(height: 12),
             CartSummaryCard(

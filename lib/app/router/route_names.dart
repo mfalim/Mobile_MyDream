@@ -10,6 +10,10 @@ abstract final class AppRoutes {
   // Wajib login
   static const myWedding = '/my-wedding';
   static const cart = '/cart';
+
+  /// Keranjang dengan voucher yang langsung dipasang (tombol "Klaim Voucher").
+  static String cartWithVoucher(String code) =>
+      Uri(path: cart, queryParameters: {'claim': code}).toString();
   static const checkout = '/checkout';
   static const payment = '/payment';
 

@@ -79,7 +79,8 @@ class _HomeContent extends ConsumerWidget {
           deals: data.deals,
           onSeeAll: goVendors,
           // Klaim voucher = aksi yang butuh login: router mengarahkan tamu ke Login.
-          onClaim: (_) => context.push(AppRoutes.cart),
+          onClaim: (deal) =>
+              context.push(AppRoutes.cartWithVoucher(deal.voucherCode)),
         ),
         gap,
         const AuraPayBanner(),

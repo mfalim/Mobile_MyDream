@@ -52,6 +52,7 @@ class HomeMockDatasource {
       deals: [
         DealItem(
           id: 'deal-1',
+          voucherCode: 'DREAMWEDDING',
           title: 'The Cliff Oceanfront Villa',
           badge: 'Hemat 13 Jt',
           isDiscount: true,
@@ -64,6 +65,7 @@ class HomeMockDatasource {
         ),
         DealItem(
           id: 'deal-2',
+          voucherCode: 'NEWCOUPLE',
           title: 'Ethereal Glow Bridal MUA',
           badge: 'Best Price',
           isDiscount: false,

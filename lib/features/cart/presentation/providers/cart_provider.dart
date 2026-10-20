@@ -1,29 +1,44 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:w51/features/cart/domain/entities/cart_item.dart';
+import 'package:w51/features/cart/domain/entities/voucher.dart';
 
 /// MOCK: DP tetap untuk prototype. Nanti dihitung/diambil dari server.
 const kDownPayment = 1000000;
 
 class CartState {
-  const CartState({
-    this.items = const [],
-    this.couponCode = 'DREAMWEDDING',
-    this.couponValue = 5000000, // MOCK
-  });
+  const CartState({this.items = const [], this.voucher});
 
   final List<CartItem> items;
-  final String couponCode;
-  final int couponValue;
+  final Voucher? voucher;
 
   List<CartItem> get selected => items.where((i) => i.selected).toList();
   int get subtotal => selected.fold(0, (sum, i) => sum + i.price);
-  int get discount => selected.isEmpty ? 0 : couponValue;
+
+  /// Potongan voucher untuk [amount]; 0 bila tanpa voucher atau syaratnya
+  /// (belanja minimal) belum terpenuhi.
+  int discountFor(int amount) {
+    final v = voucher;
+    if (v == null || !v.isEligible(amount)) return 0;
+    return v.discountFor(amount);
+  }
+
+  int get discount => selected.isEmpty ? 0 : discountFor(subtotal);
   int get total => subtotal - discount;
 
-  CartState copyWith({List<CartItem>? items}) => CartState(
+  /// Ada voucher terpasang, tapi belanja minimalnya belum terpenuhi.
+  bool get voucherNotEligible {
+    final v = voucher;
+    return v != null && selected.isNotEmpty && !v.isEligible(subtotal);
+  }
+
+  CartState copyWith({
+    List<CartItem>? items,
+    Voucher? voucher,
+    bool clearVoucher = false,
+  }) =>
+      CartState(
         items: items ?? this.items,
-        couponCode: couponCode,
-        couponValue: couponValue,
+        voucher: clearVoucher ? null : (voucher ?? this.voucher),
       );
 }
 
@@ -56,5 +71,10 @@ class CartController extends Notifier<CartState> {
     );
   }
 
-  void clear() => state = state.copyWith(items: const []);
+  /// Memasang voucher, atau melepasnya bila [voucher] null.
+  void selectVoucher(Voucher? voucher) =>
+      state = state.copyWith(voucher: voucher, clearVoucher: voucher == null);
+
+  /// Mengosongkan keranjang dan voucher (mis. saat keluar akun).
+  void clear() => state = const CartState();
 }

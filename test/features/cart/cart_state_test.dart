@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:w51/features/cart/domain/entities/cart_item.dart';
+import 'package:w51/features/cart/domain/entities/voucher.dart';
 import 'package:w51/features/cart/presentation/providers/cart_provider.dart';
 
 CartItem _item(String id, int price) => CartItem(
@@ -19,6 +20,27 @@ CartItem _item(String id, int price) => CartItem(
       installmentMonths: 24,
     );
 
+const _fixed = Voucher(
+  code: 'FIX',
+  title: 'Potongan Rp 5 Juta',
+  description: '',
+  type: VoucherType.fixed,
+  value: 5000000,
+  minSpend: 50000000,
+  validUntilLabel: '-',
+);
+
+const _bigPercent = Voucher(
+  code: 'BIG',
+  title: 'Diskon 10%',
+  description: '',
+  type: VoucherType.percent,
+  value: 10,
+  maxDiscount: 15000000,
+  minSpend: 300000000,
+  validUntilLabel: '-',
+);
+
 void main() {
   late ProviderContainer container;
 
@@ -30,18 +52,49 @@ void main() {
   CartController controller() => container.read(cartProvider.notifier);
   CartState state() => container.read(cartProvider);
 
-  test('keranjang kosong: total 0 dan tanpa potongan kupon', () {
+  test('keranjang kosong: total 0, tanpa voucher dan tanpa potongan', () {
     expect(state().items, isEmpty);
+    expect(state().voucher, isNull);
     expect(state().subtotal, 0);
     expect(state().discount, 0);
     expect(state().total, 0);
   });
 
-  test('satu item: total = harga dikurangi kupon', () {
+  test('satu item tanpa voucher: total = harga', () {
     controller().add(_item('a', 247459800));
     expect(state().subtotal, 247459800);
+    expect(state().discount, 0);
+    expect(state().total, 247459800);
+  });
+
+  test('voucher nominal tetap mengurangi total', () {
+    controller().add(_item('a', 247459800));
+    controller().selectVoucher(_fixed);
     expect(state().discount, 5000000);
     expect(state().total, 242459800);
+    expect(state().voucherNotEligible, isFalse);
+  });
+
+  test('voucher belum berlaku bila belanja di bawah minimum', () {
+    controller().add(_item('a', 247459800));
+    controller().selectVoucher(_bigPercent);
+    expect(state().discount, 0);
+    expect(state().voucherNotEligible, isTrue);
+    expect(state().total, 247459800);
+
+    // Belanja bertambah sehingga memenuhi minimum (494.919.600 >= 300 jt).
+    controller().add(_item('b', 247459800));
+    expect(state().voucherNotEligible, isFalse);
+    expect(state().discount, 15000000); // 10% dibatasi maksimal 15 jt
+  });
+
+  test('melepas voucher mengembalikan total penuh', () {
+    controller().add(_item('a', 100000000));
+    controller().selectVoucher(_fixed);
+    expect(state().discount, 5000000);
+    controller().selectVoucher(null);
+    expect(state().voucher, isNull);
+    expect(state().discount, 0);
   });
 
   test('paket yang sama tidak ditambahkan dua kali', () {
@@ -64,13 +117,25 @@ void main() {
     expect(state().total, 0);
   });
 
-  test('remove dan clear', () {
+  test(
+      'tanpa item terpilih voucher tidak memberi potongan dan tanpa peringatan',
+      () {
+    controller().add(_item('a', 100000000));
+    controller().selectVoucher(_fixed);
+    controller().toggle('a');
+    expect(state().discount, 0);
+    expect(state().voucherNotEligible, isFalse);
+  });
+
+  test('remove menghapus item, clear menghapus item dan voucher', () {
     controller().add(_item('a', 100));
     controller().add(_item('b', 200));
     controller().remove('a');
     expect(state().items.map((i) => i.vendorId), ['b']);
 
+    controller().selectVoucher(_fixed);
     controller().clear();
     expect(state().items, isEmpty);
+    expect(state().voucher, isNull);
   });
 }

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:w51/app/theme/app_colors.dart';
 import 'package:w51/app/theme/app_radius.dart';
-import 'package:w51/core/utils/formatters.dart';
 
 /// "Estimasi Waktu Pelaksanaan".
 class EstimateCard extends StatelessWidget {
@@ -54,14 +53,14 @@ class EstimateCard extends StatelessWidget {
 
 class VoucherTile extends StatelessWidget {
   const VoucherTile({
-    required this.code,
-    required this.discount,
+    required this.subtitle,
     required this.onTap,
+    this.subtitleColor = AppColors.primary,
     super.key,
   });
 
-  final String code;
-  final int discount;
+  final String subtitle;
+  final Color subtitleColor;
   final VoidCallback onTap;
 
   @override
@@ -94,11 +93,8 @@ class VoucherTile extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      "Kupon '$code' dipasang (hemat ${formatRupiah(discount)})",
-                      style: const TextStyle(
-                        color: AppColors.primary,
-                        fontSize: 13,
-                      ),
+                      subtitle,
+                      style: TextStyle(color: subtitleColor, fontSize: 13),
                     ),
                   ],
                 ),

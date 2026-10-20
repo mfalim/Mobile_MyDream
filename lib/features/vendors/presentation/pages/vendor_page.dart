@@ -164,7 +164,9 @@ class _VendorPageState extends ConsumerState<VendorPage> {
           gap,
         ],
         // Klaim voucher = aksi yang butuh login: router mengarahkan tamu ke Login.
-        VendorsPromoBanner(onClaim: () => context.push(AppRoutes.cart)),
+        VendorsPromoBanner(
+          onClaim: () => context.push(AppRoutes.cartWithVoucher('BRIDALEXPO')),
+        ),
         gap,
         SectionHeader(
           eyebrow: isFiltering ? 'Hasil Pencarian' : 'Pilihan Editor',

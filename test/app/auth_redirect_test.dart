@@ -54,4 +54,22 @@ void main() {
       }
     });
   });
+  test('tujuan dengan query tetap dipertahankan setelah login', () {
+    final uri = Uri(
+      path: '/login',
+      queryParameters: {'from': '/cart?claim=BRIDALEXPO'},
+    );
+    expect(authRedirect(loggedIn: true, uri: uri), '/cart?claim=BRIDALEXPO');
+  });
+
+  test('tamu yang membuka keranjang dengan voucher: query ikut terbawa', () {
+    final result = authRedirect(
+      loggedIn: false,
+      uri: Uri.parse('/cart?claim=BRIDALEXPO'),
+    );
+    expect(
+      Uri.parse(result!).queryParameters['from'],
+      '/cart?claim=BRIDALEXPO',
+    );
+  });
 }

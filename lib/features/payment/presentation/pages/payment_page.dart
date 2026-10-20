@@ -73,6 +73,7 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
     final checkout = ref.read(checkoutProvider.notifier);
     context.go(AppRoutes.home);
     cart.remove(vendorId);
+    cart.selectVoucher(null); // voucher habis dipakai
     checkout.clear();
     messenger
       ..hideCurrentSnackBar()
@@ -126,10 +127,11 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
       );
     }
 
+    final base = item.price + details.guestExtraCost;
     final summary = PaymentSummary(
-      packagePrice: item.price + details.guestExtraCost,
+      packagePrice: base,
       originalPrice: item.originalPrice + details.guestExtraCost,
-      couponDiscount: cart.couponValue,
+      couponDiscount: cart.discountFor(base),
       deposit: kDownPayment,
     );
     final isDp = _scheme == PaymentScheme.downPayment;
