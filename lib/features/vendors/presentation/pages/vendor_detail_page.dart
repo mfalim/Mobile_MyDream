@@ -19,6 +19,8 @@ import 'package:w51/features/vendors/presentation/widgets/vendor_price_card.dart
 import 'package:w51/features/vendors/presentation/widgets/vendor_provider_card.dart';
 import 'package:w51/features/cart/domain/entities/cart_item.dart';
 import 'package:w51/features/cart/presentation/providers/cart_provider.dart';
+import 'package:w51/core/errors/app_exceptions.dart';
+import 'package:w51/features/vendors/presentation/widgets/vendor_info_sheets.dart';
 
 class VendorDetailPage extends ConsumerStatefulWidget {
   const VendorDetailPage({required this.vendorId, super.key});
@@ -79,8 +81,12 @@ class _VendorDetailPageState extends ConsumerState<VendorDetailPage> {
       body: detail.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, s) => ErrorState(
-          message: 'Detail vendor gagal dimuat.',
-          onRetry: () => ref.invalidate(vendorDetailProvider(widget.vendorId)),
+          message: e is NotFoundException
+              ? 'Vendor tidak ditemukan.'
+              : 'Detail vendor gagal dimuat.',
+          onRetry: e is NotFoundException
+              ? null
+              : () => ref.invalidate(vendorDetailProvider(widget.vendorId)),
         ),
         data: _buildContent,
       ),
@@ -162,7 +168,12 @@ class _VendorDetailPageState extends ConsumerState<VendorDetailPage> {
           title: 'Earn ${formatNumber(d.cashbackPoints)} Points',
           badge: '${d.cashbackPercent}% Cashback',
           subtitle: d.cashbackNote,
-          onTap: () => _soon('Detail poin'),
+          onTap: () => showPointsSheet(
+            context,
+            price: d.price,
+            percent: d.cashbackPercent,
+            points: d.cashbackPoints,
+          ),
         ),
         const SizedBox(height: 10),
         VendorBenefitTile(
@@ -171,7 +182,11 @@ class _VendorDetailPageState extends ConsumerState<VendorDetailPage> {
           title: 'Cicilan 0% ${d.installmentMonths} Bulan',
           subtitle:
               'Mulai ${formatRupiah(d.installmentPerMonth)} / bulan via Bridestory Pay',
-          onTap: () => _soon('Simulasi cicilan'),
+          onTap: () => showInstallmentSheet(
+            context,
+            price: d.price,
+            maxMonths: d.installmentMonths,
+          ),
         ),
         gap,
         VendorProviderCard(
@@ -185,7 +200,8 @@ class _VendorDetailPageState extends ConsumerState<VendorDetailPage> {
               child: Text('Package Details', style: AppTypography.heading(22)),
             ),
             TextButton(
-              onPressed: () => _soon('Daftar lengkap'),
+              onPressed: () =>
+                  showAllInclusionsSheet(context, sections: d.sections),
               child: const Text('All Inclusions'),
             ),
           ],

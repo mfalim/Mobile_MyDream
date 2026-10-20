@@ -24,7 +24,7 @@ class CartItem {
         providerName: d.provider.name,
         providerSubtitle: 'Official Partner • ${d.location}',
         location: d.location,
-        packageTitle: '${d.name} - All Inclusive ${d.paxIncluded} Pax',
+        packageTitle: '${d.name} - ${d.packageLabel}',
         paxIncluded: d.paxIncluded,
         price: d.price,
         originalPrice: d.originalPrice,

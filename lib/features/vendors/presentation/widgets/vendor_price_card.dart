@@ -5,6 +5,7 @@ import 'package:w51/app/theme/app_typography.dart';
 import 'package:w51/core/utils/formatters.dart';
 import 'package:w51/core/widgets/badge_pill.dart';
 import 'package:w51/features/vendors/domain/entities/vendor_detail.dart';
+import 'package:w51/core/utils/icon_mapper.dart';
 
 class VendorPriceCard extends StatelessWidget {
   const VendorPriceCard({required this.detail, super.key});
@@ -68,11 +69,8 @@ class VendorPriceCard extends StatelessWidget {
             spacing: 20,
             runSpacing: 8,
             children: [
-              _Fact(
-                icon: Icons.groups_outlined,
-                text: '${detail.paxIncluded} Pax Included',
-              ),
-              _Fact(icon: Icons.wb_sunny_outlined, text: detail.setting),
+              for (final f in detail.facts)
+                _Fact(icon: iconFor(f.iconKey), text: f.text),
             ],
           ),
         ],

@@ -111,13 +111,14 @@ class CheckoutPackageCard extends StatelessWidget {
                 ),
               ),
               BadgePill(item.savingsBadge),
-              Text(
-                '${item.paxIncluded} Pax',
-                style: const TextStyle(
-                  color: AppColors.textSecondary,
-                  fontSize: 12,
+              if (item.paxIncluded > 0)
+                Text(
+                  '${item.paxIncluded} Pax',
+                  style: const TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 12,
+                  ),
                 ),
-              ),
             ],
           ),
           if (otherCount > 0) ...[

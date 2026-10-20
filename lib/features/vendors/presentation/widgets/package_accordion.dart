@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:w51/app/theme/app_colors.dart';
 import 'package:w51/app/theme/app_radius.dart';
 import 'package:w51/features/vendors/domain/entities/vendor_detail.dart';
+import 'package:w51/core/utils/icon_mapper.dart';
 
 class PackageAccordion extends StatelessWidget {
   const PackageAccordion({
@@ -36,7 +37,11 @@ class PackageAccordion extends StatelessWidget {
               color: AppColors.surfaceTint,
               shape: BoxShape.circle,
             ),
-            child: Icon(section.icon, color: AppColors.primary, size: 22),
+            child: Icon(
+              iconFor(section.iconKey),
+              color: AppColors.primary,
+              size: 22,
+            ),
           ),
           title: Text(
             section.title,

@@ -1,16 +1,22 @@
-import 'package:flutter/widgets.dart';
+/// Satu poin ringkas di kartu harga, mis. "100 Pax Included".
+class VendorFact {
+  const VendorFact({required this.iconKey, required this.text});
+
+  final String iconKey;
+  final String text;
+}
 
 class PackageSection {
   const PackageSection({
     required this.title,
     required this.subtitle,
-    required this.icon,
+    required this.iconKey,
     required this.inclusions,
   });
 
   final String title;
   final String subtitle;
-  final IconData icon;
+  final String iconKey;
   final List<String> inclusions;
 }
 
@@ -33,6 +39,7 @@ class VendorDetail {
     required this.id,
     required this.name,
     required this.location,
+    required this.packageLabel,
     required this.price,
     required this.originalPrice,
     required this.savePercent,
@@ -40,7 +47,7 @@ class VendorDetail {
     required this.validUntil,
     required this.photoCount,
     required this.paxIncluded,
-    required this.setting,
+    required this.facts,
     required this.cashbackPoints,
     required this.cashbackPercent,
     required this.cashbackNote,
@@ -55,14 +62,20 @@ class VendorDetail {
   final String id;
   final String name;
   final String location;
+
+  /// Nama paket, mis. "All Inclusive 100 Pax" atau "Paket D-Day".
+  final String packageLabel;
   final int price;
   final int originalPrice;
   final int savePercent;
   final String savingsBadge;
   final String validUntil;
   final int photoCount;
+
+  /// Jumlah tamu yang dicakup paket; 0 bila harganya tidak berbasis tamu
+  /// (fotografi, rias, busana, dan sejenisnya).
   final int paxIncluded;
-  final String setting;
+  final List<VendorFact> facts;
   final int cashbackPoints;
   final double cashbackPercent;
   final String cashbackNote;

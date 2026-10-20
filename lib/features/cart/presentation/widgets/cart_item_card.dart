@@ -193,15 +193,16 @@ class _Package extends StatelessWidget {
                 icon: Icons.photo_outlined,
                 borderRadius: BorderRadius.circular(AppRadius.sm),
               ),
-              Positioned(
-                left: 6,
-                bottom: 6,
-                child: BadgePill(
-                  '${item.paxIncluded} Pax',
-                  background: Colors.black54,
-                  foreground: Colors.white,
+              if (item.paxIncluded > 0)
+                Positioned(
+                  left: 6,
+                  bottom: 6,
+                  child: BadgePill(
+                    '${item.paxIncluded} Pax',
+                    background: Colors.black54,
+                    foreground: Colors.white,
+                  ),
                 ),
-              ),
             ],
           ),
         ),
