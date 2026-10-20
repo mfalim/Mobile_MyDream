@@ -14,6 +14,7 @@ import '../../features/checkout/presentation/pages/checkout_page.dart';
 import '../../features/payment/presentation/pages/payment_page.dart';
 import 'app_shell.dart';
 import 'route_names.dart';
+import 'auth_redirect.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   // Memberi tahu router agar mengevaluasi ulang redirect saat status login berubah.
@@ -24,26 +25,10 @@ final routerProvider = Provider<GoRouter>((ref) {
   final router = GoRouter(
     initialLocation: AppRoutes.home,
     refreshListenable: refresh,
-    redirect: (context, state) {
-      final loggedIn = ref.read(authProvider) != null;
-      final path = state.uri.path;
-      final isProtected = AppRoutes.protectedPaths.any(
-        (p) => path == p || path.startsWith('$p/'),
-      );
-
-      // Tamu membuka halaman yang butuh login -> ke Login, ingat tujuannya.
-      if (!loggedIn && isProtected) {
-        return Uri(
-          path: AppRoutes.login,
-          queryParameters: {'from': state.uri.toString()},
-        ).toString();
-      }
-      // Sudah login tapi berada di Login -> kembali ke tujuan semula.
-      if (loggedIn && path == AppRoutes.login) {
-        return state.uri.queryParameters['from'] ?? AppRoutes.home;
-      }
-      return null;
-    },
+    redirect: (context, state) => authRedirect(
+      loggedIn: ref.read(authProvider) != null,
+      uri: state.uri,
+    ),
     routes: [
       StatefulShellRoute.indexedStack(
         builder: (context, state, shell) => AppShell(navigationShell: shell),
