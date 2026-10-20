@@ -6,15 +6,11 @@ import 'package:flutter/widgets.dart';
 class WeddingCountdown {
   const WeddingCountdown({
     required this.coupleNames,
-    required this.dateLabel,
-    required this.daysLeft,
     required this.readiness,
     required this.nextTask,
   });
 
   final String coupleNames;
-  final String dateLabel;
-  final int daysLeft;
   final double readiness; // 0.0 - 1.0
   final String nextTask;
 }

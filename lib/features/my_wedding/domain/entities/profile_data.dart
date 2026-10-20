@@ -8,8 +8,6 @@ class ProfileData {
   const ProfileData({
     required this.coupleNames,
     required this.isVerified,
-    required this.weddingDateLabel,
-    required this.daysLeft,
     required this.inspirationBoards,
     required this.vendorsContacted,
     required this.boards,
@@ -20,8 +18,6 @@ class ProfileData {
 
   final String coupleNames;
   final bool isVerified;
-  final String weddingDateLabel;
-  final int daysLeft;
   final int inspirationBoards;
   final int vendorsContacted;
   final List<VisionBoard> boards;

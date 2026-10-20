@@ -23,6 +23,7 @@ import 'package:w51/core/widgets/step_progress_header.dart';
 import 'package:w51/features/checkout/presentation/widgets/concept_selector.dart';
 import 'package:w51/features/checkout/presentation/widgets/deal_protection_card.dart';
 import 'package:w51/features/checkout/presentation/widgets/guest_tier_selector.dart';
+import 'package:w51/features/my_wedding/presentation/providers/wedding_date_provider.dart';
 
 class CheckoutPage extends ConsumerStatefulWidget {
   const CheckoutPage({super.key});
@@ -41,11 +42,18 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
   final _notes = TextEditingController();
 
   // MOCK: nilai awal. Nanti diambil dari data pasangan / slot vendor.
-  DateTime _date = DateTime(2026, 10, 24);
+  late DateTime _date;
   TimeOfDay _ceremony = const TimeOfDay(hour: 15, minute: 30);
   TimeOfDay _reception = const TimeOfDay(hour: 18, minute: 30);
   int _tier = 0;
   int _concept = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    // Tanggal awal mengikuti tanggal pernikahan, tapi tetap bisa diubah.
+    _date = ref.read(weddingDateProvider);
+  }
 
   @override
   void dispose() {

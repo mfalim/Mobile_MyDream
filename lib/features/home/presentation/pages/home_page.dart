@@ -1,3 +1,7 @@
+import 'dart:math' as math;
+import 'package:w51/core/utils/date_helpers.dart';
+import 'package:w51/core/utils/formatters.dart';
+import 'package:w51/features/my_wedding/presentation/providers/wedding_date_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -33,13 +37,14 @@ class HomePage extends ConsumerWidget {
   }
 }
 
-class _HomeContent extends StatelessWidget {
+class _HomeContent extends ConsumerWidget {
   const _HomeContent({required this.data});
 
   final HomeData data;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final weddingDate = ref.watch(weddingDateProvider);
     const gap = SizedBox(height: AppSpacing.lg);
     void goVendors() => context.go(AppRoutes.vendors);
 
@@ -53,6 +58,8 @@ class _HomeContent extends StatelessWidget {
       children: [
         WeddingCountdownCard(
           countdown: data.countdown,
+          dateLabel: formatDateId(weddingDate),
+          daysLeft: math.max(0, daysUntil(weddingDate)),
           onDetail: () => context.go(AppRoutes.myWedding),
         ),
         gap,

@@ -6,8 +6,6 @@ class ProfileMockDatasource {
     return const ProfileData(
       coupleNames: 'Clarissa Wijaya & Adrian',
       isVerified: true,
-      weddingDateLabel: '24 Okt 2026',
-      daysLeft: 184,
       inspirationBoards: 48,
       vendorsContacted: 12,
       boards: [

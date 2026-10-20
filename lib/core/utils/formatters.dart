@@ -44,3 +44,22 @@ String formatDateId(DateTime d) =>
 /// 15, 30 -> "15:30 WITA"
 String formatTimeWita(int hour, int minute) =>
     '${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')} WITA';
+
+const _monthShort = [
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'Mei',
+  'Jun',
+  'Jul',
+  'Agu',
+  'Sep',
+  'Okt',
+  'Nov',
+  'Des',
+];
+
+/// DateTime(2026, 10, 24) -> "24 Okt 2026"
+String formatDateShortId(DateTime d) =>
+    '${d.day} ${_monthShort[d.month - 1]} ${d.year}';

@@ -9,13 +9,16 @@ import 'package:w51/features/home/domain/entities/home_entities.dart';
 class WeddingCountdownCard extends StatelessWidget {
   const WeddingCountdownCard({
     required this.countdown,
+    required this.dateLabel,
+    required this.daysLeft,
     this.onDetail,
     super.key,
   });
 
   final WeddingCountdown countdown;
+  final String dateLabel;
+  final int daysLeft;
   final VoidCallback? onDetail;
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -55,7 +58,7 @@ class WeddingCountdownCard extends StatelessWidget {
                         const SizedBox(width: 6),
                         Flexible(
                           child: Text(
-                            countdown.dateLabel,
+                            dateLabel,
                             style: const TextStyle(
                               color: AppColors.textSecondary,
                               fontSize: 13,
@@ -69,7 +72,7 @@ class WeddingCountdownCard extends StatelessWidget {
               ),
               const SizedBox(width: 12),
               _ProgressBadge(
-                daysLeft: countdown.daysLeft,
+                daysLeft: daysLeft,
                 readiness: countdown.readiness,
               ),
             ],

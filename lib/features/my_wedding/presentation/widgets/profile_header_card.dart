@@ -8,6 +8,8 @@ import 'package:w51/features/my_wedding/domain/entities/profile_data.dart';
 class ProfileHeaderCard extends StatelessWidget {
   const ProfileHeaderCard({
     required this.profile,
+    required this.weddingDateLabel,
+    required this.daysLeft,
     required this.cartCount,
     required this.onEditPhoto,
     required this.onSetDate,
@@ -16,6 +18,8 @@ class ProfileHeaderCard extends StatelessWidget {
   });
 
   final ProfileData profile;
+  final String weddingDateLabel;
+  final int daysLeft;
   final int cartCount;
   final VoidCallback onEditPhoto;
   final VoidCallback onSetDate;
@@ -107,7 +111,7 @@ class ProfileHeaderCard extends StatelessWidget {
                       style: TextStyle(color: AppColors.textSecondary),
                     ),
                     Text(
-                      profile.weddingDateLabel,
+                      weddingDateLabel,
                       style: const TextStyle(fontWeight: FontWeight.w700),
                     ),
                   ],
@@ -146,7 +150,11 @@ class ProfileHeaderCard extends StatelessWidget {
                               ),
                             ),
                             Text(
-                              '${profile.daysLeft} Hari Tersisa',
+                              daysLeft > 0
+                                  ? '$daysLeft Hari Tersisa'
+                                  : daysLeft == 0
+                                      ? 'Hari Ini!'
+                                      : 'Sudah Terlaksana',
                               style: const TextStyle(
                                 color: AppColors.primary,
                                 fontWeight: FontWeight.w700,

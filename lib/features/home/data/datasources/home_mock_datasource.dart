@@ -8,8 +8,6 @@ class HomeMockDatasource {
     return const HomeData(
       countdown: WeddingCountdown(
         coupleNames: 'Clarissa & Adrian',
-        dateLabel: 'Sabtu, 24 Oktober 2026',
-        daysLeft: 148,
         readiness: 0.62,
         nextTask: 'Finalisasi Undangan & RSVP',
       ),
