@@ -11,8 +11,12 @@ class VendorDetailMockDatasource {
     ),
     'vendor-maison': ("Maison de L'Amour Bridal", 'Menteng, Jakarta Pusat'),
     'vendor-vivaldi': ('Vivaldi Floral & Scenery', 'Jakarta & Bali'),
+    'vendor-sora': ('Sora Visual Stories', 'Bali'),
+    'vendor-ethereal': ('Ethereal Glow Bridal MUA', 'Jakarta'),
+    'vendor-mattana': ('Mattana Wedding Planner', 'Bali'),
+    'vendor-lumiere': ('Lumière Cinematic Films', 'Jakarta'),
+    'vendor-santap': ('Santap Rasa Catering', 'Jakarta & Bali'),
   };
-
   Future<VendorDetail> fetch(String id) async {
     final (name, location) = _known[id] ??
         ('The Westin Resort Nusa Dua, Bali', 'Nusa Dua, Badung - Bali');

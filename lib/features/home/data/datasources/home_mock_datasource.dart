@@ -12,16 +12,41 @@ class HomeMockDatasource {
         nextTask: 'Finalisasi Undangan & RSVP',
       ),
       services: [
-        ServiceCategory(label: 'All-In Package', icon: Icons.celebration),
-        ServiceCategory(label: 'Venue Deals', icon: Icons.villa),
-        ServiceCategory(label: 'Photography', icon: Icons.photo_camera),
+        ServiceCategory(
+          label: 'All-In Package',
+          icon: Icons.celebration,
+          vendorCategory: 'Wedding Planner',
+        ),
+        ServiceCategory(
+          label: 'Venue Deals',
+          icon: Icons.villa,
+          vendorCategory: 'Venue',
+        ),
+        ServiceCategory(
+          label: 'Photography',
+          icon: Icons.photo_camera,
+          vendorCategory: 'Photography',
+        ),
         ServiceCategory(
           label: 'Bridal & MUA',
           icon: Icons.face_retouching_natural,
+          vendorCategory: 'Hair & Makeup',
         ),
-        ServiceCategory(label: 'Dekorasi', icon: Icons.local_florist),
-        ServiceCategory(label: 'Catering', icon: Icons.restaurant),
-        ServiceCategory(label: 'Honeymoon', icon: Icons.flight),
+        ServiceCategory(
+          label: 'Dekorasi',
+          icon: Icons.local_florist,
+          vendorCategory: 'Decoration',
+        ),
+        ServiceCategory(
+          label: 'Catering',
+          icon: Icons.restaurant,
+          vendorCategory: 'Catering',
+        ),
+        ServiceCategory(
+          label: 'Honeymoon',
+          icon: Icons.flight,
+          vendorCategory: 'Honeymoon',
+        ),
         ServiceCategory(label: 'Lainnya', icon: Icons.apps),
       ],
       deals: [

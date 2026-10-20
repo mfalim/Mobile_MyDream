@@ -16,6 +16,7 @@ import 'package:w51/features/home/presentation/widgets/deals_section.dart';
 import 'package:w51/features/home/presentation/widgets/inspirations_section.dart';
 import 'package:w51/features/home/presentation/widgets/service_grid.dart';
 import 'package:w51/features/home/presentation/widgets/wedding_countdown_card.dart';
+import 'package:w51/features/vendors/presentation/providers/vendor_filter_provider.dart';
 
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
@@ -46,7 +47,16 @@ class _HomeContent extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final weddingDate = ref.watch(weddingDateProvider);
     const gap = SizedBox(height: AppSpacing.lg);
-    void goVendors() => context.go(AppRoutes.vendors);
+    void goVendors() {
+      ref.read(vendorFilterProvider.notifier).reset();
+      context.go(AppRoutes.vendors);
+    }
+
+    void openCategory(ServiceCategory service) {
+      final filter = ref.read(vendorFilterProvider.notifier)..reset();
+      filter.setCategory(service.vendorCategory);
+      context.go(AppRoutes.vendors);
+    }
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(
@@ -63,7 +73,7 @@ class _HomeContent extends ConsumerWidget {
           onDetail: () => context.go(AppRoutes.myWedding),
         ),
         gap,
-        ServiceGrid(services: data.services, onSelected: (_) => goVendors()),
+        ServiceGrid(services: data.services, onSelected: openCategory),
         gap,
         DealsSection(
           deals: data.deals,

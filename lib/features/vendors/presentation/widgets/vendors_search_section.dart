@@ -1,34 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:w51/app/theme/app_colors.dart';
 import 'package:w51/core/widgets/search_field.dart';
+import 'package:w51/features/vendors/domain/entities/vendor_filter.dart';
 
 class VendorsSearchSection extends StatelessWidget {
   const VendorsSearchSection({
     required this.controller,
     required this.popular,
-    required this.filters,
-    required this.onFilterTap,
+    required this.filter,
+    required this.onOpenFilter,
+    required this.onResetFilter,
     super.key,
   });
 
   final TextEditingController controller;
   final List<String> popular;
-  final List<String> filters;
-  final ValueChanged<String> onFilterTap;
+  final VendorFilter filter;
+  final VoidCallback onOpenFilter;
+  final VoidCallback onResetFilter;
 
   @override
   Widget build(BuildContext context) {
+    final searching = controller.text.isNotEmpty;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         AppSearchField(
           controller: controller,
           hint: 'Cari vendor, ballroom, atau tema...',
-          trailingIcon:
-              controller.text.isEmpty ? Icons.tune : Icons.close_rounded,
-          onTrailingTap: controller.text.isEmpty
-              ? () => onFilterTap('Filter')
-              : controller.clear,
+          trailingIcon: searching ? Icons.close_rounded : Icons.tune,
+          onTrailingTap: searching ? controller.clear : onOpenFilter,
         ),
         const SizedBox(height: 12),
         SingleChildScrollView(
@@ -65,24 +66,52 @@ class VendorsSearchSection extends StatelessWidget {
           scrollDirection: Axis.horizontal,
           child: Row(
             children: [
-              for (var i = 0; i < filters.length; i++)
-                Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: _Chip(
-                    label: filters[i],
-                    selected: i == 0,
-                    background: i == 0 ? AppColors.primary : AppColors.surface,
-                    foreground: i == 0 ? Colors.white : AppColors.textPrimary,
-                    leading: i == 1 ? Icons.place_outlined : null,
-                    trailing: i <= 1 ? Icons.keyboard_arrow_down : null,
-                    outlined: i != 0,
-                    onTap: () => onFilterTap(filters[i]),
-                  ),
+              _filterChip(
+                label: filter.category ?? 'Semua Kategori',
+                active: filter.category != null,
+              ),
+              _filterChip(
+                label: filter.city == null
+                    ? 'Lokasi: Semua'
+                    : 'Lokasi: ${filter.city}',
+                active: filter.city != null,
+                leading: Icons.place_outlined,
+              ),
+              _filterChip(
+                label: filter.budget?.label ?? 'Estimasi Budget',
+                active: filter.budget != null,
+              ),
+              if (filter.isActive)
+                _Chip(
+                  label: 'Reset',
+                  background: Colors.transparent,
+                  foreground: AppColors.primary,
+                  leading: Icons.refresh,
+                  onTap: onResetFilter,
                 ),
             ],
           ),
         ),
       ],
+    );
+  }
+
+  Widget _filterChip({
+    required String label,
+    required bool active,
+    IconData? leading,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: _Chip(
+        label: label,
+        background: active ? AppColors.primary : AppColors.surface,
+        foreground: active ? Colors.white : AppColors.textPrimary,
+        leading: leading,
+        trailing: Icons.keyboard_arrow_down,
+        outlined: !active,
+        onTap: onOpenFilter,
+      ),
     );
   }
 }
@@ -93,7 +122,6 @@ class _Chip extends StatelessWidget {
     required this.background,
     required this.foreground,
     required this.onTap,
-    this.selected = false,
     this.outlined = false,
     this.leading,
     this.trailing,
@@ -103,7 +131,6 @@ class _Chip extends StatelessWidget {
   final Color background;
   final Color foreground;
   final VoidCallback onTap;
-  final bool selected;
   final bool outlined;
   final IconData? leading;
   final IconData? trailing;

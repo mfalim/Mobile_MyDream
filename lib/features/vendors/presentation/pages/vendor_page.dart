@@ -8,9 +8,12 @@ import 'package:w51/core/widgets/empty_state.dart';
 import 'package:w51/core/widgets/error_state.dart';
 import 'package:w51/core/widgets/section_header.dart';
 import 'package:w51/features/vendors/domain/entities/vendor_entities.dart';
+import 'package:w51/features/vendors/domain/entities/vendor_filter.dart';
+import 'package:w51/features/vendors/presentation/providers/vendor_filter_provider.dart';
 import 'package:w51/features/vendors/presentation/providers/vendors_provider.dart';
 import 'package:w51/features/vendors/presentation/widgets/category_grid.dart';
 import 'package:w51/features/vendors/presentation/widgets/featured_vendor_card.dart';
+import 'package:w51/features/vendors/presentation/widgets/vendor_filter_sheet.dart';
 import 'package:w51/features/vendors/presentation/widgets/vendors_help_banner.dart';
 import 'package:w51/features/vendors/presentation/widgets/vendors_promo_banner.dart';
 import 'package:w51/features/vendors/presentation/widgets/vendors_search_section.dart';
@@ -44,22 +47,41 @@ class _VendorPageState extends ConsumerState<VendorPage> {
       ..showSnackBar(SnackBar(content: Text('$feature segera hadir.')));
   }
 
-  List<FeaturedVendor> _filter(List<FeaturedVendor> all) {
+  List<FeaturedVendor> _filter(List<FeaturedVendor> all, VendorFilter filter) {
     final q = _search.text.trim().toLowerCase();
-    if (q.isEmpty) return all;
-    return all
-        .where(
-          (v) =>
-              v.name.toLowerCase().contains(q) ||
-              v.categoryLabel.toLowerCase().contains(q) ||
-              v.description.toLowerCase().contains(q),
-        )
-        .toList();
+    return all.where((v) {
+      if (!filter.matches(v)) return false;
+      if (q.isEmpty) return true;
+      return v.name.toLowerCase().contains(q) ||
+          v.categoryLabel.toLowerCase().contains(q) ||
+          v.description.toLowerCase().contains(q);
+    }).toList();
+  }
+
+  List<String> _allCategories(VendorsData data) => [
+        for (final c in data.categories) c.label,
+        for (final q in data.quickCategories) q.label,
+      ];
+
+  Future<void> _openFilter(VendorsData data) async {
+    final result = await showVendorFilterSheet(
+      context,
+      initial: ref.read(vendorFilterProvider),
+      categories: _allCategories(data),
+    );
+    if (result == null || !mounted) return;
+    ref.read(vendorFilterProvider.notifier).apply(result);
+  }
+
+  void _clearAll() {
+    _search.clear();
+    ref.read(vendorFilterProvider.notifier).reset();
   }
 
   @override
   Widget build(BuildContext context) {
     final data = ref.watch(vendorsDataProvider);
+    final filter = ref.watch(vendorFilterProvider);
     return SafeArea(
       bottom: false,
       child: data.when(
@@ -68,15 +90,16 @@ class _VendorPageState extends ConsumerState<VendorPage> {
           message: 'Daftar vendor gagal dimuat.',
           onRetry: () => ref.invalidate(vendorsDataProvider),
         ),
-        data: _buildContent,
+        data: (d) => _buildContent(d, filter),
       ),
     );
   }
 
-  Widget _buildContent(VendorsData data) {
+  Widget _buildContent(VendorsData data, VendorFilter filter) {
     const gap = SizedBox(height: AppSpacing.lg);
-    final featured = _filter(data.featured);
-    final isSearching = _search.text.trim().isNotEmpty;
+    final featured = _filter(data.featured, filter);
+    final isFiltering = _search.text.trim().isNotEmpty || filter.isActive;
+    final controller = ref.read(vendorFilterProvider.notifier);
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(
@@ -94,12 +117,13 @@ class _VendorPageState extends ConsumerState<VendorPage> {
         VendorsSearchSection(
           controller: _search,
           popular: data.popularSearches,
-          filters: data.filters,
-          onFilterTap: _soon,
+          filter: filter,
+          onOpenFilter: () => _openFilter(data),
+          onResetFilter: controller.reset,
         ),
         gap,
-        // Kategori hanya tampil di keadaan awal (belum mencari).
-        if (!isSearching) ...[
+        // Kategori hanya tampil di keadaan awal (belum mencari / menyaring).
+        if (!isFiltering) ...[
           SectionHeader(
             eyebrow: 'Kurasi Spesialis',
             eyebrowColor: AppColors.primary,
@@ -115,7 +139,7 @@ class _VendorPageState extends ConsumerState<VendorPage> {
           const SizedBox(height: 12),
           CategoryGrid(
             categories: data.categories,
-            onSelected: (c) => _search.text = c.label,
+            onSelected: (c) => controller.setCategory(c.label),
           ),
           const SizedBox(height: 12),
           SingleChildScrollView(
@@ -128,7 +152,7 @@ class _VendorPageState extends ConsumerState<VendorPage> {
                     child: ActionChip(
                       avatar: Icon(q.icon, size: 18, color: AppColors.primary),
                       label: Text(q.label),
-                      onPressed: () => _search.text = q.label,
+                      onPressed: () => controller.setCategory(q.label),
                       backgroundColor: AppColors.surface,
                       side: const BorderSide(color: AppColors.outline),
                       shape: const StadiumBorder(),
@@ -143,13 +167,13 @@ class _VendorPageState extends ConsumerState<VendorPage> {
         VendorsPromoBanner(onClaim: () => context.push(AppRoutes.cart)),
         gap,
         SectionHeader(
-          eyebrow: isSearching ? 'Hasil Pencarian' : 'Pilihan Editor',
+          eyebrow: isFiltering ? 'Hasil Pencarian' : 'Pilihan Editor',
           eyebrowColor: AppColors.primary,
-          title: isSearching
+          title: isFiltering
               ? '${featured.length} Vendor Ditemukan'
               : 'Featured Vendors of the Month',
-          actionLabel: isSearching ? 'Hapus' : 'Lihat Semua',
-          onAction: _search.clear,
+          actionLabel: isFiltering ? 'Hapus' : null,
+          onAction: _clearAll,
         ),
         const SizedBox(height: 12),
         if (featured.isEmpty)

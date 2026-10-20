@@ -26,6 +26,8 @@ class FeaturedVendor {
   const FeaturedVendor({
     required this.id,
     required this.name,
+    required this.category,
+    required this.cities,
     required this.categoryLabel,
     required this.tag,
     required this.tagIcon,
@@ -34,6 +36,7 @@ class FeaturedVendor {
     required this.description,
     required this.priceLabel,
     required this.price,
+    required this.startingBudget,
     required this.promoBadge,
     required this.promoNote,
     this.badge,
@@ -43,6 +46,10 @@ class FeaturedVendor {
 
   final String id;
   final String name;
+
+  /// Nama kategori, sama dengan label di daftar kategori (untuk filter).
+  final String category;
+  final List<String> cities;
   final String categoryLabel;
   final String tag;
   final IconData tagIcon;
@@ -54,6 +61,9 @@ class FeaturedVendor {
   final int price;
   final String? priceUnit;
   final int? originalPrice;
+
+  /// Perkiraan total biaya termurah, dipakai untuk filter budget (MOCK).
+  final int startingBudget;
   final String promoBadge;
   final String promoNote;
 }
@@ -61,14 +71,12 @@ class FeaturedVendor {
 class VendorsData {
   const VendorsData({
     required this.popularSearches,
-    required this.filters,
     required this.categories,
     required this.quickCategories,
     required this.featured,
   });
 
   final List<String> popularSearches;
-  final List<String> filters;
   final List<VendorCategory> categories;
   final List<QuickCategory> quickCategories;
   final List<FeaturedVendor> featured;

@@ -16,10 +16,17 @@ class WeddingCountdown {
 }
 
 class ServiceCategory {
-  const ServiceCategory({required this.label, required this.icon});
+  const ServiceCategory({
+    required this.label,
+    required this.icon,
+    this.vendorCategory,
+  });
 
   final String label;
   final IconData icon;
+
+  /// Nama kategori di direktori Vendors. Null = tampilkan semua vendor.
+  final String? vendorCategory;
 }
 
 class DealItem {
