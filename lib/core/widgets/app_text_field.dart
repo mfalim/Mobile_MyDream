@@ -42,6 +42,10 @@ class AppTextField extends StatelessWidget {
     this.helperText,
     this.inputFormatters,
     this.textCapitalization = TextCapitalization.none,
+    this.obscureText = false,
+    this.suffixIcon,
+    this.onFieldSubmitted,
+    this.autofillHints,
     super.key,
   });
 
@@ -57,6 +61,10 @@ class AppTextField extends StatelessWidget {
   final String? helperText;
   final List<TextInputFormatter>? inputFormatters;
   final TextCapitalization textCapitalization;
+  final bool obscureText;
+  final Widget? suffixIcon;
+  final ValueChanged<String>? onFieldSubmitted;
+  final Iterable<String>? autofillHints;
 
   @override
   Widget build(BuildContext context) {
@@ -79,6 +87,11 @@ class AppTextField extends StatelessWidget {
               maxLines > 1 ? TextInputAction.newline : textInputAction,
           textCapitalization: textCapitalization,
           inputFormatters: inputFormatters,
+          obscureText: obscureText,
+          enableSuggestions: !obscureText,
+          autocorrect: !obscureText,
+          autofillHints: autofillHints,
+          onFieldSubmitted: onFieldSubmitted,
           maxLines: maxLines,
           minLines: maxLines > 1 ? 3 : null,
           decoration: InputDecoration(
@@ -92,6 +105,7 @@ class AppTextField extends StatelessWidget {
               color: AppColors.textPrimary,
               fontWeight: FontWeight.w600,
             ),
+            suffixIcon: suffixIcon,
             helperText: helperText,
             helperMaxLines: 2,
             helperStyle: const TextStyle(

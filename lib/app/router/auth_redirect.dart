@@ -17,7 +17,7 @@ String? authRedirect({required bool loggedIn, required Uri uri}) {
   }
 
   // Sudah login tapi berada di Login -> kembali ke tujuan semula.
-  if (loggedIn && path == AppRoutes.login) {
+  if (loggedIn && AppRoutes.authPaths.contains(path)) {
     final from = uri.queryParameters['from'];
     // Hanya alamat internal aplikasi yang diterima.
     if (from != null && from.startsWith('/') && !from.startsWith('//')) {

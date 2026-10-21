@@ -32,7 +32,9 @@ class PaymentTotalCard extends StatelessWidget {
       child: Column(
         children: [
           _Line(
-              'Harga Paket Wedding ($guests Pax)', formatRupiah(packagePrice)),
+            guests > 0 ? 'Harga Paket Wedding ($guests Pax)' : 'Harga Paket',
+            formatRupiah(packagePrice),
+          ),
           if (couponDiscount > 0)
             _Line(
               'Potongan Kupon Promo',

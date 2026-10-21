@@ -92,7 +92,7 @@ class PaymentOrderCard extends StatelessWidget {
                         const SizedBox(width: 4),
                         Flexible(
                           child: Text(
-                            '$dateLabel • $guests Pax',
+                            guests > 0 ? '$dateLabel • $guests Pax' : dateLabel,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(

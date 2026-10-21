@@ -123,6 +123,8 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
       return;
     }
 
+    final usesTiers = item.paxIncluded > 0;
+
     final tier = kGuestTiers[_tier];
     ref.read(checkoutProvider.notifier).save(
           CheckoutDetails(
@@ -134,8 +136,8 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
             receptionTime: _time(_reception),
             city: item.location,
             hallDetail: _hall.text.trim(),
-            guestCount: tier.guests,
-            guestExtraCost: tier.extraCost,
+            guestCount: usesTiers ? tier.guests : 0,
+            guestExtraCost: usesTiers ? tier.extraCost : 0,
             concept: kWeddingConcepts[_concept],
             picName: _pic.text.trim(),
             whatsapp: '+62${_whatsapp.text.trim()}',
@@ -214,7 +216,8 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
       bottomNavigationBar: item == null || keyboardOpen
           ? null
           : CheckoutBar(
-              total: item.price + kGuestTiers[_tier].extraCost,
+              total: item.price +
+                  (item.paxIncluded > 0 ? kGuestTiers[_tier].extraCost : 0),
               onContinue: () => _submit(item),
             ),
     );
@@ -331,21 +334,23 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
             ),
           ),
           gap,
-          CheckoutSection(
-            icon: Icons.groups_outlined,
-            title: 'Estimasi Jumlah Tamu',
-            trailing: const BadgePill(
-              'Kapasitas Maksimal',
-              background: AppColors.surfaceTint,
-              foreground: AppColors.textSecondary,
+          if (item.paxIncluded > 0) ...[
+            CheckoutSection(
+              icon: Icons.groups_outlined,
+              title: 'Estimasi Jumlah Tamu',
+              trailing: const BadgePill(
+                'Kapasitas Maksimal',
+                background: AppColors.surfaceTint,
+                foreground: AppColors.textSecondary,
+              ),
+              child: GuestTierSelector(
+                tiers: kGuestTiers,
+                selectedIndex: _tier,
+                onChanged: (i) => setState(() => _tier = i),
+              ),
             ),
-            child: GuestTierSelector(
-              tiers: kGuestTiers,
-              selectedIndex: _tier,
-              onChanged: (i) => setState(() => _tier = i),
-            ),
-          ),
-          gap,
+            gap,
+          ],
           CheckoutSection(
             icon: Icons.palette_outlined,
             title: 'Konsep & Nuansa Pernikahan',

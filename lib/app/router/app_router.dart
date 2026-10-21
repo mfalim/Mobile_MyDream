@@ -12,6 +12,7 @@ import '../../features/vendors/presentation/pages/vendor_detail_page.dart';
 import '../../features/cart/presentation/pages/cart_page.dart';
 import '../../features/checkout/presentation/pages/checkout_page.dart';
 import '../../features/payment/presentation/pages/payment_page.dart';
+import '../../features/auth/presentation/pages/register_page.dart';
 import 'app_shell.dart';
 import 'route_names.dart';
 import 'auth_redirect.dart';
@@ -61,7 +62,13 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: AppRoutes.login,
-        builder: (context, state) => const LoginPage(),
+        builder: (context, state) =>
+            LoginPage(from: state.uri.queryParameters['from']),
+      ),
+      GoRoute(
+        path: AppRoutes.register,
+        builder: (context, state) =>
+            RegisterPage(from: state.uri.queryParameters['from']),
       ),
       GoRoute(
         path: AppRoutes.cart,

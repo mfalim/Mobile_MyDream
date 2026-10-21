@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:w51/app/router/auth_redirect.dart';
+import 'package:w51/app/router/route_names.dart';
 
 void main() {
   group('tamu (belum login)', () {
@@ -71,5 +72,22 @@ void main() {
       Uri.parse(result!).queryParameters['from'],
       '/cart?claim=BRIDALEXPO',
     );
+  });
+
+  test('tamu boleh membuka Login dan Register', () {
+    expect(authRedirect(loggedIn: false, uri: Uri.parse('/login')), isNull);
+    expect(authRedirect(loggedIn: false, uri: Uri.parse('/register')), isNull);
+  });
+
+  test('pengguna yang sudah login dialihkan dari Register', () {
+    expect(authRedirect(loggedIn: true, uri: Uri.parse('/register')), '/home');
+    final uri = Uri.parse('/register?from=%2Fcart');
+    expect(authRedirect(loggedIn: true, uri: uri), '/cart');
+  });
+
+  test('loginPath dan registerPath meneruskan tujuan', () {
+    expect(AppRoutes.loginPath(), '/login');
+    expect(AppRoutes.loginPath(from: '/cart'), '/login?from=%2Fcart');
+    expect(AppRoutes.registerPath(from: '/cart'), '/register?from=%2Fcart');
   });
 }

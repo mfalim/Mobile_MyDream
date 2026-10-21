@@ -14,11 +14,13 @@ class AuthController extends Notifier<AppUser?> {
   /// PROTOTYPE: login palsu tanpa server. Nanti isi method ini diganti
   /// dengan Firebase / API; router dan layar tidak perlu berubah.
   void signInDemo({String? email}) {
-    state = AppUser(
-      id: 'demo-user',
-      name: 'Clarissa Wijaya',
-      email: email ?? 'demo@example.com',
-    );
+    final mail = email ?? 'demo@example.com';
+    state = AppUser(id: 'demo-user', name: mail.split('@').first, email: mail);
+  }
+
+  /// PROTOTYPE: pendaftaran palsu (belum disimpan di mana pun).
+  void register({required String name, required String email}) {
+    state = AppUser(id: 'demo-user', name: name, email: email);
   }
 
   void signOut() => state = null;
