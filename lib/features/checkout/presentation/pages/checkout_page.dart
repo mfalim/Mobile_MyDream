@@ -23,7 +23,7 @@ import 'package:w51/core/widgets/step_progress_header.dart';
 import 'package:w51/features/checkout/presentation/widgets/concept_selector.dart';
 import 'package:w51/features/checkout/presentation/widgets/deal_protection_card.dart';
 import 'package:w51/features/checkout/presentation/widgets/guest_tier_selector.dart';
-import 'package:w51/features/my_wedding/presentation/providers/wedding_date_provider.dart';
+import 'package:w51/features/my_wedding/presentation/providers/couple_provider.dart';
 
 class CheckoutPage extends ConsumerStatefulWidget {
   const CheckoutPage({super.key});
@@ -42,7 +42,8 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
   final _notes = TextEditingController();
 
   // MOCK: nilai awal. Nanti diambil dari data pasangan / slot vendor.
-  late DateTime _date;
+  DateTime? _date;
+  bool _dateError = false;
   TimeOfDay _ceremony = const TimeOfDay(hour: 15, minute: 30);
   TimeOfDay _reception = const TimeOfDay(hour: 18, minute: 30);
   int _tier = 0;
@@ -51,8 +52,13 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
   @override
   void initState() {
     super.initState();
-    // Tanggal awal mengikuti tanggal pernikahan, tapi tetap bisa diubah.
-    _date = ref.read(weddingDateProvider);
+    // Nama dan tanggal diisi dari data pasangan, tapi tetap bisa diubah.
+    final couple = ref.read(coupleProvider);
+    if (couple != null) {
+      _bride.text = couple.brideName;
+      _groom.text = couple.groomName;
+      _date = couple.weddingDate;
+    }
   }
 
   @override
@@ -83,14 +89,18 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
   Future<void> _pickDate() async {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
+    final current = _date;
     final picked = await showDatePicker(
       context: context,
-      initialDate: _date.isBefore(today) ? today : _date,
+      initialDate: current == null || current.isBefore(today) ? today : current,
       firstDate: today,
       lastDate: today.add(const Duration(days: 365 * 3)),
     );
     if (picked != null) {
-      setState(() => _date = picked);
+      setState(() {
+        _date = picked;
+        _dateError = false;
+      });
     }
   }
 
@@ -112,7 +122,10 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
   String _time(TimeOfDay t) => formatTimeWita(t.hour, t.minute);
 
   void _submit(CartItem item) {
-    if (!(_formKey.currentState?.validate() ?? false)) {
+    final formOk = _formKey.currentState?.validate() ?? false;
+    final date = _date;
+    if (date == null) setState(() => _dateError = true);
+    if (!formOk || date == null) {
       _snack('Lengkapi data yang wajib diisi.');
       return;
     }
@@ -131,7 +144,7 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
             vendorId: item.vendorId,
             brideName: _bride.text.trim(),
             groomName: _groom.text.trim(),
-            eventDate: _date,
+            eventDate: date,
             ceremonyTime: _time(_ceremony),
             receptionTime: _time(_reception),
             city: item.location,
@@ -277,8 +290,10 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                   label: 'Tanggal Pelaksanaan (Akad & Resepsi)',
                   required: true,
                   icon: Icons.calendar_today_outlined,
-                  value: formatDateId(_date),
-                  subtitle: 'Slot Musim Pernikahan Tersedia',
+                  value: _date == null ? 'Pilih tanggal' : formatDateId(_date!),
+                  subtitle:
+                      _date == null ? null : 'Slot Musim Pernikahan Tersedia',
+                  errorText: _dateError ? 'Pilih tanggal pelaksanaan' : null,
                   onTap: _pickDate,
                 ),
                 const SizedBox(height: 14),
@@ -417,3 +432,5 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
     );
   }
 }
+
+//

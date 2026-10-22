@@ -49,14 +49,18 @@ void main() {
     expect(d.facts.single.iconKey, 'groups');
   });
 
-  test('setiap vendor di daftar punya detail dengan nama dan harga yang sama',
-      () async {
+  test('setiap vendor di daftar cocok dengan detailnya', () async {
     final list = await VendorsMockDatasource().fetch();
     final datasource = VendorDetailMockDatasource();
     for (final v in list.featured) {
       final d = await datasource.fetch(v.id);
-      expect(d.name, v.name, reason: v.id);
-      expect(d.price, v.startingBudget, reason: v.id);
+      expect(d.name, v.name, reason: '${v.id}: nama');
+      expect(d.price, v.price, reason: '${v.id}: harga kartu vs detail');
+      expect(d.originalPrice, v.originalPrice, reason: '${v.id}: harga coret');
+      expect(d.packageLabel, v.priceLabel, reason: '${v.id}: label paket');
+      expect(d.provider.rating, v.rating, reason: '${v.id}: rating');
+      expect(d.provider.reviewCount, v.reviewCount, reason: '${v.id}: ulasan');
+      expect(v.startingBudget, v.price, reason: '${v.id}: budget filter');
     }
   });
 

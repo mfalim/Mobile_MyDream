@@ -15,6 +15,7 @@ class CuratedVendorsSection extends StatefulWidget {
     required this.vendors,
     this.onSeeAll,
     this.onAsk,
+    this.onOpen,
     super.key,
   });
 
@@ -22,6 +23,7 @@ class CuratedVendorsSection extends StatefulWidget {
   final List<CuratedVendor> vendors;
   final VoidCallback? onSeeAll;
   final ValueChanged<CuratedVendor>? onAsk;
+  final ValueChanged<CuratedVendor>? onOpen;
 
   @override
   State<CuratedVendorsSection> createState() => _CuratedVendorsSectionState();
@@ -74,9 +76,12 @@ class _CuratedVendorsSectionState extends State<CuratedVendorsSection> {
           for (final vendor in vendors)
             Padding(
               padding: const EdgeInsets.only(bottom: 12),
-              child: _VendorCard(
-                vendor: vendor,
-                onAsk: () => widget.onAsk?.call(vendor),
+              child: GestureDetector(
+                onTap: () => widget.onOpen?.call(vendor),
+                child: _VendorCard(
+                  vendor: vendor,
+                  onAsk: () => widget.onAsk?.call(vendor),
+                ),
               ),
             ),
       ],

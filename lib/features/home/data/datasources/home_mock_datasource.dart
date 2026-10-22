@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:w51/features/home/domain/entities/home_entities.dart';
 
 /// MOCK DATA: contoh untuk prototype, BUKAN data dari server.
-/// Saat API siap, buat datasource baru dan ganti di home_repository_impl.dart.
+/// Deal dan vendor pilihan memakai id vendor yang sama dengan daftar Vendors;
+/// nama, harga, dan rating harus sama (tes memeriksanya).
 class HomeMockDatasource {
   Future<HomeData> fetch() async {
     return const HomeData(
       countdown: WeddingCountdown(
-        coupleNames: 'Clarissa & Adrian',
         readiness: 0.62,
         nextTask: 'Finalisasi Undangan & RSVP',
       ),
@@ -51,20 +51,20 @@ class HomeMockDatasource {
       ],
       deals: [
         DealItem(
-          id: 'deal-1',
+          id: 'vendor-glasshouse',
           voucherCode: 'DREAMWEDDING',
-          title: 'The Cliff Oceanfront Villa',
-          badge: 'Hemat 13 Jt',
+          title: 'The Glasshouse Cliff Sanctuary',
+          badge: 'Hemat 7 Jt',
           isDiscount: true,
-          locationLabel: 'Nusa Dua, Bali',
+          locationLabel: 'Uluwatu, Bali',
           tag: 'All-Inclusive',
-          detail: 'Hingga 350 Tamu',
+          detail: 'Paket 100 Tamu',
           detailIcon: Icons.groups_outlined,
-          originalPrice: 260459800,
-          price: 247459800,
+          originalPrice: 92000000,
+          price: 85000000,
         ),
         DealItem(
-          id: 'deal-2',
+          id: 'vendor-ethereal',
           voucherCode: 'NEWCOUPLE',
           title: 'Ethereal Glow Bridal MUA',
           badge: 'Best Price',
@@ -80,11 +80,11 @@ class HomeMockDatasource {
         'Semua Kategori',
         'Venue',
         'Photography',
-        'Dress & Attire'
+        'Bridal & Gown'
       ],
       vendors: [
         CuratedVendor(
-          id: 'vendor-1',
+          id: 'vendor-sora',
           name: 'Sora Visual Stories',
           subtitle: 'Photography & Videography • Bali',
           category: 'Photography',
@@ -95,15 +95,26 @@ class HomeMockDatasource {
           tag: 'Top 1%',
         ),
         CuratedVendor(
-          id: 'vendor-2',
-          name: 'Maison de Belle Bridal',
+          id: 'vendor-maison',
+          name: "Maison de L'Amour Bridal",
           subtitle: 'Bridal Gown & Kebaya • Jakarta',
-          category: 'Dress & Attire',
+          category: 'Bridal & Gown',
           rating: 5.0,
-          reviewCount: 98,
+          reviewCount: 89,
           highlight: 'Fitting Gratis',
-          startingPrice: 25000000,
+          startingPrice: 38000000,
           tag: 'Couture',
+        ),
+        CuratedVendor(
+          id: 'vendor-glasshouse',
+          name: 'The Glasshouse Cliff Sanctuary',
+          subtitle: 'Venue • Uluwatu, Bali',
+          category: 'Venue',
+          rating: 4.9,
+          reviewCount: 124,
+          highlight: 'Cashback 8%',
+          startingPrice: 85000000,
+          tag: 'Top Tier',
         ),
       ],
       articles: [

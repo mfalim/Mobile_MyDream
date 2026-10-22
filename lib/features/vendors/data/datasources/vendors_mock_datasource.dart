@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:w51/features/vendors/domain/entities/vendor_entities.dart';
 
 /// MOCK DATA: contoh untuk prototype, BUKAN data dari server.
-/// Vendor selain tiga yang pertama adalah nama rekaan untuk menguji filter.
+/// Harga, nama, dan label paket harus sama dengan data detail
+/// (vendor_detail_mock_datasource.dart); tes memeriksanya.
 class VendorsMockDatasource {
   Future<VendorsData> fetch() async {
     return const VendorsData(
@@ -61,12 +62,13 @@ class VendorsMockDatasource {
           badge: "Editor's Choice",
           description:
               'Uluwatu, Bali • Kapasitas hingga 350 pax • Ocean cliff view panoramic',
-          priceLabel: 'Mulai dari',
-          price: 850000,
-          priceUnit: '/ pax',
+          priceLabel: 'All Inclusive 100 Pax',
+          price: 85000000,
+          originalPrice: 92000000,
+          priceNote: '≈ Rp 850.000 / tamu',
           startingBudget: 85000000,
           promoBadge: 'Cashback 8%',
-          promoNote: 'Min. 150 pax',
+          promoNote: 'Cicilan 0% 12 Bln',
         ),
         FeaturedVendor(
           id: 'vendor-maison',
@@ -102,6 +104,7 @@ class VendorsMockDatasource {
               'Specialized Concept Design • 3D Visual Rendering • Free Lighting Rigging',
           priceLabel: 'Paket All-In Decor',
           price: 65000000,
+          originalPrice: 72000000,
           startingBudget: 65000000,
           promoBadge: 'Free Hand Bouquet',
           promoNote: 'Book by Nov 2026',
@@ -117,8 +120,9 @@ class VendorsMockDatasource {
           rating: 4.9,
           reviewCount: 142,
           description: 'Photography & Videography • Prewedding & D-Day',
-          priceLabel: 'Mulai dari',
+          priceLabel: 'Paket D-Day Photo & Video',
           price: 18500000,
+          originalPrice: 22000000,
           startingBudget: 18500000,
           promoBadge: 'Fast RSVP',
           promoNote: 'Slot terbatas',
@@ -134,7 +138,7 @@ class VendorsMockDatasource {
           rating: 4.8,
           reviewCount: 97,
           description: 'Bridal MUA Pro • Termasuk Retouch',
-          priceLabel: 'Paket Bridal',
+          priceLabel: 'Paket Bridal Akad + Resepsi',
           price: 21000000,
           originalPrice: 28500000,
           startingBudget: 21000000,
@@ -152,8 +156,9 @@ class VendorsMockDatasource {
           rating: 4.9,
           reviewCount: 128,
           description: 'Full planning & day-of coordination • Bali',
-          priceLabel: 'Paket Full WO',
+          priceLabel: 'Full Planning 100 Pax',
           price: 45000000,
+          originalPrice: 52000000,
           startingBudget: 45000000,
           promoBadge: 'Konsultasi Gratis',
           promoNote: 'Slot 2027 dibuka',
@@ -169,8 +174,9 @@ class VendorsMockDatasource {
           rating: 4.8,
           reviewCount: 76,
           description: 'Wedding film sinematik • Drone & same-day edit',
-          priceLabel: 'Mulai dari',
+          priceLabel: 'Paket Cinematic Film',
           price: 15000000,
+          originalPrice: 18000000,
           startingBudget: 15000000,
           promoBadge: 'Free Teaser',
           promoNote: 'Same-day edit',
@@ -186,9 +192,10 @@ class VendorsMockDatasource {
           rating: 4.7,
           reviewCount: 203,
           description: 'Buffet & plated dinner • Menu Nusantara dan Western',
-          priceLabel: 'Mulai dari',
-          price: 175000,
-          priceUnit: '/ pax',
+          priceLabel: 'Paket Buffet 100 Pax',
+          price: 17500000,
+          originalPrice: 19500000,
+          priceNote: '≈ Rp 175.000 / tamu',
           startingBudget: 17500000,
           promoBadge: 'Free Tasting',
           promoNote: 'Min. 100 pax',

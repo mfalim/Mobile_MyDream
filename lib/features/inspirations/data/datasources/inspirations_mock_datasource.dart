@@ -48,15 +48,15 @@ class InspirationsMockDatasource {
           StoryVendor(
             name: 'Vivaldi Decor Atelier',
             role: 'Floral & Space Design',
-            rating: 5.0,
-            reviewCount: 94,
+            rating: 4.9,
+            reviewCount: 160,
             kind: StoryVendorKind.decor,
           ),
           StoryVendor(
             name: 'Sora Visual Stories',
             role: 'Dokumentasi & Cinematic Film',
             rating: 4.9,
-            reviewCount: 150,
+            reviewCount: 142,
             kind: StoryVendorKind.photographer,
           ),
         ],

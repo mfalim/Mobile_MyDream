@@ -9,6 +9,7 @@ import 'package:w51/features/home/domain/entities/home_entities.dart';
 class WeddingCountdownCard extends StatelessWidget {
   const WeddingCountdownCard({
     required this.countdown,
+    required this.coupleNames,
     required this.dateLabel,
     required this.daysLeft,
     this.onDetail,
@@ -16,6 +17,7 @@ class WeddingCountdownCard extends StatelessWidget {
   });
 
   final WeddingCountdown countdown;
+  final String coupleNames;
   final String dateLabel;
   final int daysLeft;
   final VoidCallback? onDetail;
@@ -44,7 +46,7 @@ class WeddingCountdownCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 10),
                     Text(
-                      countdown.coupleNames,
+                      coupleNames,
                       style: AppTypography.heading(24),
                     ),
                     const SizedBox(height: 6),

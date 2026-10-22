@@ -13,6 +13,8 @@ import '../../features/cart/presentation/pages/cart_page.dart';
 import '../../features/checkout/presentation/pages/checkout_page.dart';
 import '../../features/payment/presentation/pages/payment_page.dart';
 import '../../features/auth/presentation/pages/register_page.dart';
+import '../../features/my_wedding/presentation/pages/couple_setup_page.dart';
+import '../../features/my_wedding/presentation/providers/couple_provider.dart';
 import 'app_shell.dart';
 import 'route_names.dart';
 import 'auth_redirect.dart';
@@ -28,6 +30,7 @@ final routerProvider = Provider<GoRouter>((ref) {
     refreshListenable: refresh,
     redirect: (context, state) => authRedirect(
       loggedIn: ref.read(authProvider) != null,
+      needsCoupleSetup: ref.read(coupleProvider) == null,
       uri: state.uri,
     ),
     routes: [
@@ -69,6 +72,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.register,
         builder: (context, state) =>
             RegisterPage(from: state.uri.queryParameters['from']),
+      ),
+      GoRoute(
+        path: AppRoutes.coupleSetup,
+        builder: (context, state) =>
+            CoupleSetupPage(from: state.uri.queryParameters['from']),
       ),
       GoRoute(
         path: AppRoutes.cart,

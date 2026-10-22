@@ -154,8 +154,8 @@ class VendorDetailMockDatasource {
       'provider': {
         'name': 'Vivaldi Decor Atelier',
         'tagline': 'Floral & Space Design',
-        'rating': 5.0,
-        'review_count': 94,
+        'rating': 4.9,
+        'review_count': 160,
       },
       'sections': [
         {

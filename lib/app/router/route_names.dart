@@ -17,9 +17,16 @@ abstract final class AppRoutes {
   static const checkout = '/checkout';
   static const payment = '/payment';
 
-  static const protectedPaths = [myWedding, cart, checkout, payment];
-
+  static const protectedPaths = [
+    myWedding,
+    cart,
+    checkout,
+    payment,
+    coupleSetup
+  ];
   static const register = '/register';
+  static const coupleSetup = '/couple-setup';
+  static String coupleSetupPath({String? from}) => _authPath(coupleSetup, from);
   static const authPaths = [login, register];
 
   /// Alamat Login/Register; `from` adalah tujuan setelah berhasil masuk.

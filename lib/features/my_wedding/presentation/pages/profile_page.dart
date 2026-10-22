@@ -16,7 +16,7 @@ import 'package:w51/features/my_wedding/presentation/widgets/settings_section.da
 import 'package:w51/features/my_wedding/presentation/widgets/vision_board_card.dart';
 import 'package:w51/core/utils/date_helpers.dart';
 import 'package:w51/core/utils/formatters.dart';
-import 'package:w51/features/my_wedding/presentation/providers/wedding_date_provider.dart';
+import 'package:w51/features/my_wedding/presentation/providers/couple_provider.dart';
 
 class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
@@ -30,21 +30,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(SnackBar(content: Text('$feature segera hadir.')));
-  }
-
-  Future<void> _pickWeddingDate() async {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final current = ref.read(weddingDateProvider);
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: current.isBefore(today) ? today : current,
-      firstDate: today,
-      lastDate: today.add(const Duration(days: 365 * 3)),
-      helpText: 'Pilih tanggal pernikahan',
-    );
-    if (picked == null || !mounted) return;
-    ref.read(weddingDateProvider.notifier).setDate(picked);
   }
 
   Future<void> _logout() async {
@@ -77,11 +62,13 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     final auth = ref.read(authProvider.notifier);
     final cart = ref.read(cartProvider.notifier);
     final checkout = ref.read(checkoutProvider.notifier);
+    final couple = ref.read(coupleProvider.notifier);
     final messenger = ScaffoldMessenger.of(context);
     context.go(AppRoutes.home);
     auth.signOut();
     cart.clear();
     checkout.clear();
+    couple.clear();
     messenger
       ..hideCurrentSnackBar()
       ..showSnackBar(const SnackBar(content: Text('Kamu sudah keluar.')));
@@ -105,7 +92,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
   Widget _buildContent(ProfileData p) {
     const gap = SizedBox(height: AppSpacing.lg);
-    final weddingDate = ref.watch(weddingDateProvider);
+    final couple = ref.watch(coupleProvider);
+    final user = ref.watch(authProvider);
     final cartCount = ref.watch(cartProvider).items.length;
     return ListView(
       padding: const EdgeInsets.fromLTRB(
@@ -117,11 +105,13 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       children: [
         ProfileHeaderCard(
           profile: p,
-          weddingDateLabel: formatDateShortId(weddingDate),
-          daysLeft: daysUntil(weddingDate),
+          coupleNames: couple?.profileNames ?? user?.name ?? 'Calon Pengantin',
+          weddingDateLabel:
+              couple == null ? null : formatDateShortId(couple.weddingDate),
+          daysLeft: couple == null ? null : daysUntil(couple.weddingDate),
           cartCount: cartCount,
           onEditPhoto: () => _soon('Ganti foto profil'),
-          onSetDate: _pickWeddingDate,
+          onSetDate: () => context.push(AppRoutes.coupleSetup),
           onStat: (i) {
             if (i == 2) {
               context.push(AppRoutes.cart);

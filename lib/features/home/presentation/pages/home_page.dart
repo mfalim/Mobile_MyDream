@@ -1,7 +1,6 @@
 import 'dart:math' as math;
 import 'package:w51/core/utils/date_helpers.dart';
 import 'package:w51/core/utils/formatters.dart';
-import 'package:w51/features/my_wedding/presentation/providers/wedding_date_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -17,6 +16,9 @@ import 'package:w51/features/home/presentation/widgets/inspirations_section.dart
 import 'package:w51/features/home/presentation/widgets/service_grid.dart';
 import 'package:w51/features/home/presentation/widgets/wedding_countdown_card.dart';
 import 'package:w51/features/vendors/presentation/providers/vendor_filter_provider.dart';
+import 'package:w51/features/auth/presentation/providers/auth_provider.dart';
+import 'package:w51/features/home/presentation/widgets/couple_cta_card.dart';
+import 'package:w51/features/my_wedding/presentation/providers/couple_provider.dart';
 
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
@@ -45,7 +47,8 @@ class _HomeContent extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final weddingDate = ref.watch(weddingDateProvider);
+    final couple = ref.watch(coupleProvider);
+    final isGuest = ref.watch(authProvider) == null;
     const gap = SizedBox(height: AppSpacing.lg);
     void goVendors() {
       ref.read(vendorFilterProvider.notifier).reset();
@@ -66,12 +69,19 @@ class _HomeContent extends ConsumerWidget {
         AppSpacing.lg,
       ),
       children: [
-        WeddingCountdownCard(
-          countdown: data.countdown,
-          dateLabel: formatDateId(weddingDate),
-          daysLeft: math.max(0, daysUntil(weddingDate)),
-          onDetail: () => context.go(AppRoutes.myWedding),
-        ),
+        if (couple != null)
+          WeddingCountdownCard(
+            countdown: data.countdown,
+            coupleNames: couple.shortNames,
+            dateLabel: formatDateId(couple.weddingDate),
+            daysLeft: math.max(0, daysUntil(couple.weddingDate)),
+            onDetail: () => context.go(AppRoutes.myWedding),
+          )
+        else
+          CoupleCtaCard(
+            isGuest: isGuest,
+            onStart: () => context.push(AppRoutes.coupleSetup),
+          ),
         gap,
         ServiceGrid(services: data.services, onSelected: openCategory),
         gap,
@@ -81,6 +91,7 @@ class _HomeContent extends ConsumerWidget {
           // Klaim voucher = aksi yang butuh login: router mengarahkan tamu ke Login.
           onClaim: (deal) =>
               context.push(AppRoutes.cartWithVoucher(deal.voucherCode)),
+          onOpen: (deal) => context.push(AppRoutes.vendorDetailPath(deal.id)),
         ),
         gap,
         const AuraPayBanner(),
@@ -92,6 +103,7 @@ class _HomeContent extends ConsumerWidget {
           onAsk: (_) => ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Fitur chat vendor segera hadir.')),
           ),
+          onOpen: (v) => context.push(AppRoutes.vendorDetailPath(v.id)),
         ),
         gap,
         InspirationsSection(

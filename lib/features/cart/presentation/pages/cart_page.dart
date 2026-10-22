@@ -13,9 +13,9 @@ import 'package:w51/features/cart/presentation/widgets/cart_item_card.dart';
 import 'package:w51/features/cart/presentation/widgets/cart_summary_card.dart';
 import 'package:w51/features/cart/presentation/widgets/cart_tab_switcher.dart';
 import 'package:w51/core/utils/formatters.dart';
-import 'package:w51/features/my_wedding/presentation/providers/wedding_date_provider.dart';
 import 'package:w51/features/cart/presentation/providers/voucher_provider.dart';
 import 'package:w51/features/cart/presentation/widgets/voucher_sheet.dart';
+import 'package:w51/features/my_wedding/presentation/providers/couple_provider.dart';
 
 class CartPage extends ConsumerStatefulWidget {
   const CartPage({this.claimCode, super.key});
@@ -95,7 +95,7 @@ class _CartPageState extends ConsumerState<CartPage> {
   Widget build(BuildContext context) {
     final cart = ref.watch(cartProvider);
     final controller = ref.read(cartProvider.notifier);
-    final weddingDate = ref.watch(weddingDateProvider);
+    final couple = ref.watch(coupleProvider);
     final showBar = _tab == 0 && cart.items.isNotEmpty;
 
     return Scaffold(
@@ -174,8 +174,10 @@ class _CartPageState extends ConsumerState<CartPage> {
                       context.push(AppRoutes.vendorDetailPath(item.vendorId)),
                 ),
               ),
-            EstimateCard(dateLabel: formatDateId(weddingDate)),
-            const SizedBox(height: 12),
+            if (couple != null) ...[
+              EstimateCard(dateLabel: formatDateId(couple.weddingDate)),
+              const SizedBox(height: 12),
+            ],
             VoucherTile(
               subtitle: switch (cart.voucher) {
                 null => 'Pilih voucher untuk hemat lebih banyak',

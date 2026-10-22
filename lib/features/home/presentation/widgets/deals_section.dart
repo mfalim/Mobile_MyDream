@@ -12,12 +12,14 @@ class DealsSection extends StatelessWidget {
   const DealsSection({
     required this.deals,
     required this.onClaim,
+    required this.onOpen,
     this.onSeeAll,
     super.key,
   });
 
   final List<DealItem> deals;
   final ValueChanged<DealItem> onClaim;
+  final ValueChanged<DealItem> onOpen;
   final VoidCallback? onSeeAll;
 
   @override
@@ -36,7 +38,10 @@ class DealsSection extends StatelessWidget {
         HorizontalCardList(
           children: [
             for (final deal in deals)
-              _DealCard(deal: deal, onClaim: () => onClaim(deal)),
+              GestureDetector(
+                onTap: () => onOpen(deal),
+                child: _DealCard(deal: deal, onClaim: () => onClaim(deal)),
+              ),
           ],
         ),
       ],

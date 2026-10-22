@@ -6,7 +6,6 @@ class VisionBoard {
 
 class ProfileData {
   const ProfileData({
-    required this.coupleNames,
     required this.isVerified,
     required this.inspirationBoards,
     required this.vendorsContacted,
@@ -16,7 +15,6 @@ class ProfileData {
     required this.appVersion,
   });
 
-  final String coupleNames;
   final bool isVerified;
   final int inspirationBoards;
   final int vendorsContacted;

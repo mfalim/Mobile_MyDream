@@ -9,6 +9,8 @@ import 'package:w51/features/auth/presentation/providers/auth_provider.dart';
 import 'package:w51/features/auth/presentation/widgets/auth_layout.dart';
 import 'package:w51/features/auth/presentation/widgets/google_sign_in_button.dart';
 import 'package:w51/features/auth/presentation/widgets/password_field.dart';
+import 'package:w51/app/router/auth_redirect.dart';
+import 'package:w51/features/my_wedding/presentation/providers/couple_provider.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({this.from, super.key});
@@ -45,11 +47,20 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     if (_busy != null) return;
     setState(() => _busy = action);
     // PROTOTYPE: meniru jeda jaringan. Autentikasi sungguhan menggantikan
-    // bagian ini; router mengalihkan otomatis setelah status login berubah.
+    // bagian ini.
     await Future<void>.delayed(const Duration(milliseconds: 500));
     if (!mounted) return;
+
+    // Ambil dulu: halaman ini bisa hilang begitu status login berubah.
+    final router = GoRouter.of(context);
+    final destination = postLoginDestination(
+      from: widget.from,
+      needsCoupleSetup: ref.read(coupleProvider) == null,
+    );
     setState(() => _busy = null);
     signIn();
+    // Pindah halaman secara eksplisit, tidak bergantung pada penyegaran router.
+    router.go(destination);
   }
 
   void _submit() {

@@ -40,7 +40,7 @@ class FeaturedVendor {
     required this.promoBadge,
     required this.promoNote,
     this.badge,
-    this.priceUnit,
+    this.priceNote,
     this.originalPrice,
   });
 
@@ -59,7 +59,7 @@ class FeaturedVendor {
   final String description;
   final String priceLabel;
   final int price;
-  final String? priceUnit;
+  final String? priceNote;
   final int? originalPrice;
 
   /// Perkiraan total biaya termurah, dipakai untuk filter budget (MOCK).

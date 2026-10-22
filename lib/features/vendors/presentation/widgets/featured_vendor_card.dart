@@ -82,6 +82,8 @@ class _FeaturedVendorCardState extends State<FeaturedVendorCard> {
   @override
   Widget build(BuildContext context) {
     final v = widget.vendor;
+    final original = v.originalPrice;
+    final note = v.priceNote;
     return Semantics(
       button: true,
       label: 'Buka detail ${v.name}',
@@ -174,7 +176,7 @@ class _FeaturedVendorCardState extends State<FeaturedVendorCard> {
                     const SizedBox(height: 10),
                     Text(
                       v.priceLabel,
-                      maxLines: 1,
+                      maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
                         color: AppColors.textSecondary,
@@ -184,32 +186,27 @@ class _FeaturedVendorCardState extends State<FeaturedVendorCard> {
                     FittedBox(
                       fit: BoxFit.scaleDown,
                       alignment: Alignment.centerLeft,
-                      child: Text.rich(
-                        TextSpan(
-                          text: formatRupiah(v.price, prefix: 'Rp'),
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                          ),
-                          children: [
-                            if (v.priceUnit != null)
-                              TextSpan(
-                                text: ' ${v.priceUnit}',
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w400,
-                                  color: AppColors.textSecondary,
-                                ),
-                              ),
-                          ],
+                      child: Text(
+                        formatRupiah(v.price, prefix: 'Rp'),
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
                     ),
-                    if (v.originalPrice != null)
+                    if (original != null)
                       Text(
-                        formatRupiah(v.originalPrice!, prefix: 'Rp'),
+                        formatRupiah(original, prefix: 'Rp'),
                         style: const TextStyle(
                           decoration: TextDecoration.lineThrough,
+                          color: AppColors.textSecondary,
+                          fontSize: 11,
+                        ),
+                      ),
+                    if (note != null)
+                      Text(
+                        note,
+                        style: const TextStyle(
                           color: AppColors.textSecondary,
                           fontSize: 11,
                         ),
@@ -245,8 +242,9 @@ class _FeaturedVendorCardState extends State<FeaturedVendorCard> {
                             onPressed: widget.onOpen,
                             style: FilledButton.styleFrom(
                               minimumSize: const Size(0, 40),
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 8),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                              ),
                               textStyle: const TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
