@@ -22,7 +22,9 @@ abstract final class AppRoutes {
     cart,
     checkout,
     payment,
-    coupleSetup
+    coupleSetup,
+    notifications,
+    notificationSettings,
   ];
   static const register = '/register';
   static const coupleSetup = '/couple-setup';
@@ -37,4 +39,9 @@ abstract final class AppRoutes {
         path: path,
         queryParameters: from == null ? null : {'from': from},
       ).toString();
+
+  static const notifications = '/notifications';
+  static const notificationSettings = '/notification-settings';
+  static const info = '/info/:slug';
+  static String infoPath(String slug) => '/info/$slug';
 }

@@ -197,7 +197,7 @@ class _CartPageState extends ConsumerState<CartPage> {
               discount: cart.discount,
               total: cart.total,
               deposit: kDownPayment,
-              onTerms: () => _soon('Ketentuan garansi'),
+              onTerms: () => context.push(AppRoutes.infoPath('guarantee')),
             ),
             const SizedBox(height: 12),
             const TrustTiles(),

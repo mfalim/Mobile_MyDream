@@ -18,6 +18,8 @@ import 'package:w51/features/vendors/presentation/widgets/vendors_help_banner.da
 import 'package:w51/features/vendors/presentation/widgets/vendors_promo_banner.dart';
 import 'package:w51/features/vendors/presentation/widgets/vendors_search_section.dart';
 import 'package:w51/features/vendors/presentation/widgets/vendors_top_bar.dart';
+import 'package:w51/features/auth/presentation/providers/auth_provider.dart';
+import 'package:w51/features/notifications/presentation/providers/notifications_provider.dart';
 
 class VendorPage extends ConsumerStatefulWidget {
   const VendorPage({super.key});
@@ -100,6 +102,8 @@ class _VendorPageState extends ConsumerState<VendorPage> {
     final featured = _filter(data.featured, filter);
     final isFiltering = _search.text.trim().isNotEmpty || filter.isActive;
     final controller = ref.read(vendorFilterProvider.notifier);
+    final loggedIn = ref.watch(authProvider) != null;
+    final unread = loggedIn ? ref.watch(unreadCountProvider) : 0;
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(
@@ -110,8 +114,10 @@ class _VendorPageState extends ConsumerState<VendorPage> {
       ),
       children: [
         VendorsTopBar(
-          onNotifications: () => _soon('Notifikasi'),
+          unreadCount: unread,
+          onNotifications: () => context.push(AppRoutes.notifications),
           onChat: () => _soon('Pesan'),
+          onProfile: () => context.go(AppRoutes.myWedding),
         ),
         const SizedBox(height: AppSpacing.md),
         VendorsSearchSection(

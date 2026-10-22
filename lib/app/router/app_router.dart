@@ -15,6 +15,9 @@ import '../../features/payment/presentation/pages/payment_page.dart';
 import '../../features/auth/presentation/pages/register_page.dart';
 import '../../features/my_wedding/presentation/pages/couple_setup_page.dart';
 import '../../features/my_wedding/presentation/providers/couple_provider.dart';
+import '../../features/info/presentation/pages/info_page.dart';
+import '../../features/notifications/presentation/pages/notification_settings_page.dart';
+import '../../features/notifications/presentation/pages/notifications_page.dart';
 import 'app_shell.dart';
 import 'route_names.dart';
 import 'auth_redirect.dart';
@@ -95,6 +98,19 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.vendorDetail,
         builder: (context, state) =>
             VendorDetailPage(vendorId: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: AppRoutes.notifications,
+        builder: (context, state) => const NotificationsPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.notificationSettings,
+        builder: (context, state) => const NotificationSettingsPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.info,
+        builder: (context, state) =>
+            InfoPage(slug: state.pathParameters['slug']!),
       ),
     ],
   );

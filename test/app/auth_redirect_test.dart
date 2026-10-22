@@ -176,4 +176,16 @@ void main() {
       );
     });
   });
+
+  test('notifikasi butuh login, halaman info tidak', () {
+    for (final path in ['/notifications', '/notification-settings']) {
+      final result = authRedirect(loggedIn: false, uri: Uri.parse(path));
+      expect(Uri.parse(result!).path, '/login', reason: path);
+    }
+    expect(
+      authRedirect(loggedIn: false, uri: Uri.parse('/info/terms')),
+      isNull,
+    );
+    expect(AppRoutes.infoPath('guarantee'), '/info/guarantee');
+  });
 }

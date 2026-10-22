@@ -163,7 +163,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               icon: Icons.notifications_none_rounded,
               title: 'Preferensi Notifikasi',
               subtitle: 'Jadwal konsultasi vendor, diskon eksklusif',
-              onTap: () => _soon('Preferensi notifikasi'),
+              onTap: () => context.push(AppRoutes.notificationSettings),
             ),
             SettingsTile(
               icon: Icons.language,
@@ -218,7 +218,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               icon: Icons.description_outlined,
               title: 'Syarat & Ketentuan Layanan',
               subtitle: 'Perlindungan konsumen, kebijakan garansi DP',
-              onTap: () => _soon('Syarat & ketentuan'),
+              onTap: () => context.push(AppRoutes.infoPath('terms')),
             ),
             SettingsTile(
               icon: Icons.help_outline,
