@@ -175,4 +175,16 @@ void main() {
       expect(item.originalPrice, item.price);
     });
   });
+  test('kapasitas paket menjadi batas jumlah tamu di checkout', () async {
+    final intimate = await PackagesMockDatasource().fetch('pkg-intimate-bali');
+    expect(CartItem.fromPackage(intimate).guestCapacity, 100);
+
+    final photo = await PackagesMockDatasource().fetch('pkg-photo-glam');
+    expect(CartItem.fromPackage(photo).guestCapacity, isNull);
+  });
+
+  test('custom order tidak punya batas kapasitas', () {
+    final item = CartItem.custom(const []);
+    expect(item.guestCapacity, isNull);
+  });
 }

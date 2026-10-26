@@ -124,10 +124,10 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
       );
     }
 
-    final base = item.price + details.guestExtraCost;
+    final base = item.price;
     final summary = PaymentSummary(
       packagePrice: base,
-      originalPrice: item.originalPrice + details.guestExtraCost,
+      originalPrice: item.originalPrice,
       couponDiscount: cart.discountFor(base),
       deposit: kDownPayment,
     );
