@@ -204,4 +204,13 @@ void main() {
     expect(AppRoutes.checkoutPath(), '/checkout');
     expect(AppRoutes.checkoutPath(custom: true), '/checkout?type=custom');
   });
+
+  test('daftar dan detail paket terbuka untuk tamu', () {
+    expect(authRedirect(loggedIn: false, uri: Uri.parse('/packages')), isNull);
+    expect(
+      authRedirect(loggedIn: false, uri: Uri.parse('/package/pkg-1')),
+      isNull,
+    );
+    expect(AppRoutes.packageDetailPath('pkg-1'), '/package/pkg-1');
+  });
 }

@@ -1,4 +1,6 @@
 import 'package:w51/features/cart/domain/entities/custom_vendor_item.dart';
+import 'package:w51/core/utils/formatters.dart';
+import 'package:w51/features/packages/domain/entities/wedding_package.dart';
 
 /// Id khusus untuk pesanan custom (gabungan vendor pilihan) di checkout.
 const kCustomOrderId = 'custom-order';
@@ -41,6 +43,37 @@ class CartItem {
       originalPrice: total,
       savingsBadge: '',
       inclusionSummary: names.join(', '),
+      cashbackPoints: 0,
+      cashbackPercent: 0,
+      installmentMonths: 0,
+    );
+  }
+
+  /// Item paket pernikahan. Hemat dihitung dari selisih terhadap jumlah harga
+  /// vendor di dalam paket; kosong bila tidak ada penghematan.
+  factory CartItem.fromPackage(WeddingPackage p) {
+    final cities = p.vendors.map((v) => v.city).whereType<String>().toSet();
+    final capacity = p.guestCapacity;
+    final total = p.vendorsTotal;
+    return CartItem(
+      vendorId: p.id,
+      providerName: 'Paket Pernikahan',
+      providerSubtitle: capacity == null
+          ? '${p.vendors.length} vendor'
+          : '${p.vendors.length} vendor • hingga $capacity tamu',
+      location: cities.isEmpty
+          ? 'Sesuai paket'
+          : cities.length == 1
+              ? cities.first
+              : 'Beberapa kota',
+      packageTitle: p.name,
+      // Jumlah tamu ditanyakan di checkout (Langkah 41), bukan dari paket.
+      paxIncluded: 0,
+      price: p.price,
+      originalPrice: total ?? p.price,
+      savingsBadge:
+          p.savings > 0 ? 'Hemat ${formatRupiah(p.savings, prefix: 'Rp')}' : '',
+      inclusionSummary: p.vendors.map((v) => v.name).join(', '),
       cashbackPoints: 0,
       cashbackPercent: 0,
       installmentMonths: 0,

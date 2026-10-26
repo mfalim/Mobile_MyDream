@@ -18,6 +18,7 @@ class ServiceCategory {
     required this.label,
     required this.icon,
     this.vendorCategory,
+    this.route,
   });
 
   final String label;
@@ -25,6 +26,9 @@ class ServiceCategory {
 
   /// Nama kategori di direktori Vendors. Null = tampilkan semua vendor.
   final String? vendorCategory;
+
+  /// Bila ada, membuka halaman ini (bukan direktori Vendors).
+  final String? route;
 }
 
 class DealItem {

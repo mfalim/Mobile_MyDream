@@ -109,7 +109,7 @@ class CheckoutPackageCard extends StatelessWidget {
                   20,
                 ).copyWith(color: AppColors.primary),
               ),
-              if (!custom) ...[
+              if (item.originalPrice > item.price)
                 Text(
                   formatRupiah(item.originalPrice),
                   style: const TextStyle(
@@ -118,8 +118,7 @@ class CheckoutPackageCard extends StatelessWidget {
                     fontSize: 12,
                   ),
                 ),
-                BadgePill(item.savingsBadge),
-              ],
+              if (item.savingsBadge.isNotEmpty) BadgePill(item.savingsBadge),
               if (item.paxIncluded > 0)
                 Text(
                   '${item.paxIncluded} Pax',

@@ -13,7 +13,7 @@ import 'package:w51/features/vendors/presentation/providers/vendors_provider.dar
 import 'package:w51/features/vendors/presentation/widgets/deposit_guarantee_card.dart';
 import 'package:w51/features/vendors/presentation/widgets/package_accordion.dart';
 import 'package:w51/features/vendors/presentation/widgets/vendor_benefit_tile.dart';
-import 'package:w51/features/vendors/presentation/widgets/vendor_booking_bar.dart';
+import 'package:w51/core/widgets/booking_bar.dart';
 import 'package:w51/features/vendors/presentation/widgets/vendor_gallery_header.dart';
 import 'package:w51/features/vendors/presentation/widgets/vendor_price_card.dart';
 import 'package:w51/features/vendors/presentation/widgets/vendor_provider_card.dart';
@@ -129,7 +129,7 @@ class _VendorDetailPageState extends ConsumerState<VendorDetailPage> {
       bottomNavigationBar: detail.when<Widget?>(
         loading: () => null,
         error: (e, s) => null,
-        data: (d) => VendorBookingBar(
+        data: (d) => BookingBar(
           totalPrice: d.price,
           caption: 'Harga vendor',
           actionLabel: 'Tambah',

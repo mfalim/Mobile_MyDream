@@ -18,6 +18,8 @@ import '../../features/my_wedding/presentation/providers/couple_provider.dart';
 import '../../features/info/presentation/pages/info_page.dart';
 import '../../features/notifications/presentation/pages/notification_settings_page.dart';
 import '../../features/notifications/presentation/pages/notifications_page.dart';
+import '../../features/packages/presentation/pages/package_detail_page.dart';
+import '../../features/packages/presentation/pages/packages_page.dart';
 import 'app_shell.dart';
 import 'route_names.dart';
 import 'auth_redirect.dart';
@@ -101,6 +103,15 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.vendorDetail,
         builder: (context, state) =>
             VendorDetailPage(vendorId: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: AppRoutes.packages,
+        builder: (context, state) => const PackagesPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.packageDetail,
+        builder: (context, state) =>
+            PackageDetailPage(packageId: state.pathParameters['id']!),
       ),
       GoRoute(
         path: AppRoutes.notifications,

@@ -51,4 +51,8 @@ abstract final class AppRoutes {
   /// Checkout untuk paket, atau untuk Custom Order bila [custom] true.
   static String checkoutPath({bool custom = false}) =>
       custom ? '$checkout?type=custom' : checkout;
+
+  static const packages = '/packages';
+  static const packageDetail = '/package/:id';
+  static String packageDetailPath(String id) => '/package/$id';
 }

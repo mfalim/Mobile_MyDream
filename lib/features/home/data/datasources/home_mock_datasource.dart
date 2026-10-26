@@ -15,7 +15,7 @@ class HomeMockDatasource {
         ServiceCategory(
           label: 'All-In Package',
           icon: Icons.celebration,
-          vendorCategory: 'Wedding Planner',
+          route: '/packages',
         ),
         ServiceCategory(
           label: 'Venue Deals',

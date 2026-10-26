@@ -199,10 +199,12 @@ class _CartPageState extends ConsumerState<CartPage> {
       return [
         _EmptyCart(
           message:
-              'Belum ada paket pernikahan di keranjang.\nDaftar paket segera '
-              'hadir. Sementara itu, susun pesananmu lewat Custom Order.',
-          buttonLabel: 'Buat Custom Order',
-          onPressed: () => setState(() => _tab = 1),
+              'Belum ada paket pernikahan di keranjang.\nPilih paket lengkap, '
+              'atau susun sendiri lewat Custom Order.',
+          buttonLabel: 'Lihat Paket Pernikahan',
+          onPressed: () => context.push(AppRoutes.packages),
+          secondaryLabel: 'Buat Custom Order',
+          onSecondary: () => setState(() => _tab = 1),
         ),
       ];
     }
@@ -239,7 +241,7 @@ class _CartPageState extends ConsumerState<CartPage> {
             onRemove: () => controller.remove(item.vendorId),
             onChat: () => _soon('Chat vendor'),
             onOpenPackage: () =>
-                context.push(AppRoutes.vendorDetailPath(item.vendorId)),
+                context.push(AppRoutes.packageDetailPath(item.vendorId)),
           ),
         ),
       if (couple != null) ...[
@@ -320,14 +322,20 @@ class _EmptyCart extends StatelessWidget {
     required this.message,
     required this.buttonLabel,
     required this.onPressed,
+    this.secondaryLabel,
+    this.onSecondary,
   });
 
   final String message;
   final String buttonLabel;
   final VoidCallback onPressed;
+  final String? secondaryLabel;
+  final VoidCallback? onSecondary;
 
   @override
   Widget build(BuildContext context) {
+    final secondary = secondaryLabel;
+    final onSecond = onSecondary;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 40),
       child: Column(
@@ -339,6 +347,8 @@ class _EmptyCart extends StatelessWidget {
             style: FilledButton.styleFrom(minimumSize: const Size(220, 48)),
             child: Text(buttonLabel),
           ),
+          if (secondary != null && onSecond != null)
+            TextButton(onPressed: onSecond, child: Text(secondary)),
         ],
       ),
     );

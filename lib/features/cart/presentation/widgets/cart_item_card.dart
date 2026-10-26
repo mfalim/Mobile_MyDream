@@ -48,8 +48,10 @@ class CartItemCard extends StatelessWidget {
                 _Package(item: item),
                 const SizedBox(height: 12),
                 _Inclusions(item: item, onDetail: onOpenPackage),
-                const SizedBox(height: 10),
-                _PointsRow(item: item),
+                if (item.cashbackPoints > 0) ...[
+                  const SizedBox(height: 10),
+                  _PointsRow(item: item),
+                ],
                 const SizedBox(height: 10),
                 Row(
                   children: [
@@ -61,7 +63,9 @@ class CartItemCard extends StatelessWidget {
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        'Cicilan 0% hingga ${item.installmentMonths} bln',
+                        item.installmentMonths > 0
+                            ? 'Cicilan 0% hingga ${item.installmentMonths} bln'
+                            : 'DP & pelunasan via transfer bank',
                         style: const TextStyle(fontSize: 13),
                       ),
                     ),
@@ -211,19 +215,21 @@ class _Package extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Wrap(
-                spacing: 6,
-                runSpacing: 4,
-                children: [
-                  const BadgePill('Best Price', icon: Icons.verified),
-                  BadgePill(
-                    item.savingsBadge,
-                    background: AppColors.coral.withValues(alpha: 0.4),
-                    foreground: AppColors.primary,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 6),
+              if (item.savingsBadge.isNotEmpty) ...[
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 4,
+                  children: [
+                    const BadgePill('Best Price', icon: Icons.verified),
+                    BadgePill(
+                      item.savingsBadge,
+                      background: AppColors.coral.withValues(alpha: 0.4),
+                      foreground: AppColors.primary,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+              ],
               Text(
                 item.packageTitle,
                 maxLines: 3,
@@ -235,14 +241,15 @@ class _Package extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 6),
-              Text(
-                formatRupiah(item.originalPrice),
-                style: const TextStyle(
-                  decoration: TextDecoration.lineThrough,
-                  color: AppColors.textSecondary,
-                  fontSize: 12,
+              if (item.originalPrice > item.price)
+                Text(
+                  formatRupiah(item.originalPrice),
+                  style: const TextStyle(
+                    decoration: TextDecoration.lineThrough,
+                    color: AppColors.textSecondary,
+                    fontSize: 12,
+                  ),
                 ),
-              ),
               FittedBox(
                 fit: BoxFit.scaleDown,
                 alignment: Alignment.centerLeft,
@@ -287,7 +294,7 @@ class _Inclusions extends StatelessWidget {
               const SizedBox(width: 6),
               const Expanded(
                 child: Text(
-                  'Termasuk Perlengkapan & Resepsi Lengkap',
+                  'Vendor dalam paket',
                   style: TextStyle(
                     color: AppColors.primary,
                     fontWeight: FontWeight.w700,

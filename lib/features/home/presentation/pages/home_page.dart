@@ -56,6 +56,11 @@ class _HomeContent extends ConsumerWidget {
     }
 
     void openCategory(ServiceCategory service) {
+      final route = service.route;
+      if (route != null) {
+        context.push(route);
+        return;
+      }
       final filter = ref.read(vendorFilterProvider.notifier)..reset();
       filter.setCategory(service.vendorCategory);
       context.go(AppRoutes.vendors);

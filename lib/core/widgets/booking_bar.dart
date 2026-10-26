@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:w51/app/theme/app_colors.dart';
 import 'package:w51/core/utils/formatters.dart';
 
-class VendorBookingBar extends StatelessWidget {
-  const VendorBookingBar({
+class BookingBar extends StatelessWidget {
+  const BookingBar({
     required this.totalPrice,
     required this.onChat,
     required this.onBook,
