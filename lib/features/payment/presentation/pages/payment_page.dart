@@ -90,10 +90,7 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
   Widget build(BuildContext context) {
     final details = ref.watch(checkoutProvider);
     final cart = ref.watch(cartProvider);
-    final item = details == null
-        ? null
-        : cart.items.where((i) => i.vendorId == details.vendorId).firstOrNull;
-
+    final item = details == null ? null : cart.orderItemFor(details.vendorId);
     final appBar = AppBar(
       automaticallyImplyLeading: false,
       leading: IconButton(
@@ -272,8 +269,10 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              'Dapatkan +${formatNumber(item.cashbackPoints)} '
-                              'Wedding Points siap redeem honeymoon',
+                              item.cashbackPoints > 0
+                                  ? 'Dapatkan +${formatNumber(item.cashbackPoints)} '
+                                      'Wedding Points siap redeem honeymoon'
+                                  : 'Bonus eksklusif untuk pelunasan di awal',
                               style: const TextStyle(fontSize: 13),
                             ),
                           ),

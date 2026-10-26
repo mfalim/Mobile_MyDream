@@ -38,6 +38,7 @@ class VendorDetail {
   const VendorDetail({
     required this.id,
     required this.name,
+    required this.category,
     required this.location,
     required this.packageLabel,
     required this.price,
@@ -61,6 +62,7 @@ class VendorDetail {
 
   final String id;
   final String name;
+  final String category;
   final String location;
 
   /// Nama paket, mis. "All Inclusive 100 Pax" atau "Paket D-Day".

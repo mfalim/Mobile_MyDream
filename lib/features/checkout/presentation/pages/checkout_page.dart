@@ -26,7 +26,10 @@ import 'package:w51/features/checkout/presentation/widgets/guest_tier_selector.d
 import 'package:w51/features/my_wedding/presentation/providers/couple_provider.dart';
 
 class CheckoutPage extends ConsumerStatefulWidget {
-  const CheckoutPage({super.key});
+  const CheckoutPage({this.isCustom = false, super.key});
+
+  /// True bila ini checkout Custom Order (gabungan vendor pilihan).
+  final bool isCustom;
 
   @override
   ConsumerState<CheckoutPage> createState() => _CheckoutPageState();
@@ -183,7 +186,9 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
   Widget build(BuildContext context) {
     final cart = ref.watch(cartProvider);
     final selected = cart.selected;
-    final item = selected.isEmpty ? null : selected.first;
+    final item = widget.isCustom
+        ? cart.customOrderItem
+        : (selected.isEmpty ? null : selected.first);
     final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
 
     return Scaffold(
@@ -223,7 +228,12 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                   total: 2,
                   caption: 'Validasi Detail Acara',
                 ),
-                Expanded(child: _buildForm(item, selected.length - 1)),
+                Expanded(
+                  child: _buildForm(
+                    item,
+                    widget.isCustom ? 0 : selected.length - 1,
+                  ),
+                ),
               ],
             ),
       bottomNavigationBar: item == null || keyboardOpen
@@ -332,11 +342,13 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                   label: 'Kota & Destinasi Acara',
                   icon: Icons.explore_outlined,
                   value: item.location,
-                  trailing: const BadgePill(
-                    'LOCKED PACKAGE',
-                    background: AppColors.outline,
-                    foreground: AppColors.textSecondary,
-                  ),
+                  trailing: item.isCustom
+                      ? null
+                      : const BadgePill(
+                          'LOCKED PACKAGE',
+                          background: AppColors.outline,
+                          foreground: AppColors.textSecondary,
+                        ),
                 ),
                 const SizedBox(height: 14),
                 AppTextField(

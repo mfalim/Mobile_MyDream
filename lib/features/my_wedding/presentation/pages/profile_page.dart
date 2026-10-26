@@ -94,7 +94,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     const gap = SizedBox(height: AppSpacing.lg);
     final couple = ref.watch(coupleProvider);
     final user = ref.watch(authProvider);
-    final cartCount = ref.watch(cartProvider).items.length;
+    final cartCount = ref.watch(cartProvider).orderCount;
     return ListView(
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.screenPadding,

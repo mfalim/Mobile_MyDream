@@ -17,10 +17,11 @@ import 'package:w51/features/vendors/presentation/widgets/vendor_booking_bar.dar
 import 'package:w51/features/vendors/presentation/widgets/vendor_gallery_header.dart';
 import 'package:w51/features/vendors/presentation/widgets/vendor_price_card.dart';
 import 'package:w51/features/vendors/presentation/widgets/vendor_provider_card.dart';
-import 'package:w51/features/cart/domain/entities/cart_item.dart';
 import 'package:w51/features/cart/presentation/providers/cart_provider.dart';
 import 'package:w51/core/errors/app_exceptions.dart';
 import 'package:w51/features/vendors/presentation/widgets/vendor_info_sheets.dart';
+import 'package:w51/features/auth/presentation/providers/auth_provider.dart';
+import 'package:w51/features/cart/domain/entities/custom_vendor_item.dart';
 
 class VendorDetailPage extends ConsumerStatefulWidget {
   const VendorDetailPage({required this.vendorId, super.key});
@@ -46,6 +47,41 @@ class _VendorDetailPageState extends ConsumerState<VendorDetailPage> {
     } else {
       context.go(AppRoutes.vendors);
     }
+  }
+
+  void _addToCustom(VendorDetail d) {
+    final already =
+        ref.read(cartProvider).customVendors.any((v) => v.vendorId == d.id);
+    if (!already) {
+      ref
+          .read(cartProvider.notifier)
+          .addCustomVendor(CustomVendorItem.fromVendorDetail(d));
+    }
+
+    // Memesan butuh login: tamu langsung diarahkan (router meminta login).
+    if (ref.read(authProvider) == null) {
+      context.push(AppRoutes.cartCustomPath);
+      return;
+    }
+
+    final count = ref.read(cartProvider).customVendors.length;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(
+            already
+                ? 'Vendor sudah ada di Custom Order '
+                    '($count dari minimal $kMinCustomVendors).'
+                : 'Ditambahkan ke Custom Order '
+                    '($count dari minimal $kMinCustomVendors).',
+          ),
+          action: SnackBarAction(
+            label: 'Lihat',
+            onPressed: () => context.push(AppRoutes.cartCustomPath),
+          ),
+        ),
+      );
   }
 
   @override
@@ -95,12 +131,11 @@ class _VendorDetailPageState extends ConsumerState<VendorDetailPage> {
         error: (e, s) => null,
         data: (d) => VendorBookingBar(
           totalPrice: d.price,
+          caption: 'Harga vendor',
+          actionLabel: 'Tambah',
+          actionIcon: Icons.add,
           onChat: () => _soon('Chat vendor'),
-          // Keranjang butuh login: router mengarahkan tamu ke Login dulu.
-          onBook: () {
-            ref.read(cartProvider.notifier).add(CartItem.fromVendorDetail(d));
-            context.push(AppRoutes.cart);
-          },
+          onBook: () => _addToCustom(d),
         ),
       ),
     );

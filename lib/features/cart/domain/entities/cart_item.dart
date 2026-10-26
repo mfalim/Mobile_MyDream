@@ -1,4 +1,9 @@
-import 'package:w51/features/vendors/domain/entities/vendor_detail.dart';
+import 'package:w51/features/cart/domain/entities/custom_vendor_item.dart';
+
+/// Id khusus untuk pesanan custom (gabungan vendor pilihan) di checkout.
+const kCustomOrderId = 'custom-order';
+
+enum CartItemKind { package, custom }
 
 class CartItem {
   const CartItem({
@@ -15,26 +20,34 @@ class CartItem {
     required this.cashbackPoints,
     required this.cashbackPercent,
     required this.installmentMonths,
+    this.kind = CartItemKind.package,
     this.selected = true,
   });
 
-  /// Satu vendor = satu paket di keranjang, jadi id vendor dipakai sebagai id item.
-  factory CartItem.fromVendorDetail(VendorDetail d) => CartItem(
-        vendorId: d.id,
-        providerName: d.provider.name,
-        providerSubtitle: 'Official Partner • ${d.location}',
-        location: d.location,
-        packageTitle: '${d.name} - ${d.packageLabel}',
-        paxIncluded: d.paxIncluded,
-        price: d.price,
-        originalPrice: d.originalPrice,
-        savingsBadge: d.savingsBadge,
-        inclusionSummary: d.sections.map((s) => s.title).join(', '),
-        cashbackPoints: d.cashbackPoints,
-        cashbackPercent: d.cashbackPercent,
-        installmentMonths: d.installmentMonths,
-      );
+  /// Pesanan custom: gabungan vendor pilihan diperlakukan sebagai satu paket
+  /// (di server kemungkinan berupa paket yang dibuat dari vendor terpilih).
+  factory CartItem.custom(List<CustomVendorItem> vendors) {
+    final total = vendors.fold<int>(0, (sum, v) => sum + v.price);
+    final names = vendors.map((v) => v.name).toList();
+    return CartItem(
+      vendorId: kCustomOrderId,
+      kind: CartItemKind.custom,
+      providerName: 'Custom Order',
+      providerSubtitle: names.join(' • '),
+      location: 'Sesuai venue pilihanmu',
+      packageTitle: 'Custom Order (${vendors.length} vendor)',
+      paxIncluded: 0,
+      price: total,
+      originalPrice: total,
+      savingsBadge: '',
+      inclusionSummary: names.join(', '),
+      cashbackPoints: 0,
+      cashbackPercent: 0,
+      installmentMonths: 0,
+    );
+  }
 
+  /// Id paket (untuk item paket) atau [kCustomOrderId] (untuk custom).
   final String vendorId;
   final String providerName;
   final String providerSubtitle;
@@ -48,7 +61,10 @@ class CartItem {
   final int cashbackPoints;
   final double cashbackPercent;
   final int installmentMonths;
+  final CartItemKind kind;
   final bool selected;
+
+  bool get isCustom => kind == CartItemKind.custom;
 
   CartItem copyWith({bool? selected}) => CartItem(
         vendorId: vendorId,
@@ -64,6 +80,7 @@ class CartItem {
         cashbackPoints: cashbackPoints,
         cashbackPercent: cashbackPercent,
         installmentMonths: installmentMonths,
+        kind: kind,
         selected: selected ?? this.selected,
       );
 }

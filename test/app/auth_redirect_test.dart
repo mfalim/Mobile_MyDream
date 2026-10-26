@@ -188,4 +188,20 @@ void main() {
     );
     expect(AppRoutes.infoPath('guarantee'), '/info/guarantee');
   });
+
+  test(
+      'Custom Order: tamu dialihkan ke Login dan tujuan (dengan query) terbawa',
+      () {
+    final result = authRedirect(
+      loggedIn: false,
+      uri: Uri.parse(AppRoutes.cartCustomPath),
+    );
+    expect(Uri.parse(result!).path, '/login');
+    expect(Uri.parse(result).queryParameters['from'], '/cart?tab=custom');
+  });
+
+  test('checkoutPath membedakan paket dan custom', () {
+    expect(AppRoutes.checkoutPath(), '/checkout');
+    expect(AppRoutes.checkoutPath(custom: true), '/checkout?type=custom');
+  });
 }

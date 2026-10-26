@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:w51/features/cart/domain/entities/cart_item.dart';
 import 'package:w51/features/cart/domain/entities/voucher.dart';
 import 'package:w51/features/cart/presentation/providers/cart_provider.dart';
+import 'package:w51/features/cart/domain/entities/custom_vendor_item.dart';
 
 CartItem _item(String id, int price) => CartItem(
       vendorId: id,
@@ -40,6 +41,14 @@ const _bigPercent = Voucher(
   minSpend: 300000000,
   validUntilLabel: '-',
 );
+
+CustomVendorItem _vendor(String id, int price) => CustomVendorItem(
+      vendorId: id,
+      name: 'Vendor $id',
+      category: 'Venue',
+      location: 'Bali',
+      price: price,
+    );
 
 void main() {
   late ProviderContainer container;
@@ -137,5 +146,83 @@ void main() {
     controller().clear();
     expect(state().items, isEmpty);
     expect(state().voucher, isNull);
+  });
+
+  group('custom order', () {
+    test('baru siap setelah $kMinCustomVendors vendor', () {
+      controller().addCustomVendor(_vendor('a', 10000000));
+      controller().addCustomVendor(_vendor('b', 20000000));
+      expect(state().customReady, isFalse);
+      expect(state().customOrderItem, isNull);
+
+      controller().addCustomVendor(_vendor('c', 30000000));
+      expect(state().customReady, isTrue);
+      final item = state().customOrderItem!;
+      expect(item.isCustom, isTrue);
+      expect(item.vendorId, kCustomOrderId);
+      expect(item.price, 60000000);
+      expect(state().customSubtotal, 60000000);
+    });
+
+    test('vendor yang sama tidak ditambahkan dua kali', () {
+      controller().addCustomVendor(_vendor('a', 100));
+      controller().addCustomVendor(_vendor('a', 100));
+      expect(state().customVendors.length, 1);
+    });
+
+    test('menghapus vendor menurunkan syarat minimal', () {
+      for (final id in ['a', 'b', 'c']) {
+        controller().addCustomVendor(_vendor(id, 1000000));
+      }
+      expect(state().customReady, isTrue);
+      controller().removeCustomVendor('b');
+      expect(state().customReady, isFalse);
+      expect(state().customVendors.map((v) => v.vendorId), ['a', 'c']);
+    });
+
+    test('voucher dihitung dari jumlah vendor, dengan syarat minimum', () {
+      for (final id in ['a', 'b', 'c']) {
+        controller().addCustomVendor(_vendor(id, 20000000)); // 60 jt
+      }
+      controller().selectVoucher(_fixed); // minimal 50 jt
+      expect(state().customDiscount, 5000000);
+      expect(state().customTotal, 55000000);
+      expect(state().customVoucherNotEligible, isFalse);
+
+      controller().removeCustomVendor('c'); // 40 jt < 50 jt
+      expect(state().customDiscount, 0);
+      expect(state().customVoucherNotEligible, isTrue);
+    });
+
+    test('orderItemFor: paket dan custom dibedakan lewat id', () {
+      controller().add(_item('paket-1', 90000000));
+      for (final id in ['a', 'b', 'c']) {
+        controller().addCustomVendor(_vendor(id, 1000000));
+      }
+      expect(state().orderItemFor('paket-1')?.price, 90000000);
+      expect(state().orderItemFor(kCustomOrderId)?.price, 3000000);
+      expect(state().orderItemFor('tidak-ada'), isNull);
+    });
+
+    test('remove(kCustomOrderId) mengosongkan custom, paket tidak ikut', () {
+      controller().add(_item('paket-1', 90000000));
+      controller().addCustomVendor(_vendor('a', 1000000));
+      expect(state().orderCount, 2);
+
+      controller().remove(kCustomOrderId);
+      expect(state().customVendors, isEmpty);
+      expect(state().items.length, 1);
+      expect(state().orderCount, 1);
+    });
+
+    test('clear mengosongkan paket, custom, dan voucher', () {
+      controller().add(_item('paket-1', 100));
+      controller().addCustomVendor(_vendor('a', 100));
+      controller().selectVoucher(_fixed);
+      controller().clear();
+      expect(state().items, isEmpty);
+      expect(state().customVendors, isEmpty);
+      expect(state().voucher, isNull);
+    });
   });
 }

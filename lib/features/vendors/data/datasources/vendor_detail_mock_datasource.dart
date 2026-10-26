@@ -21,6 +21,7 @@ class VendorDetailMockDatasource {
     'vendor-glasshouse': {
       'id': 'vendor-glasshouse',
       'name': 'The Glasshouse Cliff Sanctuary',
+      'category': 'Venue',
       'location': 'Uluwatu, Badung - Bali',
       'package_label': 'All Inclusive 100 Pax',
       'price': 85000000,
@@ -80,6 +81,7 @@ class VendorDetailMockDatasource {
     'vendor-maison': {
       'id': 'vendor-maison',
       'name': "Maison de L'Amour Bridal",
+      'category': 'Bridal & Gown',
       'location': 'Menteng, Jakarta Pusat',
       'package_label': 'Paket D-Day',
       'price': 38000000,
@@ -137,6 +139,7 @@ class VendorDetailMockDatasource {
     'vendor-vivaldi': {
       'id': 'vendor-vivaldi',
       'name': 'Vivaldi Floral & Scenery',
+      'category': 'Decoration',
       'location': 'Jakarta & Bali',
       'package_label': 'Paket All-In Decor',
       'price': 65000000,
@@ -195,6 +198,7 @@ class VendorDetailMockDatasource {
     'vendor-sora': {
       'id': 'vendor-sora',
       'name': 'Sora Visual Stories',
+      'category': 'Photography',
       'location': 'Bali',
       'package_label': 'Paket D-Day Photo & Video',
       'price': 18500000,
@@ -252,6 +256,7 @@ class VendorDetailMockDatasource {
     'vendor-ethereal': {
       'id': 'vendor-ethereal',
       'name': 'Ethereal Glow Bridal MUA',
+      'category': 'Hair & Makeup',
       'location': 'Jakarta',
       'package_label': 'Paket Bridal Akad + Resepsi',
       'price': 21000000,
@@ -309,6 +314,7 @@ class VendorDetailMockDatasource {
     'vendor-mattana': {
       'id': 'vendor-mattana',
       'name': 'Mattana Wedding Planner',
+      'category': 'Wedding Planner',
       'location': 'Bali',
       'package_label': 'Full Planning 100 Pax',
       'price': 45000000,
@@ -366,6 +372,7 @@ class VendorDetailMockDatasource {
     'vendor-lumiere': {
       'id': 'vendor-lumiere',
       'name': 'Lumière Cinematic Films',
+      'category': 'Videography',
       'location': 'Jakarta',
       'package_label': 'Paket Cinematic Film',
       'price': 15000000,
@@ -423,6 +430,7 @@ class VendorDetailMockDatasource {
     'vendor-santap': {
       'id': 'vendor-santap',
       'name': 'Santap Rasa Catering',
+      'category': 'Catering',
       'location': 'Jakarta & Bali',
       'package_label': 'Paket Buffet 100 Pax',
       'price': 17500000,

@@ -7,6 +7,7 @@ import 'package:w51/features/vendors/data/models/vendor_detail_model.dart';
 Map<String, dynamic> _sample() => {
       'id': 'x',
       'name': 'X',
+      'category': 'Venue',
       'location': 'Bali',
       'package_label': 'Paket',
       'price': 247459800,
@@ -55,6 +56,7 @@ void main() {
     for (final v in list.featured) {
       final d = await datasource.fetch(v.id);
       expect(d.name, v.name, reason: '${v.id}: nama');
+      expect(d.category, v.category, reason: '${v.id}: kategori');
       expect(d.price, v.price, reason: '${v.id}: harga kartu vs detail');
       expect(d.originalPrice, v.originalPrice, reason: '${v.id}: harga coret');
       expect(d.packageLabel, v.priceLabel, reason: '${v.id}: label paket');

@@ -44,4 +44,11 @@ abstract final class AppRoutes {
   static const notificationSettings = '/notification-settings';
   static const info = '/info/:slug';
   static String infoPath(String slug) => '/info/$slug';
+
+  /// Keranjang yang langsung membuka tab Custom Order.
+  static const cartCustomPath = '/cart?tab=custom';
+
+  /// Checkout untuk paket, atau untuk Custom Order bila [custom] true.
+  static String checkoutPath({bool custom = false}) =>
+      custom ? '$checkout?type=custom' : checkout;
 }

@@ -7,12 +7,18 @@ class VendorBookingBar extends StatelessWidget {
     required this.totalPrice,
     required this.onChat,
     required this.onBook,
+    this.caption = 'Total Investasi',
+    this.actionLabel = 'Book Now',
+    this.actionIcon = Icons.arrow_forward,
     super.key,
   });
 
   final int totalPrice;
   final VoidCallback onChat;
   final VoidCallback onBook;
+  final String caption;
+  final String actionLabel;
+  final IconData actionIcon;
 
   @override
   Widget build(BuildContext context) {
@@ -62,7 +68,7 @@ class VendorBookingBar extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'Total Investasi',
+                                  caption,
                                   style: TextStyle(
                                     color: Colors.white.withValues(alpha: 0.85),
                                     fontSize: 11,
@@ -84,19 +90,15 @@ class VendorBookingBar extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(width: 8),
-                          const Text(
-                            'Book Now',
-                            style: TextStyle(
+                          Text(
+                            actionLabel,
+                            style: const TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.w700,
                             ),
                           ),
                           const SizedBox(width: 6),
-                          const Icon(
-                            Icons.arrow_forward,
-                            size: 18,
-                            color: Colors.white,
-                          ),
+                          Icon(actionIcon, size: 18, color: Colors.white),
                         ],
                       ),
                     ),

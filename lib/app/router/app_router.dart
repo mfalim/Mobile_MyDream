@@ -83,12 +83,15 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: AppRoutes.cart,
-        builder: (context, state) =>
-            CartPage(claimCode: state.uri.queryParameters['claim']),
+        builder: (context, state) => CartPage(
+          claimCode: state.uri.queryParameters['claim'],
+          initialTab: state.uri.queryParameters['tab'] == 'custom' ? 1 : 0,
+        ),
       ),
       GoRoute(
         path: AppRoutes.checkout,
-        builder: (context, state) => const CheckoutPage(),
+        builder: (context, state) => CheckoutPage(
+            isCustom: state.uri.queryParameters['type'] == 'custom'),
       ),
       GoRoute(
         path: AppRoutes.payment,

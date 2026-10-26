@@ -8,7 +8,8 @@ class CartCheckoutBar extends StatelessWidget {
   const CartCheckoutBar({
     required this.total,
     required this.deposit,
-    required this.selectedCount,
+    required this.continueLabel,
+    required this.canContinue,
     required this.onHelp,
     required this.onContinue,
     super.key,
@@ -16,7 +17,10 @@ class CartCheckoutBar extends StatelessWidget {
 
   final int total;
   final int deposit;
-  final int selectedCount;
+  final String continueLabel;
+
+  /// False menonaktifkan tombol lanjut (mis. Custom Order belum 3 vendor).
+  final bool canContinue;
   final VoidCallback onHelp;
   final VoidCallback onContinue;
 
@@ -96,18 +100,20 @@ class CartCheckoutBar extends StatelessWidget {
                   const SizedBox(width: 10),
                   Expanded(
                     child: FilledButton(
-                      onPressed: selectedCount == 0 ? null : onContinue,
+                      onPressed: canContinue ? onContinue : null,
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Flexible(
                             child: Text(
-                              'Lanjut ke Validasi Data ($selectedCount Item)',
+                              continueLabel,
                               textAlign: TextAlign.center,
                             ),
                           ),
-                          const SizedBox(width: 6),
-                          const Icon(Icons.arrow_forward, size: 18),
+                          if (canContinue) ...[
+                            const SizedBox(width: 6),
+                            const Icon(Icons.arrow_forward, size: 18),
+                          ],
                         ],
                       ),
                     ),

@@ -17,6 +17,7 @@ abstract final class VendorDetailModel {
     return VendorDetail(
       id: json['id'] as String,
       name: json['name'] as String,
+      category: json['category'] as String,
       location: json['location'] as String,
       packageLabel: json['package_label'] as String,
       price: price,

@@ -5,23 +5,28 @@ import 'package:w51/app/router/route_names.dart';
 import 'package:w51/app/theme/app_colors.dart';
 import 'package:w51/app/theme/app_spacing.dart';
 import 'package:w51/app/theme/app_typography.dart';
+import 'package:w51/core/utils/formatters.dart';
 import 'package:w51/core/widgets/empty_state.dart';
 import 'package:w51/features/cart/presentation/providers/cart_provider.dart';
+import 'package:w51/features/cart/presentation/providers/voucher_provider.dart';
 import 'package:w51/features/cart/presentation/widgets/cart_checkout_bar.dart';
 import 'package:w51/features/cart/presentation/widgets/cart_info_blocks.dart';
 import 'package:w51/features/cart/presentation/widgets/cart_item_card.dart';
 import 'package:w51/features/cart/presentation/widgets/cart_summary_card.dart';
 import 'package:w51/features/cart/presentation/widgets/cart_tab_switcher.dart';
-import 'package:w51/core/utils/formatters.dart';
-import 'package:w51/features/cart/presentation/providers/voucher_provider.dart';
+import 'package:w51/features/cart/presentation/widgets/custom_order_section.dart';
 import 'package:w51/features/cart/presentation/widgets/voucher_sheet.dart';
+import 'package:w51/features/my_wedding/domain/entities/couple_profile.dart';
 import 'package:w51/features/my_wedding/presentation/providers/couple_provider.dart';
 
 class CartPage extends ConsumerStatefulWidget {
-  const CartPage({this.claimCode, super.key});
+  const CartPage({this.claimCode, this.initialTab = 0, super.key});
 
   /// Kode voucher yang langsung dipasang (dari tombol "Klaim Voucher").
   final String? claimCode;
+
+  /// 0 = Paket Pernikahan, 1 = Custom Order.
+  final int initialTab;
 
   @override
   ConsumerState<CartPage> createState() => _CartPageState();
@@ -30,7 +35,7 @@ class CartPage extends ConsumerStatefulWidget {
 class _CartPageState extends ConsumerState<CartPage> {
   static const _filters = ['Semua', 'Menunggu Review', 'Tawaran Negosiasi'];
 
-  int _tab = 0;
+  late int _tab = widget.initialTab;
 
   @override
   void initState() {
@@ -58,12 +63,13 @@ class _CartPageState extends ConsumerState<CartPage> {
       return;
     }
     ref.read(cartProvider.notifier).selectVoucher(voucher);
-    final hasItems = ref.read(cartProvider).items.isNotEmpty;
+    final cart = ref.read(cartProvider);
+    final hasItems = cart.items.isNotEmpty || cart.customVendors.isNotEmpty;
     _snack(
       hasItems
           ? 'Voucher ${voucher.code} dipasang.'
-          : 'Voucher ${voucher.code} siap dipakai. Pilih paket vendor untuk '
-              'menggunakannya.',
+          : 'Voucher ${voucher.code} siap dipakai. Pilih paket atau vendor '
+              'untuk menggunakannya.',
     );
   }
 
@@ -75,7 +81,7 @@ class _CartPageState extends ConsumerState<CartPage> {
       context,
       vouchers: vouchers,
       selectedCode: cart.voucher?.code,
-      amount: cart.subtotal,
+      amount: _tab == 1 ? cart.customSubtotal : cart.subtotal,
     );
     if (code == null || !mounted) return;
     ref.read(cartProvider.notifier).selectVoucher(
@@ -96,7 +102,9 @@ class _CartPageState extends ConsumerState<CartPage> {
     final cart = ref.watch(cartProvider);
     final controller = ref.read(cartProvider.notifier);
     final couple = ref.watch(coupleProvider);
-    final showBar = _tab == 0 && cart.items.isNotEmpty;
+    final isCustomTab = _tab == 1;
+    final showBar =
+        isCustomTab ? cart.customVendors.isNotEmpty : cart.items.isNotEmpty;
 
     return Scaffold(
       appBar: AppBar(
@@ -127,116 +135,209 @@ class _CartPageState extends ConsumerState<CartPage> {
           CartTabSwitcher(
             selected: _tab,
             packageCount: cart.items.length,
-            customCount: 0,
+            customCount: cart.customVendors.length,
             onChanged: (i) => setState(() => _tab = i),
           ),
           const SizedBox(height: 12),
-          if (_tab == 1)
-            const EmptyState(
-              message: 'Belum ada custom order.',
-              icon: Icons.palette_outlined,
-            )
-          else if (cart.items.isEmpty)
-            _EmptyCart(onBrowse: () => context.go(AppRoutes.vendors))
-          else ...[
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  for (final f in _filters)
-                    Padding(
-                      padding: const EdgeInsets.only(right: 8),
-                      child: ChoiceChip(
-                        label: Text(f),
-                        selected: f == _filters.first,
-                        onSelected: (_) {
-                          if (f != _filters.first) _soon('Filter "$f"');
-                        },
-                        selectedColor: AppColors.coral.withValues(alpha: 0.3),
-                        backgroundColor: AppColors.surfaceTint,
-                        side: BorderSide.none,
-                        shape: const StadiumBorder(),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 12),
-            for (final item in cart.items)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: CartItemCard(
-                  item: item,
-                  onToggle: () => controller.toggle(item.vendorId),
-                  onRemove: () => controller.remove(item.vendorId),
-                  onChat: () => _soon('Chat vendor'),
-                  onOpenPackage: () =>
-                      context.push(AppRoutes.vendorDetailPath(item.vendorId)),
-                ),
-              ),
-            if (couple != null) ...[
-              EstimateCard(dateLabel: formatDateId(couple.weddingDate)),
-              const SizedBox(height: 12),
-            ],
-            VoucherTile(
-              subtitle: switch (cart.voucher) {
-                null => 'Pilih voucher untuk hemat lebih banyak',
-                final v when cart.voucherNotEligible =>
-                  'Kupon ${v.code}: belanja minimal '
-                      '${formatRupiah(v.minSpend)} belum terpenuhi',
-                final v => "Kupon '${v.code}' dipasang "
-                    '(hemat ${formatRupiah(cart.discount)})',
-              },
-              subtitleColor:
-                  cart.voucherNotEligible ? AppColors.error : AppColors.primary,
-              onTap: _pickVoucher,
-            ),
-            const SizedBox(height: 12),
-            CartSummaryCard(
-              subtotal: cart.subtotal,
-              discount: cart.discount,
-              total: cart.total,
-              deposit: kDownPayment,
-              onTerms: () => context.push(AppRoutes.infoPath('guarantee')),
-            ),
-            const SizedBox(height: 12),
-            const TrustTiles(),
-          ],
+          if (isCustomTab)
+            ..._customContent(cart, controller, couple)
+          else
+            ..._packageContent(cart, controller, couple),
         ],
       ),
-      bottomNavigationBar: showBar
-          ? CartCheckoutBar(
-              total: cart.total,
-              deposit: kDownPayment,
-              selectedCount: cart.selected.length,
-              onHelp: () => _soon('Bantuan'),
-              onContinue: () => context.push(AppRoutes.checkout),
-            )
-          : null,
+      bottomNavigationBar: !showBar
+          ? null
+          : isCustomTab
+              ? CartCheckoutBar(
+                  total: cart.customTotal,
+                  deposit: kDownPayment,
+                  canContinue: cart.customReady,
+                  continueLabel: cart.customReady
+                      ? 'Lanjut ke Validasi Data (${cart.customVendors.length} Vendor)'
+                      : 'Pilih ${kMinCustomVendors - cart.customVendors.length} '
+                          'vendor lagi',
+                  onHelp: () => _soon('Bantuan'),
+                  onContinue: () =>
+                      context.push(AppRoutes.checkoutPath(custom: true)),
+                )
+              : CartCheckoutBar(
+                  total: cart.total,
+                  deposit: kDownPayment,
+                  canContinue: cart.selected.isNotEmpty,
+                  continueLabel:
+                      'Lanjut ke Validasi Data (${cart.selected.length} Item)',
+                  onHelp: () => _soon('Bantuan'),
+                  onContinue: () => context.push(AppRoutes.checkoutPath()),
+                ),
     );
+  }
+
+  Widget _voucherTile(CartState cart, {required bool custom}) {
+    final v = cart.voucher;
+    final notEligible =
+        custom ? cart.customVoucherNotEligible : cart.voucherNotEligible;
+    final discount = custom ? cart.customDiscount : cart.discount;
+    final subtitle = v == null
+        ? 'Pilih voucher untuk hemat lebih banyak'
+        : notEligible
+            ? 'Kupon ${v.code}: belanja minimal ${formatRupiah(v.minSpend)} '
+                'belum terpenuhi'
+            : "Kupon '${v.code}' dipasang (hemat ${formatRupiah(discount)})";
+    return VoucherTile(
+      subtitle: subtitle,
+      subtitleColor: notEligible ? AppColors.error : AppColors.primary,
+      onTap: _pickVoucher,
+    );
+  }
+
+  List<Widget> _packageContent(
+    CartState cart,
+    CartController controller,
+    CoupleProfile? couple,
+  ) {
+    if (cart.items.isEmpty) {
+      return [
+        _EmptyCart(
+          message:
+              'Belum ada paket pernikahan di keranjang.\nDaftar paket segera '
+              'hadir. Sementara itu, susun pesananmu lewat Custom Order.',
+          buttonLabel: 'Buat Custom Order',
+          onPressed: () => setState(() => _tab = 1),
+        ),
+      ];
+    }
+    return [
+      SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: [
+            for (final f in _filters)
+              Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: ChoiceChip(
+                  label: Text(f),
+                  selected: f == _filters.first,
+                  onSelected: (_) {
+                    if (f != _filters.first) _soon('Filter "$f"');
+                  },
+                  selectedColor: AppColors.coral.withValues(alpha: 0.3),
+                  backgroundColor: AppColors.surfaceTint,
+                  side: BorderSide.none,
+                  shape: const StadiumBorder(),
+                ),
+              ),
+          ],
+        ),
+      ),
+      const SizedBox(height: 12),
+      for (final item in cart.items)
+        Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: CartItemCard(
+            item: item,
+            onToggle: () => controller.toggle(item.vendorId),
+            onRemove: () => controller.remove(item.vendorId),
+            onChat: () => _soon('Chat vendor'),
+            onOpenPackage: () =>
+                context.push(AppRoutes.vendorDetailPath(item.vendorId)),
+          ),
+        ),
+      if (couple != null) ...[
+        EstimateCard(dateLabel: formatDateId(couple.weddingDate)),
+        const SizedBox(height: 12),
+      ],
+      _voucherTile(cart, custom: false),
+      const SizedBox(height: 12),
+      CartSummaryCard(
+        subtotal: cart.subtotal,
+        discount: cart.discount,
+        total: cart.total,
+        deposit: kDownPayment,
+        onTerms: () => context.push(AppRoutes.infoPath('guarantee')),
+      ),
+      const SizedBox(height: 12),
+      const TrustTiles(),
+    ];
+  }
+
+  List<Widget> _customContent(
+    CartState cart,
+    CartController controller,
+    CoupleProfile? couple,
+  ) {
+    final count = cart.customVendors.length;
+    if (count == 0) {
+      return [
+        _EmptyCart(
+          message:
+              'Custom Order masih kosong.\nPilih minimal $kMinCustomVendors '
+              'vendor untuk memesan.',
+          buttonLabel: 'Pilih Vendor',
+          onPressed: () => context.go(AppRoutes.vendors),
+        ),
+      ];
+    }
+    return [
+      CustomOrderProgress(count: count, min: kMinCustomVendors),
+      const SizedBox(height: 12),
+      for (final v in cart.customVendors)
+        Padding(
+          padding: const EdgeInsets.only(bottom: 10),
+          child: CustomVendorTile(
+            item: v,
+            onOpen: () => context.push(AppRoutes.vendorDetailPath(v.vendorId)),
+            onRemove: () => controller.removeCustomVendor(v.vendorId),
+          ),
+        ),
+      OutlinedButton.icon(
+        onPressed: () => context.go(AppRoutes.vendors),
+        icon: const Icon(Icons.add),
+        label: const Text('Tambah Vendor'),
+        style: OutlinedButton.styleFrom(minimumSize: const Size(0, 48)),
+      ),
+      const SizedBox(height: 12),
+      if (couple != null) ...[
+        EstimateCard(dateLabel: formatDateId(couple.weddingDate)),
+        const SizedBox(height: 12),
+      ],
+      _voucherTile(cart, custom: true),
+      const SizedBox(height: 12),
+      CartSummaryCard(
+        subtotal: cart.customSubtotal,
+        discount: cart.customDiscount,
+        total: cart.customTotal,
+        deposit: kDownPayment,
+        onTerms: () => context.push(AppRoutes.infoPath('guarantee')),
+      ),
+      const SizedBox(height: 12),
+      const TrustTiles(),
+    ];
   }
 }
 
 class _EmptyCart extends StatelessWidget {
-  const _EmptyCart({required this.onBrowse});
+  const _EmptyCart({
+    required this.message,
+    required this.buttonLabel,
+    required this.onPressed,
+  });
 
-  final VoidCallback onBrowse;
+  final String message;
+  final String buttonLabel;
+  final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 48),
+      padding: const EdgeInsets.symmetric(vertical: 40),
       child: Column(
         children: [
-          const EmptyState(
-            message: 'Keranjangmu masih kosong.\nPilih paket vendor impianmu.',
-            icon: Icons.shopping_bag_outlined,
-          ),
+          EmptyState(message: message, icon: Icons.shopping_bag_outlined),
           const SizedBox(height: 8),
           FilledButton(
-            onPressed: onBrowse,
-            style: FilledButton.styleFrom(minimumSize: const Size(200, 48)),
-            child: const Text('Jelajahi Vendor'),
+            onPressed: onPressed,
+            style: FilledButton.styleFrom(minimumSize: const Size(220, 48)),
+            child: Text(buttonLabel),
           ),
         ],
       ),

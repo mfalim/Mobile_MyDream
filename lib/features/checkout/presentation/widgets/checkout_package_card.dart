@@ -8,8 +8,11 @@ import 'package:w51/core/widgets/image_placeholder.dart';
 import 'package:w51/features/cart/domain/entities/cart_item.dart';
 
 class CheckoutPackageCard extends StatelessWidget {
-  const CheckoutPackageCard(
-      {required this.item, this.otherCount = 0, super.key});
+  const CheckoutPackageCard({
+    required this.item,
+    this.otherCount = 0,
+    super.key,
+  });
 
   final CartItem item;
 
@@ -18,6 +21,7 @@ class CheckoutPackageCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final custom = item.isCustom;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -29,10 +33,10 @@ class CheckoutPackageCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Expanded(
+              Expanded(
                 child: Text(
-                  'PAKET YANG DIPILIH',
-                  style: TextStyle(
+                  custom ? 'PESANAN CUSTOM' : 'PAKET YANG DIPILIH',
+                  style: const TextStyle(
                     color: AppColors.textSecondary,
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
@@ -40,9 +44,9 @@ class CheckoutPackageCard extends StatelessWidget {
                   ),
                 ),
               ),
-              const BadgePill(
-                'Verified Organizer',
-                icon: Icons.verified,
+              BadgePill(
+                custom ? 'Custom Order' : 'Verified Organizer',
+                icon: custom ? Icons.tune : Icons.verified,
                 background: AppColors.surfaceTint,
                 foreground: AppColors.textSecondary,
               ),
@@ -56,7 +60,8 @@ class CheckoutPackageCard extends StatelessWidget {
                 width: 76,
                 height: 76,
                 child: ImagePlaceholder(
-                  icon: Icons.photo_outlined,
+                  icon:
+                      custom ? Icons.storefront_outlined : Icons.photo_outlined,
                   borderRadius: BorderRadius.circular(AppRadius.sm),
                 ),
               ),
@@ -77,8 +82,10 @@ class CheckoutPackageCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      '${item.providerName} • Wedding Organizer',
-                      maxLines: 2,
+                      custom
+                          ? item.providerSubtitle
+                          : '${item.providerName} • Wedding Organizer',
+                      maxLines: 4,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
                         color: AppColors.textSecondary,
@@ -102,15 +109,17 @@ class CheckoutPackageCard extends StatelessWidget {
                   20,
                 ).copyWith(color: AppColors.primary),
               ),
-              Text(
-                formatRupiah(item.originalPrice),
-                style: const TextStyle(
-                  decoration: TextDecoration.lineThrough,
-                  color: AppColors.textSecondary,
-                  fontSize: 12,
+              if (!custom) ...[
+                Text(
+                  formatRupiah(item.originalPrice),
+                  style: const TextStyle(
+                    decoration: TextDecoration.lineThrough,
+                    color: AppColors.textSecondary,
+                    fontSize: 12,
+                  ),
                 ),
-              ),
-              BadgePill(item.savingsBadge),
+                BadgePill(item.savingsBadge),
+              ],
               if (item.paxIncluded > 0)
                 Text(
                   '${item.paxIncluded} Pax',
