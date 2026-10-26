@@ -213,4 +213,12 @@ void main() {
     );
     expect(AppRoutes.packageDetailPath('pkg-1'), '/package/pkg-1');
   });
+
+  test('layar Pesanan Terkirim butuh login', () {
+    final result = authRedirect(
+      loggedIn: false,
+      uri: Uri.parse(AppRoutes.orderSubmitted),
+    );
+    expect(Uri.parse(result!).path, '/login');
+  });
 }

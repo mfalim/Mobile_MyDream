@@ -6,6 +6,7 @@ abstract final class AppRoutes {
   static const vendorDetail = '/vendor/:id';
   static String vendorDetailPath(String id) => '/vendor/$id';
   static const login = '/login';
+  static const orderSubmitted = '/order-submitted';
 
   // Wajib login
   static const myWedding = '/my-wedding';
@@ -25,6 +26,7 @@ abstract final class AppRoutes {
     coupleSetup,
     notifications,
     notificationSettings,
+    orderSubmitted
   ];
   static const register = '/register';
   static const coupleSetup = '/couple-setup';

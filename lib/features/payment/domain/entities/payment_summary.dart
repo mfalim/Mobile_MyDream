@@ -11,12 +11,17 @@ class PaymentSummary {
   final int packagePrice;
   final int originalPrice;
   final int couponDiscount;
+
+  /// Nominal DP yang berlaku (MOCK; aturan DP nanti dari server).
   final int deposit;
 
   int get contractTotal => packagePrice - couponDiscount;
-  int get remainingAfterDeposit => contractTotal - deposit;
-  int get fullPaymentTotal => contractTotal - kFullPaymentDiscount;
+
+  /// DP tidak pernah melebihi total kontrak.
+  int get effectiveDeposit => deposit < contractTotal ? deposit : contractTotal;
+
+  int get remainingAfterDeposit => contractTotal - effectiveDeposit;
 
   int dueNow(PaymentScheme scheme) =>
-      scheme == PaymentScheme.downPayment ? deposit : fullPaymentTotal;
+      scheme == PaymentScheme.downPayment ? effectiveDeposit : contractTotal;
 }

@@ -20,6 +20,7 @@ import '../../features/notifications/presentation/pages/notification_settings_pa
 import '../../features/notifications/presentation/pages/notifications_page.dart';
 import '../../features/packages/presentation/pages/package_detail_page.dart';
 import '../../features/packages/presentation/pages/packages_page.dart';
+import '../../features/payment/presentation/pages/order_submitted_page.dart';
 import 'app_shell.dart';
 import 'route_names.dart';
 import 'auth_redirect.dart';
@@ -103,6 +104,10 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.vendorDetail,
         builder: (context, state) =>
             VendorDetailPage(vendorId: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: AppRoutes.orderSubmitted,
+        builder: (context, state) => const OrderSubmittedPage(),
       ),
       GoRoute(
         path: AppRoutes.packages,

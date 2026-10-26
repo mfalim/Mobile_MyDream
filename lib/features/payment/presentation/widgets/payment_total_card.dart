@@ -8,7 +8,6 @@ class PaymentTotalCard extends StatelessWidget {
     required this.guests,
     required this.packagePrice,
     required this.couponDiscount,
-    required this.fullPaymentDiscount,
     required this.dueLabel,
     required this.dueNow,
     super.key,
@@ -17,7 +16,6 @@ class PaymentTotalCard extends StatelessWidget {
   final int guests;
   final int packagePrice;
   final int couponDiscount;
-  final int fullPaymentDiscount;
   final String dueLabel;
   final int dueNow;
 
@@ -32,7 +30,7 @@ class PaymentTotalCard extends StatelessWidget {
       child: Column(
         children: [
           _Line(
-            guests > 0 ? 'Harga Paket Wedding ($guests Pax)' : 'Harga Paket',
+            guests > 0 ? 'Harga Pesanan ($guests tamu)' : 'Harga Pesanan',
             formatRupiah(packagePrice),
           ),
           if (couponDiscount > 0)
@@ -41,17 +39,6 @@ class PaymentTotalCard extends StatelessWidget {
               '- ${formatRupiah(couponDiscount)}',
               valueColor: AppColors.primary,
             ),
-          if (fullPaymentDiscount > 0)
-            _Line(
-              'Bonus Cashback Pelunasan',
-              '- ${formatRupiah(fullPaymentDiscount)}',
-              valueColor: AppColors.primary,
-            ),
-          const _Line(
-            'Biaya Layanan & Penjaminan Escrow',
-            'GRATIS',
-            valueColor: AppColors.success,
-          ),
           const Divider(height: 22, color: AppColors.outline),
           Row(
             children: [

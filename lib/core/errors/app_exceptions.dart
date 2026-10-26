@@ -7,3 +7,13 @@ class NotFoundException implements Exception {
   @override
   String toString() => 'NotFoundException: $what';
 }
+
+/// Data ditolak server (nanti: respons 422).
+class ValidationException implements Exception {
+  const ValidationException(this.message);
+
+  final String message;
+
+  @override
+  String toString() => 'ValidationException: $message';
+}

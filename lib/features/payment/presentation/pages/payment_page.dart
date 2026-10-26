@@ -1,23 +1,33 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:w51/app/router/route_names.dart';
 import 'package:w51/app/theme/app_colors.dart';
 import 'package:w51/app/theme/app_spacing.dart';
 import 'package:w51/app/theme/app_typography.dart';
+import 'package:w51/core/errors/app_exceptions.dart';
 import 'package:w51/core/utils/formatters.dart';
 import 'package:w51/core/widgets/empty_state.dart';
+import 'package:w51/core/widgets/error_state.dart';
 import 'package:w51/core/widgets/step_progress_header.dart';
+import 'package:w51/features/cart/domain/entities/cart_item.dart';
 import 'package:w51/features/cart/presentation/providers/cart_provider.dart';
+import 'package:w51/features/checkout/domain/entities/checkout_details.dart';
 import 'package:w51/features/checkout/presentation/providers/checkout_provider.dart';
+import 'package:w51/features/payment/domain/entities/bank_account.dart';
+import 'package:w51/features/payment/domain/entities/order_submission.dart';
 import 'package:w51/features/payment/domain/entities/payment_options.dart';
 import 'package:w51/features/payment/domain/entities/payment_summary.dart';
-import 'package:w51/features/payment/presentation/widgets/escrow_guarantee_card.dart';
+import 'package:w51/features/payment/domain/proof_rules.dart';
+import 'package:w51/features/payment/presentation/providers/payments_provider.dart';
+import 'package:w51/features/payment/presentation/widgets/bank_accounts_card.dart';
 import 'package:w51/features/payment/presentation/widgets/payment_bar.dart';
-import 'package:w51/features/payment/presentation/widgets/payment_method_section.dart';
 import 'package:w51/features/payment/presentation/widgets/payment_order_card.dart';
 import 'package:w51/features/payment/presentation/widgets/payment_total_card.dart';
-import 'package:w51/features/payment/presentation/widgets/scheme_card.dart';
+import 'package:w51/features/payment/presentation/widgets/proof_upload_card.dart';
+import 'package:w51/features/payment/presentation/widgets/scheme_option.dart';
 
 class PaymentPage extends ConsumerStatefulWidget {
   const PaymentPage({super.key});
@@ -27,13 +37,20 @@ class PaymentPage extends ConsumerStatefulWidget {
 }
 
 class _PaymentPageState extends ConsumerState<PaymentPage> {
-  static const _allMethods = [...kVirtualAccounts, kQrisMethod, kCardMethod];
+  final _picker = ImagePicker();
+  final _proofKey = GlobalKey();
 
   PaymentScheme _scheme = PaymentScheme.downPayment;
-  String _methodId = kVirtualAccounts.first.id;
+  String? _bankId;
+  XFile? _proof;
+  bool _proofError = false;
+  bool _busy = false;
 
-  String get _methodLabel =>
-      _allMethods.firstWhere((m) => m.id == _methodId).label;
+  void _snack(String message) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(message)));
+  }
 
   void _back() {
     if (context.canPop()) {
@@ -43,54 +60,124 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
     }
   }
 
-  Future<void> _pay(PaymentSummary summary, String vendorId) async {
-    final due = summary.dueNow(_scheme);
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Konfirmasi Pembayaran'),
-        content: Text(
-          'Ini prototype, belum ada pembayaran sungguhan.\n\n'
-          'Simulasikan pembayaran ${formatRupiah(due)} via $_methodLabel?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Batal'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(ctx).pop(true),
-            style: FilledButton.styleFrom(minimumSize: const Size(0, 44)),
-            child: const Text('Simulasikan'),
-          ),
-        ],
-      ),
-    );
-    if (confirmed != true || !mounted) return;
+  Future<void> _copy(String label, String value) async {
+    await Clipboard.setData(ClipboardData(text: value));
+    if (!mounted) return;
+    _snack('$label disalin.');
+  }
 
-    final messenger = ScaffoldMessenger.of(context);
+  Future<void> _pick(ImageSource source) async {
+    try {
+      final file = await _picker.pickImage(
+        source: source,
+        maxWidth: 1800,
+        imageQuality: 85,
+      );
+      if (file == null || !mounted) return;
+      final name = file.name.contains('.') ? file.name : file.path;
+      final bytes = await file.length();
+      if (!mounted) return;
+      final error = validateProofFile(name: name, bytes: bytes);
+      if (error != null) {
+        _snack(error);
+        return;
+      }
+      setState(() {
+        _proof = file;
+        _proofError = false;
+      });
+    } on PlatformException {
+      if (!mounted) return;
+      _snack(
+        'Tidak bisa membuka '
+        '${source == ImageSource.camera ? 'kamera' : 'galeri'}. '
+        'Periksa izin aplikasi.',
+      );
+    }
+  }
+
+  Future<void> _submit({
+    required CartItem item,
+    required CheckoutDetails details,
+    required PaymentSummary summary,
+    required List<BankAccount> banks,
+  }) async {
+    if (_busy) return;
+    final proof = _proof;
+    if (proof == null) {
+      setState(() => _proofError = true);
+      _snack('Unggah bukti transfer terlebih dahulu.');
+      final target = _proofKey.currentContext;
+      if (target != null) {
+        Scrollable.ensureVisible(
+          target,
+          duration: const Duration(milliseconds: 300),
+          alignment: 0.1,
+        );
+      }
+      return;
+    }
+
+    setState(() => _busy = true);
+
+    // Ambil dulu semua yang dibutuhkan: halaman ini hilang setelah go().
     final cart = ref.read(cartProvider.notifier);
     final checkout = ref.read(checkoutProvider.notifier);
-    context.go(AppRoutes.home);
-    cart.remove(vendorId);
-    cart.selectVoucher(null); // voucher habis dipakai
-    checkout.clear();
-    messenger
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Pembayaran simulasi berhasil. Pesanan belum tersimpan di server.',
-          ),
+    final receipts = ref.read(receiptProvider.notifier);
+    final repository = ref.read(paymentsRepositoryProvider);
+    final router = GoRouter.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final discount = ref.read(cartProvider).discountFor(item.price);
+    final voucherCode =
+        discount > 0 ? ref.read(cartProvider).voucher?.code : null;
+    final bankId = _bankId ?? banks.first.id;
+
+    try {
+      final receipt = await repository.submit(
+        OrderSubmission(
+          itemId: item.vendorId,
+          itemTitle: item.packageTitle,
+          isCustom: item.isCustom,
+          totalAmount: summary.contractTotal,
+          scheme: _scheme,
+          payAmount: summary.dueNow(_scheme),
+          bankAccountId: bankId,
+          proofName: proof.name,
+          proofPath: proof.path,
+          voucherCode: voucherCode,
+          checkout: details,
         ),
       );
+      receipts.save(receipt);
+      router.go(AppRoutes.orderSubmitted);
+      cart.remove(details.vendorId);
+      cart.selectVoucher(null); // voucher habis dipakai
+      checkout.clear();
+    } on ValidationException catch (e) {
+      messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text(e.message)));
+    } catch (_) {
+      messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          const SnackBar(
+            content:
+                Text('Pesanan gagal dikirim. Periksa koneksi lalu coba lagi.'),
+          ),
+        );
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final details = ref.watch(checkoutProvider);
     final cart = ref.watch(cartProvider);
+    final banks = ref.watch(bankAccountsProvider);
     final item = details == null ? null : cart.orderItemFor(details.vendorId);
+
     final appBar = AppBar(
       automaticallyImplyLeading: false,
       leading: IconButton(
@@ -99,7 +186,7 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
         icon: const Icon(Icons.arrow_back),
       ),
       centerTitle: true,
-      title: Text('Payment Options', style: AppTypography.heading(20)),
+      title: Text('Pembayaran', style: AppTypography.heading(20)),
     );
 
     if (details == null || item == null) {
@@ -133,6 +220,7 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
     );
     final isDp = _scheme == PaymentScheme.downPayment;
     final due = summary.dueNow(_scheme);
+    final bankList = banks.value;
 
     return Scaffold(
       appBar: appBar,
@@ -141,7 +229,7 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
           const StepProgressHeader(
             step: 2,
             total: 2,
-            caption: 'Pengikatan Tanggal & Escrow Aman',
+            caption: 'Transfer & Bukti Pembayaran',
           ),
           Expanded(
             child: ListView(
@@ -163,141 +251,75 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
                 const SizedBox(height: AppSpacing.lg),
                 Text('Pilih Skema Pembayaran',
                     style: AppTypography.heading(22)),
-                const SizedBox(height: 4),
-                const Text(
-                  'Pilih fleksibilitas booking sesuai preferensi finansial '
-                  'Anda',
-                  style: TextStyle(
-                    color: AppColors.textSecondary,
-                    fontSize: 13,
-                  ),
-                ),
                 const SizedBox(height: 12),
-                SchemeCard(
-                  title: 'Uang Muka / Booking Fee',
-                  badge: 'Paling Diminati',
-                  badgeBackground: AppColors.coral.withValues(alpha: 0.3),
-                  badgeForeground: AppColors.primary,
-                  price: formatRupiah(summary.deposit),
-                  description:
-                      'Kunci tanggal dan kunci harga promo sekarang juga. '
-                      'Slot tanggal aman 100% di kalender vendor.',
+                SchemeOption(
+                  title: 'Uang Muka (DP)',
+                  amount: formatRupiah(summary.effectiveDeposit),
+                  description: 'Kunci tanggal acara lebih dulu.',
+                  note: 'Sisa ${formatRupiah(summary.remainingAfterDeposit)} '
+                      'dibayar setelahnya.',
                   selected: isDp,
                   onTap: () =>
                       setState(() => _scheme = PaymentScheme.downPayment),
-                  footer: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Icon(
-                        Icons.schedule,
-                        size: 18,
-                        color: AppColors.primary,
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text.rich(
-                          TextSpan(
-                            style: const TextStyle(fontSize: 13, height: 1.4),
-                            children: [
-                              const TextSpan(text: 'Sisa pelunasan ('),
-                              TextSpan(
-                                text:
-                                    formatRupiah(summary.remainingAfterDeposit),
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                              const TextSpan(
-                                text: ') dibayarkan H-30 acara atau cicilan '
-                                    'berkala.',
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
                 ),
                 const SizedBox(height: 12),
-                SchemeCard(
-                  title: 'Pelunasan Penuh (Full Payment)',
-                  badge: 'Ekstra Hemat',
-                  badgeBackground: AppColors.gold,
-                  badgeForeground: AppColors.onGold,
-                  price: formatRupiah(summary.fullPaymentTotal),
-                  strikePrice: formatRupiah(summary.contractTotal),
-                  description:
-                      'Bayar tuntas di awal tanpa beban pikiran. Nikmati '
-                      'potongan langsung & bonus eksklusif.',
+                SchemeOption(
+                  title: 'Pelunasan Penuh',
+                  amount: formatRupiah(summary.contractTotal),
+                  description: 'Bayar tuntas sekaligus.',
                   selected: !isDp,
                   onTap: () =>
                       setState(() => _scheme = PaymentScheme.fullPayment),
-                  footer: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Icon(
-                            Icons.stars_outlined,
-                            size: 18,
-                            color: AppColors.onGold,
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              'Bonus Cashback Potongan '
-                              '${formatRupiah(kFullPaymentDiscount)} Terpasang',
-                              style: const TextStyle(
-                                color: AppColors.onGold,
-                                fontWeight: FontWeight.w700,
-                                fontSize: 13,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Icon(
-                            Icons.redeem_outlined,
-                            size: 18,
-                            color: AppColors.textSecondary,
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              item.cashbackPoints > 0
-                                  ? 'Dapatkan +${formatNumber(item.cashbackPoints)} '
-                                      'Wedding Points siap redeem honeymoon'
-                                  : 'Bonus eksklusif untuk pelunasan di awal',
-                              style: const TextStyle(fontSize: 13),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
                 ),
-                const SizedBox(height: AppSpacing.md),
-                const EscrowGuaranteeCard(),
                 const SizedBox(height: AppSpacing.lg),
-                PaymentMethodSection(
-                  selectedId: _methodId,
-                  onChanged: (id) => setState(() => _methodId = id),
+                if (banks.isLoading)
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 24),
+                    child: Center(child: CircularProgressIndicator()),
+                  )
+                else if (bankList == null || bankList.isEmpty)
+                  ErrorState(
+                    message: 'Rekening tujuan gagal dimuat.',
+                    onRetry: () => ref.invalidate(bankAccountsProvider),
+                  )
+                else
+                  BankAccountsCard(
+                    accounts: bankList,
+                    selectedId: _bankId ?? bankList.first.id,
+                    amount: due,
+                    onSelect: (id) => setState(() => _bankId = id),
+                    onCopy: _copy,
+                  ),
+                const SizedBox(height: AppSpacing.md),
+                KeyedSubtree(
+                  key: _proofKey,
+                  child: ProofUploadCard(
+                    file: _proof,
+                    hasError: _proofError,
+                    onGallery: () => _pick(ImageSource.gallery),
+                    onCamera: () => _pick(ImageSource.camera),
+                    onRemove: () => setState(() => _proof = null),
+                  ),
                 ),
                 const SizedBox(height: AppSpacing.md),
                 PaymentTotalCard(
                   guests: details.guestCount,
                   packagePrice: summary.packagePrice,
                   couponDiscount: summary.couponDiscount,
-                  fullPaymentDiscount: isDp ? 0 : kFullPaymentDiscount,
                   dueLabel: isDp
-                      ? 'Total Bayar Sekarang (DP)'
-                      : 'Total Bayar Sekarang (Lunas)',
+                      ? 'Total Transfer Sekarang (DP)'
+                      : 'Total Transfer Sekarang (Lunas)',
                   dueNow: due,
+                ),
+                const SizedBox(height: 12),
+                const Text(
+                  'Pesananmu akan diperiksa admin. Pembayaran dinyatakan '
+                  'sah setelah bukti transfer diverifikasi.',
+                  style: TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 12,
+                    height: 1.4,
+                  ),
                 ),
               ],
             ),
@@ -306,10 +328,16 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
       ),
       bottomNavigationBar: PaymentBar(
         dueNow: due,
-        buttonLabel: isDp
-            ? 'Bayar Sekarang (DP ${formatRupiah(due, prefix: 'Rp')})'
-            : 'Bayar Sekarang (Lunas ${formatRupiah(due, prefix: 'Rp')})',
-        onPay: () => _pay(summary, item.vendorId),
+        buttonLabel: 'Kirim Pesanan',
+        loading: _busy,
+        onPay: (_busy || bankList == null || bankList.isEmpty)
+            ? null
+            : () => _submit(
+                  item: item,
+                  details: details,
+                  summary: summary,
+                  banks: bankList,
+                ),
       ),
     );
   }

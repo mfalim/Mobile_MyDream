@@ -17,6 +17,7 @@ import 'package:w51/features/my_wedding/presentation/widgets/vision_board_card.d
 import 'package:w51/core/utils/date_helpers.dart';
 import 'package:w51/core/utils/formatters.dart';
 import 'package:w51/features/my_wedding/presentation/providers/couple_provider.dart';
+import 'package:w51/features/payment/presentation/providers/payments_provider.dart';
 
 class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
@@ -63,12 +64,14 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     final cart = ref.read(cartProvider.notifier);
     final checkout = ref.read(checkoutProvider.notifier);
     final couple = ref.read(coupleProvider.notifier);
+    final receipts = ref.read(receiptProvider.notifier);
     final messenger = ScaffoldMessenger.of(context);
     context.go(AppRoutes.home);
     auth.signOut();
     cart.clear();
     checkout.clear();
     couple.clear();
+    receipts.clear();
     messenger
       ..hideCurrentSnackBar()
       ..showSnackBar(const SnackBar(content: Text('Kamu sudah keluar.')));
