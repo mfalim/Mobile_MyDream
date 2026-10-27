@@ -18,6 +18,7 @@ import 'package:w51/features/cart/presentation/widgets/custom_order_section.dart
 import 'package:w51/features/cart/presentation/widgets/voucher_sheet.dart';
 import 'package:w51/features/my_wedding/domain/entities/couple_profile.dart';
 import 'package:w51/features/my_wedding/presentation/providers/couple_provider.dart';
+import 'package:w51/features/contact/presentation/contact_actions.dart';
 
 class CartPage extends ConsumerStatefulWidget {
   const CartPage({this.claimCode, this.initialTab = 0, super.key});
@@ -156,7 +157,8 @@ class _CartPageState extends ConsumerState<CartPage> {
                       ? 'Lanjut ke Validasi Data (${cart.customVendors.length} Vendor)'
                       : 'Pilih ${kMinCustomVendors - cart.customVendors.length} '
                           'vendor lagi',
-                  onHelp: () => _soon('Bantuan'),
+                  onHelp: () =>
+                      contactAdmin(context, ref, topic: 'bantuan pesanan'),
                   onContinue: () =>
                       context.push(AppRoutes.checkoutPath(custom: true)),
                 )
@@ -166,7 +168,8 @@ class _CartPageState extends ConsumerState<CartPage> {
                   canContinue: cart.selected.isNotEmpty,
                   continueLabel:
                       'Lanjut ke Validasi Data (${cart.selected.length} Item)',
-                  onHelp: () => _soon('Bantuan'),
+                  onHelp: () =>
+                      contactAdmin(context, ref, topic: 'bantuan pesanan'),
                   onContinue: () => context.push(AppRoutes.checkoutPath()),
                 ),
     );
@@ -239,7 +242,7 @@ class _CartPageState extends ConsumerState<CartPage> {
             item: item,
             onToggle: () => controller.toggle(item.vendorId),
             onRemove: () => controller.remove(item.vendorId),
-            onChat: () => _soon('Chat vendor'),
+            onChat: () => contactAdmin(context, ref, topic: item.packageTitle),
             onOpenPackage: () =>
                 context.push(AppRoutes.packageDetailPath(item.vendorId)),
           ),

@@ -56,6 +56,7 @@ abstract final class VendorDetailModel {
       ],
       guaranteeTitle: guarantee['title'] as String,
       guaranteeNote: guarantee['note'] as String,
+      phone: json['phone'] as String?,
     );
   }
 }

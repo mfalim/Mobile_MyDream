@@ -18,6 +18,7 @@ import 'package:w51/features/packages/domain/entities/wedding_package.dart';
 import 'package:w51/features/packages/presentation/providers/packages_provider.dart';
 import 'package:w51/features/packages/presentation/widgets/package_card.dart';
 import 'package:w51/features/packages/presentation/widgets/package_vendor_tile.dart';
+import 'package:w51/features/contact/presentation/contact_actions.dart';
 
 class PackageDetailPage extends ConsumerWidget {
   const PackageDetailPage({required this.packageId, super.key});
@@ -80,7 +81,7 @@ class PackageDetailPage extends ConsumerWidget {
           totalPrice: p.price,
           caption: 'Harga paket',
           actionLabel: 'Pesan',
-          onChat: () => _snack(context, 'Chat vendor segera hadir.'),
+          onChat: () => contactAdmin(context, ref, topic: p.name),
           onBook: () => _book(context, ref, p),
         ),
       ),

@@ -33,7 +33,7 @@ class VendorsTopBar extends StatelessWidget {
           ),
         ),
         IconButton(
-          tooltip: 'Pesan',
+          tooltip: 'Chat admin',
           onPressed: onChat,
           icon: const Icon(Icons.chat_bubble_outline_rounded),
         ),

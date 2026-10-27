@@ -21,6 +21,8 @@ import '../../features/notifications/presentation/pages/notifications_page.dart'
 import '../../features/packages/presentation/pages/package_detail_page.dart';
 import '../../features/packages/presentation/pages/packages_page.dart';
 import '../../features/payment/presentation/pages/order_submitted_page.dart';
+import '../../features/account/presentation/pages/account_settings_page.dart';
+import '../../features/support/presentation/pages/report_issue_page.dart';
 import 'app_shell.dart';
 import 'route_names.dart';
 import 'auth_redirect.dart';
@@ -108,6 +110,14 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.orderSubmitted,
         builder: (context, state) => const OrderSubmittedPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.account,
+        builder: (context, state) => const AccountSettingsPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.reportIssue,
+        builder: (context, state) => const ReportIssuePage(),
       ),
       GoRoute(
         path: AppRoutes.packages,

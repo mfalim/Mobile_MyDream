@@ -26,7 +26,9 @@ abstract final class AppRoutes {
     coupleSetup,
     notifications,
     notificationSettings,
-    orderSubmitted
+    orderSubmitted,
+    account,
+    reportIssue
   ];
   static const register = '/register';
   static const coupleSetup = '/couple-setup';
@@ -57,4 +59,7 @@ abstract final class AppRoutes {
   static const packages = '/packages';
   static const packageDetail = '/package/:id';
   static String packageDetailPath(String id) => '/package/$id';
+
+  static const account = '/account';
+  static const reportIssue = '/report-issue';
 }

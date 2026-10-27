@@ -8,7 +8,7 @@ import 'package:w51/features/auth/domain/validators.dart';
 import 'package:w51/features/auth/presentation/providers/auth_provider.dart';
 import 'package:w51/features/auth/presentation/widgets/auth_layout.dart';
 import 'package:w51/features/auth/presentation/widgets/google_sign_in_button.dart';
-import 'package:w51/features/auth/presentation/widgets/password_field.dart';
+import 'package:w51/core/widgets/password_field.dart';
 import 'package:w51/app/router/auth_redirect.dart';
 import 'package:w51/features/my_wedding/presentation/providers/couple_provider.dart';
 
@@ -71,8 +71,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     );
   }
 
-  void _google() =>
-      _run('google', () => ref.read(authProvider.notifier).signInDemo());
+  void _google() => _run('google',
+      () => ref.read(authProvider.notifier).signInDemo(viaGoogle: true));
 
   @override
   Widget build(BuildContext context) {

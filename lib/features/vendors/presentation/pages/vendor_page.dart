@@ -20,6 +20,7 @@ import 'package:w51/features/vendors/presentation/widgets/vendors_search_section
 import 'package:w51/features/vendors/presentation/widgets/vendors_top_bar.dart';
 import 'package:w51/features/auth/presentation/providers/auth_provider.dart';
 import 'package:w51/features/notifications/presentation/providers/notifications_provider.dart';
+import 'package:w51/features/contact/presentation/contact_actions.dart';
 
 class VendorPage extends ConsumerStatefulWidget {
   const VendorPage({super.key});
@@ -43,11 +44,11 @@ class _VendorPageState extends ConsumerState<VendorPage> {
     super.dispose();
   }
 
-  void _soon(String feature) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text('$feature segera hadir.')));
-  }
+  // void _soon(String feature) {
+  //   ScaffoldMessenger.of(context)
+  //     ..hideCurrentSnackBar()
+  //     ..showSnackBar(SnackBar(content: Text('$feature segera hadir.')));
+  // }
 
   List<FeaturedVendor> _filter(List<FeaturedVendor> all, VendorFilter filter) {
     final q = _search.text.trim().toLowerCase();
@@ -116,7 +117,7 @@ class _VendorPageState extends ConsumerState<VendorPage> {
         VendorsTopBar(
           unreadCount: unread,
           onNotifications: () => context.push(AppRoutes.notifications),
-          onChat: () => _soon('Pesan'),
+          onChat: () => contactAdmin(context, ref),
           onProfile: () => context.go(AppRoutes.myWedding),
         ),
         const SizedBox(height: AppSpacing.md),
@@ -193,10 +194,13 @@ class _VendorPageState extends ConsumerState<VendorPage> {
           FeaturedVendorGrid(
             vendors: featured,
             onOpen: (v) => context.push(AppRoutes.vendorDetailPath(v.id)),
-            onChat: (_) => _soon('Chat vendor'),
+            onChat: (v) => contactVendor(context, ref, v.id),
           ),
         gap,
-        VendorsHelpBanner(onAsk: () => _soon('Konsultasi ahli')),
+        VendorsHelpBanner(
+          onAsk: () =>
+              contactAdmin(context, ref, topic: 'konsultasi memilih vendor'),
+        ),
       ],
     );
   }

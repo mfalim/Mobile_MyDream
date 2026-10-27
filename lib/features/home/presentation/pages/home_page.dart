@@ -19,6 +19,7 @@ import 'package:w51/features/vendors/presentation/providers/vendor_filter_provid
 import 'package:w51/features/auth/presentation/providers/auth_provider.dart';
 import 'package:w51/features/home/presentation/widgets/couple_cta_card.dart';
 import 'package:w51/features/my_wedding/presentation/providers/couple_provider.dart';
+import 'package:w51/features/contact/presentation/contact_actions.dart';
 
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
@@ -105,9 +106,7 @@ class _HomeContent extends ConsumerWidget {
           categories: data.vendorCategories,
           vendors: data.vendors,
           onSeeAll: goVendors,
-          onAsk: (_) => ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Fitur chat vendor segera hadir.')),
-          ),
+          onAsk: (v) => contactVendor(context, ref, v.id),
           onOpen: (v) => context.push(AppRoutes.vendorDetailPath(v.id)),
         ),
         gap,

@@ -22,6 +22,7 @@ import 'package:w51/core/errors/app_exceptions.dart';
 import 'package:w51/features/vendors/presentation/widgets/vendor_info_sheets.dart';
 import 'package:w51/features/auth/presentation/providers/auth_provider.dart';
 import 'package:w51/features/cart/domain/entities/custom_vendor_item.dart';
+import 'package:w51/features/contact/presentation/contact_actions.dart';
 
 class VendorDetailPage extends ConsumerStatefulWidget {
   const VendorDetailPage({required this.vendorId, super.key});
@@ -134,7 +135,7 @@ class _VendorDetailPageState extends ConsumerState<VendorDetailPage> {
           caption: 'Harga vendor',
           actionLabel: 'Tambah',
           actionIcon: Icons.add,
-          onChat: () => _soon('Chat vendor'),
+          onChat: () => contactVendor(context, ref, d.id),
           onBook: () => _addToCustom(d),
         ),
       ),

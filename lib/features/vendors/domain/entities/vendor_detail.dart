@@ -35,30 +35,30 @@ class VendorProviderInfo {
 }
 
 class VendorDetail {
-  const VendorDetail({
-    required this.id,
-    required this.name,
-    required this.category,
-    required this.location,
-    required this.packageLabel,
-    required this.price,
-    required this.originalPrice,
-    required this.savePercent,
-    required this.savingsBadge,
-    required this.validUntil,
-    required this.photoCount,
-    required this.paxIncluded,
-    required this.facts,
-    required this.cashbackPoints,
-    required this.cashbackPercent,
-    required this.cashbackNote,
-    required this.installmentMonths,
-    required this.installmentPerMonth,
-    required this.provider,
-    required this.sections,
-    required this.guaranteeTitle,
-    required this.guaranteeNote,
-  });
+  const VendorDetail(
+      {required this.id,
+      required this.name,
+      required this.category,
+      required this.location,
+      required this.packageLabel,
+      required this.price,
+      required this.originalPrice,
+      required this.savePercent,
+      required this.savingsBadge,
+      required this.validUntil,
+      required this.photoCount,
+      required this.paxIncluded,
+      required this.facts,
+      required this.cashbackPoints,
+      required this.cashbackPercent,
+      required this.cashbackNote,
+      required this.installmentMonths,
+      required this.installmentPerMonth,
+      required this.provider,
+      required this.sections,
+      required this.guaranteeTitle,
+      required this.guaranteeNote,
+      required this.phone});
 
   final String id;
   final String name;
@@ -87,4 +87,5 @@ class VendorDetail {
   final List<PackageSection> sections;
   final String guaranteeTitle;
   final String guaranteeNote;
+  final String? phone;
 }

@@ -18,6 +18,7 @@ import 'package:w51/core/utils/date_helpers.dart';
 import 'package:w51/core/utils/formatters.dart';
 import 'package:w51/features/my_wedding/presentation/providers/couple_provider.dart';
 import 'package:w51/features/payment/presentation/providers/payments_provider.dart';
+import 'package:w51/features/contact/presentation/contact_actions.dart';
 
 class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
@@ -140,7 +141,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               icon: Icons.manage_accounts_outlined,
               title: 'Pengaturan Akun & Profil',
               subtitle: 'Email, nomor WhatsApp, kata sandi',
-              onTap: () => _soon('Pengaturan akun'),
+              onTap: () => context.push(AppRoutes.account),
             ),
             SettingsTile(
               icon: Icons.shopping_bag_outlined,
@@ -209,7 +210,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               title: 'Support & Concierge Planner',
               badge: '24/7 VIP',
               subtitle: 'Bantuan kurasi vendor & penawaran harga',
-              onTap: () => _soon('Concierge planner'),
+              onTap: () =>
+                  contactAdmin(context, ref, topic: 'concierge planner'),
             ),
             SettingsTile(
               icon: Icons.star_outline,
@@ -227,7 +229,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               icon: Icons.help_outline,
               title: 'Laporkan Kendala Teknis',
               subtitle: 'Kirimkan masukan atau bug aplikasi',
-              onTap: () => _soon('Laporan kendala'),
+              onTap: () => context.push(AppRoutes.reportIssue),
             ),
           ],
         ),

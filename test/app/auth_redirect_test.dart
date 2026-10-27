@@ -221,4 +221,11 @@ void main() {
     );
     expect(Uri.parse(result!).path, '/login');
   });
+
+  test('Pengaturan Akun dan Laporkan Kendala butuh login', () {
+    for (final path in ['/account', '/report-issue']) {
+      final result = authRedirect(loggedIn: false, uri: Uri.parse(path));
+      expect(Uri.parse(result!).path, '/login', reason: path);
+    }
+  });
 }

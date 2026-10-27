@@ -3,6 +3,7 @@ import 'package:w51/core/errors/app_exceptions.dart';
 import 'package:w51/features/vendors/data/datasources/vendor_detail_mock_datasource.dart';
 import 'package:w51/features/vendors/data/datasources/vendors_mock_datasource.dart';
 import 'package:w51/features/vendors/data/models/vendor_detail_model.dart';
+import 'package:w51/core/utils/whatsapp.dart';
 
 Map<String, dynamic> _sample() => {
       'id': 'x',
@@ -90,5 +91,18 @@ void main() {
       VendorDetailMockDatasource().fetch('tidak-ada'),
       throwsA(isA<NotFoundException>()),
     );
+  });
+
+  test('setiap vendor punya nomor WhatsApp yang valid', () async {
+    final list = await VendorsMockDatasource().fetch();
+    final datasource = VendorDetailMockDatasource();
+    for (final v in list.featured) {
+      final d = await datasource.fetch(v.id);
+      expect(
+        normalizeWhatsAppNumber(d.phone ?? ''),
+        isNotNull,
+        reason: '${v.id}: nomor telepon',
+      );
+    }
   });
 }
