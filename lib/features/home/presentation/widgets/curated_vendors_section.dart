@@ -3,9 +3,9 @@ import 'package:w51/app/theme/app_colors.dart';
 import 'package:w51/app/theme/app_radius.dart';
 import 'package:w51/app/theme/app_typography.dart';
 import 'package:w51/core/utils/formatters.dart';
+import 'package:w51/core/widgets/app_image.dart';
 import 'package:w51/core/widgets/badge_pill.dart';
 import 'package:w51/core/widgets/empty_state.dart';
-import 'package:w51/core/widgets/image_placeholder.dart';
 import 'package:w51/core/widgets/section_header.dart';
 import 'package:w51/features/home/domain/entities/home_entities.dart';
 
@@ -19,6 +19,7 @@ class CuratedVendorsSection extends StatefulWidget {
     super.key,
   });
 
+  /// Chip kategori; yang pertama berarti "semua".
   final List<String> categories;
   final List<CuratedVendor> vendors;
   final VoidCallback? onSeeAll;
@@ -30,9 +31,13 @@ class CuratedVendorsSection extends StatefulWidget {
 }
 
 class _CuratedVendorsSectionState extends State<CuratedVendorsSection> {
-  late String _selected = widget.categories.first;
+  late String _selected =
+      widget.categories.isEmpty ? '' : widget.categories.first;
 
-  List<CuratedVendor> get _filtered => _selected == widget.categories.first
+  bool get _showAll =>
+      widget.categories.isEmpty || _selected == widget.categories.first;
+
+  List<CuratedVendor> get _filtered => _showAll
       ? widget.vendors
       : widget.vendors.where((v) => v.category == _selected).toList();
 
@@ -50,23 +55,25 @@ class _CuratedVendorsSectionState extends State<CuratedVendorsSection> {
           onAction: widget.onSeeAll,
         ),
         const SizedBox(height: 12),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            children: [
-              for (final category in widget.categories)
-                Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: _CategoryChip(
-                    label: category,
-                    selected: category == _selected,
-                    onTap: () => setState(() => _selected = category),
+        if (widget.categories.length > 1) ...[
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                for (final category in widget.categories)
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: _CategoryChip(
+                      label: category,
+                      selected: category == _selected,
+                      onTap: () => setState(() => _selected = category),
+                    ),
                   ),
-                ),
-            ],
+              ],
+            ),
           ),
-        ),
-        const SizedBox(height: 12),
+          const SizedBox(height: 12),
+        ],
         if (vendors.isEmpty)
           const EmptyState(
             message: 'Belum ada vendor di kategori ini.',
@@ -139,6 +146,11 @@ class _VendorCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final tag = vendor.tag;
+    final rating = vendor.rating;
+    final reviews = vendor.reviewCount;
+    final highlight = vendor.highlight;
+
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -154,19 +166,20 @@ class _VendorCard extends StatelessWidget {
             child: Stack(
               fit: StackFit.expand,
               children: [
-                ImagePlaceholder(
-                  icon: Icons.photo_outlined,
+                ClipRRect(
                   borderRadius: BorderRadius.circular(AppRadius.sm),
+                  child: AppImage(url: vendor.photoUrl),
                 ),
-                Positioned(
-                  top: 6,
-                  left: 6,
-                  child: BadgePill(
-                    vendor.tag,
-                    background: AppColors.onGold,
-                    foreground: Colors.white,
+                if (tag != null)
+                  Positioned(
+                    top: 6,
+                    left: 6,
+                    child: BadgePill(
+                      tag,
+                      background: AppColors.onGold,
+                      foreground: Colors.white,
+                    ),
                   ),
-                ),
               ],
             ),
           ),
@@ -187,8 +200,11 @@ class _VendorCard extends StatelessWidget {
                     ),
                     if (vendor.isVerified) ...[
                       const SizedBox(width: 4),
-                      const Icon(Icons.verified,
-                          size: 16, color: AppColors.onGold),
+                      const Icon(
+                        Icons.verified,
+                        size: 16,
+                        color: AppColors.onGold,
+                      ),
                     ],
                   ],
                 ),
@@ -202,30 +218,38 @@ class _VendorCard extends StatelessWidget {
                     fontSize: 13,
                   ),
                 ),
-                const SizedBox(height: 6),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 4,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  children: [
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(Icons.star,
-                            size: 16, color: AppColors.onGold),
-                        const SizedBox(width: 2),
-                        Text(
-                          '${vendor.rating} (${vendor.reviewCount} ulasan)',
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                          ),
+                if (rating != null || highlight != null) ...[
+                  const SizedBox(height: 6),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 4,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      if (rating != null)
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.star,
+                              size: 16,
+                              color: AppColors.onGold,
+                            ),
+                            const SizedBox(width: 2),
+                            Text(
+                              reviews == null
+                                  ? '$rating'
+                                  : '$rating ($reviews ulasan)',
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                    BadgePill(vendor.highlight),
-                  ],
-                ),
+                      if (highlight != null) BadgePill(highlight),
+                    ],
+                  ),
+                ],
                 const SizedBox(height: 10),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.end,
@@ -241,17 +265,27 @@ class _VendorCard extends StatelessWidget {
                               fontSize: 11,
                             ),
                           ),
-                          FittedBox(
-                            fit: BoxFit.scaleDown,
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              formatRupiah(vendor.startingPrice),
-                              style: const TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w700,
+                          if (vendor.startingPrice > 0)
+                            FittedBox(
+                              fit: BoxFit.scaleDown,
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                formatRupiah(vendor.startingPrice),
+                                style: const TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            )
+                          else
+                            const Text(
+                              'Harga menyusul',
+                              style: TextStyle(
+                                color: AppColors.textSecondary,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
-                          ),
                         ],
                       ),
                     ),

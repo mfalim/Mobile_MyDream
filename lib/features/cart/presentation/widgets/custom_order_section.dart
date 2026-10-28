@@ -123,7 +123,9 @@ class CustomVendorTile extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      '${item.category} • ${item.location}',
+                      item.location.isEmpty
+                          ? item.category
+                          : '${item.category} • ${item.location}',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(

@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
 
 // IconData dipakai langsung demi kesederhanaan prototype; saat API siap,
-// ganti dengan kode ikon dari server.
+// ganti dengan kunci ikon dari server (lihat core/utils/icon_mapper.dart).
 
 class VendorCategory {
   const VendorCategory({
@@ -22,26 +22,29 @@ class QuickCategory {
   final IconData icon;
 }
 
+/// Vendor di daftar. Yang wajib hanya yang ada di database: id, nama,
+/// kategori, dan harga. Sisanya opsional dan disembunyikan bila kosong.
 class FeaturedVendor {
   const FeaturedVendor({
     required this.id,
     required this.name,
     required this.category,
-    required this.cities,
     required this.categoryLabel,
-    required this.tag,
-    required this.tagIcon,
-    required this.rating,
-    required this.reviewCount,
-    required this.description,
-    required this.priceLabel,
     required this.price,
     required this.startingBudget,
-    required this.promoBadge,
-    required this.promoNote,
+    this.cities = const [],
+    this.tag,
+    this.tagIcon,
+    this.rating,
+    this.reviewCount,
     this.badge,
+    this.description,
+    this.priceLabel,
     this.priceNote,
     this.originalPrice,
+    this.promoBadge,
+    this.promoNote,
+    this.photoUrl,
   });
 
   final String id;
@@ -51,21 +54,24 @@ class FeaturedVendor {
   final String category;
   final List<String> cities;
   final String categoryLabel;
-  final String tag;
-  final IconData tagIcon;
-  final double rating;
-  final int reviewCount;
-  final String? badge;
-  final String description;
-  final String priceLabel;
+
+  /// Harga dasar. 0 berarti belum ditetapkan.
   final int price;
+
+  /// Perkiraan total biaya termurah, dipakai untuk filter budget.
+  final int startingBudget;
+  final String? tag;
+  final IconData? tagIcon;
+  final double? rating;
+  final int? reviewCount;
+  final String? badge;
+  final String? description;
+  final String? priceLabel;
   final String? priceNote;
   final int? originalPrice;
-
-  /// Perkiraan total biaya termurah, dipakai untuk filter budget (MOCK).
-  final int startingBudget;
-  final String promoBadge;
-  final String promoNote;
+  final String? promoBadge;
+  final String? promoNote;
+  final String? photoUrl;
 }
 
 class VendorsData {

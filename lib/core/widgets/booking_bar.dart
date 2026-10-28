@@ -78,7 +78,9 @@ class BookingBar extends StatelessWidget {
                                   fit: BoxFit.scaleDown,
                                   alignment: Alignment.centerLeft,
                                   child: Text(
-                                    formatRupiah(totalPrice),
+                                    totalPrice > 0
+                                        ? formatRupiah(totalPrice)
+                                        : 'Harga menyusul',
                                     style: const TextStyle(
                                       color: Colors.white,
                                       fontWeight: FontWeight.w700,

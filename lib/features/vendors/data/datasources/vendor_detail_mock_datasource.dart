@@ -1,12 +1,13 @@
 import 'package:w51/core/errors/app_exceptions.dart';
 import 'package:w51/features/vendors/data/models/vendor_detail_model.dart';
 import 'package:w51/features/vendors/domain/entities/vendor_detail.dart';
+import 'package:w51/features/vendors/data/datasources/vendor_db_samples.dart';
 
 /// MOCK: meniru jawaban server (GET /vendors/{id}). Bentuk datanya, termasuk
 /// nama kunci snake_case, adalah rancangan kontrak API. Bukan data asli.
 class VendorDetailMockDatasource {
   Future<VendorDetail> fetch(String id) async {
-    final json = _responses[id];
+    final json = _responses[id] ?? kDatabaseShapedVendorDetails[id];
     if (json == null) throw NotFoundException('vendor $id');
     return VendorDetailModel.fromJson(json);
   }
@@ -203,6 +204,9 @@ class VendorDetailMockDatasource {
       'name': 'Sora Visual Stories',
       'category': 'Photography',
       'phone': '+628000000004',
+      'description':
+          'Tim dokumentasi pernikahan dengan gaya sinematik dan natural.',
+      'instagram': '@contoh.vendor',
       'location': 'Bali',
       'package_label': 'Paket D-Day Photo & Video',
       'price': 18500000,
@@ -492,6 +496,31 @@ class VendorDetailMockDatasource {
         },
       ],
       'guarantee': _guarantee,
+      // Berbentuk data database asli (kolom vendors saja, harga berupa teks decimal).
+      'vendor-db-katering': {
+        'id': 'vendor-db-katering',
+        'name': 'Katering Jember',
+        'category': 'Catering',
+        'price': '100000000.00',
+        'phone': '+628000000009',
+        'city': null,
+        'address': 'Jl. Contoh No. 1, Jember',
+        'description': null,
+        'instagram': null,
+        'photos': <Object>[],
+      },
+      'vendor-db-dekor': {
+        'id': 'vendor-db-dekor',
+        'name': 'dekor jember',
+        'category': 'Decoration',
+        'price': '10000290.00',
+        'phone': '+628000000010',
+        'city': null,
+        'address': 'Jl. Contoh No. 2, Surabaya',
+        'description': null,
+        'instagram': null,
+        'photos': <Object>[],
+      },
     },
   };
 }

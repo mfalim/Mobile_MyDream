@@ -28,6 +28,7 @@ class WeddingPackage {
     this.eventPeriod,
     this.guestCapacity,
     this.isFeatured = false,
+    this.photoUrl,
   });
 
   final String id;
@@ -41,6 +42,7 @@ class WeddingPackage {
   final String? eventPeriod;
   final int? guestCapacity;
   final bool isFeatured;
+  final String? photoUrl;
 
   /// Harga paket. Di database belum ada kolomnya; nilainya nanti dari API
   /// (diatur admin). 0 berarti belum ditetapkan.

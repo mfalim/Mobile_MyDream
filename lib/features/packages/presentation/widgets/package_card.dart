@@ -4,7 +4,7 @@ import 'package:w51/app/theme/app_radius.dart';
 import 'package:w51/app/theme/app_typography.dart';
 import 'package:w51/core/utils/formatters.dart';
 import 'package:w51/core/widgets/badge_pill.dart';
-import 'package:w51/core/widgets/image_placeholder.dart';
+import 'package:w51/core/widgets/app_image.dart';
 import 'package:w51/features/packages/domain/entities/wedding_package.dart';
 
 class PackageCard extends StatelessWidget {
@@ -36,7 +36,7 @@ class PackageCard extends StatelessWidget {
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
-                    const ImagePlaceholder(icon: Icons.photo_outlined),
+                    AppImage(url: package.photoUrl),
                     if (package.isFeatured)
                       const Positioned(
                         top: 12,

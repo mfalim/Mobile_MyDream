@@ -1,25 +1,26 @@
 import 'dart:math' as math;
-import 'package:w51/core/utils/date_helpers.dart';
-import 'package:w51/core/utils/formatters.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:w51/app/router/route_names.dart';
 import 'package:w51/app/theme/app_spacing.dart';
+import 'package:w51/core/utils/date_helpers.dart';
+import 'package:w51/core/utils/formatters.dart';
 import 'package:w51/core/widgets/error_state.dart';
+import 'package:w51/features/auth/presentation/providers/auth_provider.dart';
+import 'package:w51/features/contact/presentation/contact_actions.dart';
 import 'package:w51/features/home/domain/entities/home_entities.dart';
 import 'package:w51/features/home/presentation/providers/home_provider.dart';
 import 'package:w51/features/home/presentation/widgets/aura_pay_banner.dart';
+import 'package:w51/features/home/presentation/widgets/couple_cta_card.dart';
 import 'package:w51/features/home/presentation/widgets/curated_vendors_section.dart';
 import 'package:w51/features/home/presentation/widgets/deals_section.dart';
 import 'package:w51/features/home/presentation/widgets/inspirations_section.dart';
 import 'package:w51/features/home/presentation/widgets/service_grid.dart';
 import 'package:w51/features/home/presentation/widgets/wedding_countdown_card.dart';
-import 'package:w51/features/vendors/presentation/providers/vendor_filter_provider.dart';
-import 'package:w51/features/auth/presentation/providers/auth_provider.dart';
-import 'package:w51/features/home/presentation/widgets/couple_cta_card.dart';
 import 'package:w51/features/my_wedding/presentation/providers/couple_provider.dart';
-import 'package:w51/features/contact/presentation/contact_actions.dart';
+import 'package:w51/features/vendors/presentation/providers/vendor_filter_provider.dart';
 
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
@@ -48,9 +49,10 @@ class _HomeContent extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    const gap = SizedBox(height: AppSpacing.lg);
     final couple = ref.watch(coupleProvider);
     final isGuest = ref.watch(authProvider) == null;
-    const gap = SizedBox(height: AppSpacing.lg);
+
     void goVendors() {
       ref.read(vendorFilterProvider.notifier).reset();
       context.go(AppRoutes.vendors);
@@ -90,30 +92,43 @@ class _HomeContent extends ConsumerWidget {
           ),
         gap,
         ServiceGrid(services: data.services, onSelected: openCategory),
-        gap,
-        DealsSection(
-          deals: data.deals,
-          onSeeAll: goVendors,
-          // Klaim voucher = aksi yang butuh login: router mengarahkan tamu ke Login.
-          onClaim: (deal) =>
-              context.push(AppRoutes.cartWithVoucher(deal.voucherCode)),
-          onOpen: (deal) => context.push(AppRoutes.vendorDetailPath(deal.id)),
-        ),
+        if (data.deals.isNotEmpty) ...[
+          gap,
+          DealsSection(
+            deals: data.deals,
+            onSeeAll: () => context.push(AppRoutes.packages),
+            onOpen: (deal) =>
+                context.push(AppRoutes.packageDetailPath(deal.id)),
+            onAction: (deal) {
+              final code = deal.voucherCode;
+              // Voucher = aksi yang butuh login: router mengarahkan tamu ke Login.
+              context.push(
+                code == null
+                    ? AppRoutes.packageDetailPath(deal.id)
+                    : AppRoutes.cartWithVoucher(code),
+              );
+            },
+          ),
+        ],
         gap,
         const AuraPayBanner(),
-        gap,
-        CuratedVendorsSection(
-          categories: data.vendorCategories,
-          vendors: data.vendors,
-          onSeeAll: goVendors,
-          onAsk: (v) => contactVendor(context, ref, v.id),
-          onOpen: (v) => context.push(AppRoutes.vendorDetailPath(v.id)),
-        ),
-        gap,
-        InspirationsSection(
-          articles: data.articles,
-          onSeeAll: () => context.go(AppRoutes.inspirations),
-        ),
+        if (data.vendors.isNotEmpty) ...[
+          gap,
+          CuratedVendorsSection(
+            categories: data.vendorCategories,
+            vendors: data.vendors,
+            onSeeAll: goVendors,
+            onOpen: (v) => context.push(AppRoutes.vendorDetailPath(v.id)),
+            onAsk: (v) => contactVendor(context, ref, v.id),
+          ),
+        ],
+        if (data.articles.isNotEmpty) ...[
+          gap,
+          InspirationsSection(
+            articles: data.articles,
+            onSeeAll: () => context.go(AppRoutes.inspirations),
+          ),
+        ],
       ],
     );
   }

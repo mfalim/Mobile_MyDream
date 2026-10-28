@@ -11,7 +11,7 @@ import 'package:w51/core/utils/formatters.dart';
 import 'package:w51/core/widgets/badge_pill.dart';
 import 'package:w51/core/widgets/booking_bar.dart';
 import 'package:w51/core/widgets/error_state.dart';
-import 'package:w51/core/widgets/image_placeholder.dart';
+import 'package:w51/core/widgets/app_image.dart';
 import 'package:w51/features/cart/domain/entities/cart_item.dart';
 import 'package:w51/features/cart/presentation/providers/cart_provider.dart';
 import 'package:w51/features/packages/domain/entities/wedding_package.dart';
@@ -124,7 +124,7 @@ class _Content extends StatelessWidget {
             child: Stack(
               fit: StackFit.expand,
               children: [
-                const ImagePlaceholder(icon: Icons.photo_outlined),
+                AppImage(url: package.photoUrl),
                 if (package.isFeatured)
                   const Positioned(
                     top: 12,

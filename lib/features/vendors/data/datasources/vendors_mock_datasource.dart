@@ -200,6 +200,23 @@ class VendorsMockDatasource {
           promoBadge: 'Free Tasting',
           promoNote: 'Min. 100 pax',
         ),
+        // Berbentuk data database asli: hanya kolom yang ada.
+        FeaturedVendor(
+          id: 'vendor-db-katering',
+          name: 'Katering Jember',
+          category: 'Catering',
+          categoryLabel: 'Catering',
+          price: 100000000,
+          startingBudget: 100000000,
+        ),
+        FeaturedVendor(
+          id: 'vendor-db-dekor',
+          name: 'dekor jember',
+          category: 'Decoration',
+          categoryLabel: 'Decoration',
+          price: 10000290,
+          startingBudget: 10000290,
+        ),
       ],
     );
   }

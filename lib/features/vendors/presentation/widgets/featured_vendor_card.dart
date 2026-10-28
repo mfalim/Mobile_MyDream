@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:w51/app/theme/app_colors.dart';
 import 'package:w51/app/theme/app_typography.dart';
 import 'package:w51/core/utils/formatters.dart';
+import 'package:w51/core/widgets/app_image.dart';
 import 'package:w51/core/widgets/badge_pill.dart';
-import 'package:w51/core/widgets/image_placeholder.dart';
 import 'package:w51/features/vendors/domain/entities/vendor_entities.dart';
 
 /// Dua kartu per baris, tinggi disamakan per baris (aman untuk teks besar).
@@ -82,8 +82,14 @@ class _FeaturedVendorCardState extends State<FeaturedVendorCard> {
   @override
   Widget build(BuildContext context) {
     final v = widget.vendor;
+    final badge = v.badge;
+    final rating = v.rating;
+    final reviews = v.reviewCount;
+    final priceLabel = v.priceLabel;
     final original = v.originalPrice;
     final note = v.priceNote;
+    final promo = v.promoBadge;
+
     return Semantics(
       button: true,
       label: 'Buka detail ${v.name}',
@@ -101,15 +107,15 @@ class _FeaturedVendorCardState extends State<FeaturedVendorCard> {
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
-                    const ImagePlaceholder(icon: Icons.photo_outlined),
-                    if (v.badge != null)
+                    AppImage(url: v.photoUrl),
+                    if (badge != null)
                       Positioned(
                         top: 10,
                         left: 8,
                         right: 48,
                         child: Align(
                           alignment: Alignment.centerLeft,
-                          child: BadgePill(v.badge!),
+                          child: BadgePill(badge),
                         ),
                       ),
                     Positioned(
@@ -151,71 +157,88 @@ class _FeaturedVendorCardState extends State<FeaturedVendorCard> {
                       overflow: TextOverflow.ellipsis,
                       style: AppTypography.heading(16),
                     ),
-                    const SizedBox(height: 6),
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.star,
-                          size: 14,
-                          color: AppColors.onGold,
-                        ),
-                        const SizedBox(width: 2),
-                        Expanded(
-                          child: Text(
-                            '${v.rating} (${v.reviewCount})',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
+                    if (rating != null) ...[
+                      const SizedBox(height: 6),
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.star,
+                            size: 14,
+                            color: AppColors.onGold,
+                          ),
+                          const SizedBox(width: 2),
+                          Expanded(
+                            child: Text(
+                              reviews == null
+                                  ? '$rating'
+                                  : '$rating ($reviews)',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
+                        ],
+                      ),
+                    ],
                     const SizedBox(height: 10),
-                    Text(
-                      v.priceLabel,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: AppColors.textSecondary,
-                        fontSize: 11,
-                      ),
-                    ),
-                    FittedBox(
-                      fit: BoxFit.scaleDown,
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        formatRupiah(v.price, prefix: 'Rp'),
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
+                    if (v.price > 0) ...[
+                      if (priceLabel != null)
+                        Text(
+                          priceLabel,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: AppColors.textSecondary,
+                            fontSize: 11,
+                          ),
+                        ),
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          formatRupiah(v.price, prefix: 'Rp'),
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                       ),
-                    ),
-                    if (original != null)
-                      Text(
-                        formatRupiah(original, prefix: 'Rp'),
-                        style: const TextStyle(
-                          decoration: TextDecoration.lineThrough,
+                      if (original != null && original > v.price)
+                        Text(
+                          formatRupiah(original, prefix: 'Rp'),
+                          style: const TextStyle(
+                            decoration: TextDecoration.lineThrough,
+                            color: AppColors.textSecondary,
+                            fontSize: 11,
+                          ),
+                        ),
+                      if (note != null)
+                        Text(
+                          note,
+                          style: const TextStyle(
+                            color: AppColors.textSecondary,
+                            fontSize: 11,
+                          ),
+                        ),
+                    ] else
+                      const Text(
+                        'Harga menyusul',
+                        style: TextStyle(
                           color: AppColors.textSecondary,
-                          fontSize: 11,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
-                    if (note != null)
-                      Text(
-                        note,
-                        style: const TextStyle(
-                          color: AppColors.textSecondary,
-                          fontSize: 11,
-                        ),
+                    if (promo != null) ...[
+                      const SizedBox(height: 8),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: BadgePill(promo),
                       ),
-                    const SizedBox(height: 8),
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: BadgePill(v.promoBadge),
-                    ),
+                    ],
                     const SizedBox(height: 12),
                     Row(
                       children: [

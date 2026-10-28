@@ -16,13 +16,18 @@ class WeddingCountdownCard extends StatelessWidget {
     super.key,
   });
 
-  final WeddingCountdown countdown;
+  /// Kemajuan persiapan; null bila belum ada datanya (bagiannya disembunyikan).
+  final WeddingCountdown? countdown;
   final String coupleNames;
   final String dateLabel;
   final int daysLeft;
   final VoidCallback? onDetail;
+
   @override
   Widget build(BuildContext context) {
+    final readiness = countdown?.readiness;
+    final nextTask = countdown?.nextTask;
+
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
@@ -45,10 +50,7 @@ class WeddingCountdownCard extends StatelessWidget {
                       background: AppColors.surface,
                     ),
                     const SizedBox(height: 10),
-                    Text(
-                      coupleNames,
-                      style: AppTypography.heading(24),
-                    ),
+                    Text(coupleNames, style: AppTypography.heading(24)),
                     const SizedBox(height: 6),
                     Row(
                       children: [
@@ -73,29 +75,29 @@ class WeddingCountdownCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 12),
-              _ProgressBadge(
-                daysLeft: daysLeft,
-                readiness: countdown.readiness,
-              ),
+              _ProgressBadge(daysLeft: daysLeft, readiness: readiness),
             ],
           ),
           const SizedBox(height: 14),
           Row(
             children: [
-              const Icon(
-                Icons.check_circle_outline,
-                size: 20,
-                color: AppColors.primary,
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  'Tugas berikutnya: ${countdown.nextTask}',
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontSize: 13),
+              if (nextTask != null) ...[
+                const Icon(
+                  Icons.check_circle_outline,
+                  size: 20,
+                  color: AppColors.primary,
                 ),
-              ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Tugas berikutnya: $nextTask',
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontSize: 13),
+                  ),
+                ),
+              ] else
+                const Spacer(),
               TextButton(
                 onPressed: onDetail,
                 child: const Row(
@@ -118,13 +120,17 @@ class _ProgressBadge extends StatelessWidget {
   const _ProgressBadge({required this.daysLeft, required this.readiness});
 
   final int daysLeft;
-  final double readiness;
+  final double? readiness;
 
   @override
   Widget build(BuildContext context) {
-    final percent = (readiness * 100).round();
+    final value = readiness;
+    final percent = value == null ? null : (value * 100).round();
+
     return Semantics(
-      label: '$daysLeft hari lagi, persiapan $percent persen',
+      label: percent == null
+          ? '$daysLeft hari lagi'
+          : '$daysLeft hari lagi, persiapan $percent persen',
       child: Container(
         width: 104,
         padding: const EdgeInsets.all(12),
@@ -143,10 +149,12 @@ class _ProgressBadge extends StatelessWidget {
                 children: [
                   SizedBox.expand(
                     child: CircularProgressIndicator(
-                      value: readiness,
+                      value: value ?? 1,
                       strokeWidth: 6,
                       backgroundColor: AppColors.outline,
-                      color: AppColors.primary,
+                      color: value == null
+                          ? AppColors.coral.withValues(alpha: 0.4)
+                          : AppColors.primary,
                     ),
                   ),
                   Column(
@@ -165,15 +173,17 @@ class _ProgressBadge extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(height: 6),
-            Text(
-              '$percent% Siap',
-              style: const TextStyle(
-                color: AppColors.primary,
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
+            if (percent != null) ...[
+              const SizedBox(height: 6),
+              Text(
+                '$percent% Siap',
+                style: const TextStyle(
+                  color: AppColors.primary,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
-            ),
+            ],
           ],
         ),
       ),

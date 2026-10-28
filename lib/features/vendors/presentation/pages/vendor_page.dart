@@ -57,7 +57,7 @@ class _VendorPageState extends ConsumerState<VendorPage> {
       if (q.isEmpty) return true;
       return v.name.toLowerCase().contains(q) ||
           v.categoryLabel.toLowerCase().contains(q) ||
-          v.description.toLowerCase().contains(q);
+          (v.description ?? '').toLowerCase().contains(q);
     }).toList();
   }
 
