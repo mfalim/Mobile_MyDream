@@ -20,8 +20,8 @@ void main() {
   });
 
   test('pesan admin: topik kosong memakai kalimat umum', () {
-    expect(adminInquiryMessage(), contains('layanan Aura Wedding'));
-    expect(adminInquiryMessage(topic: '   '), contains('layanan Aura Wedding'));
+    expect(adminInquiryMessage(), contains('layanan MyDream'));
+    expect(adminInquiryMessage(topic: '   '), contains('layanan MyDream'));
     expect(
       adminInquiryMessage(topic: ' Paket Intimate Bali '),
       contains('tentang Paket Intimate Bali.'),

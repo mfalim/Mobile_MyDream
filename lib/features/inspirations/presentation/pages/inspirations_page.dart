@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:w51/app/router/route_names.dart';
 import 'package:w51/app/theme/app_colors.dart';
 import 'package:w51/app/theme/app_spacing.dart';
 import 'package:w51/app/theme/app_typography.dart';
@@ -9,12 +11,7 @@ import 'package:w51/features/inspirations/domain/entities/inspiration_entities.d
 import 'package:w51/features/inspirations/presentation/providers/inspirations_provider.dart';
 import 'package:w51/features/inspirations/presentation/widgets/inspiration_tabs.dart';
 import 'package:w51/features/inspirations/presentation/widgets/more_stories_list.dart';
-import 'package:w51/features/inspirations/presentation/widgets/story_body.dart';
-import 'package:w51/features/inspirations/presentation/widgets/story_engagement.dart';
-import 'package:w51/features/inspirations/presentation/widgets/story_gallery.dart';
-import 'package:w51/features/inspirations/presentation/widgets/story_header.dart';
-import 'package:w51/features/inspirations/presentation/widgets/story_tips.dart';
-import 'package:w51/features/inspirations/presentation/widgets/story_vendors.dart';
+import 'package:w51/features/inspirations/presentation/widgets/story_view.dart';
 
 class InspirationsPage extends ConsumerStatefulWidget {
   const InspirationsPage({super.key});
@@ -27,8 +24,6 @@ class _InspirationsPageState extends ConsumerState<InspirationsPage> {
   // Status ini hanya di memori (prototype).
   int _tab = 1; // 0 = Inspirasi & Tips, 1 = Real Weddings (sesuai Figma)
   String? _category;
-  bool _liked = false;
-  bool _saved = false;
 
   void _soon(String feature) {
     ScaffoldMessenger.of(context)
@@ -123,47 +118,32 @@ class _InspirationsPageState extends ConsumerState<InspirationsPage> {
                 ),
               )
             else ...[
-              StoryHeader(
-                story: story,
-                saved: _saved,
-                onSave: () => setState(() => _saved = !_saved),
-                onShare: () => _soon('Bagikan cerita'),
-              ),
-              const SizedBox(height: AppSpacing.md),
-              StoryBody(
-                stats: story.stats,
-                body: story.body,
-                quote: story.quote,
-              ),
-              gap,
-              StoryGallery(captions: story.photoCaptions),
-              gap,
-              StoryVendors(
-                title: story.vendorsTitle,
-                vendors: story.vendors,
-                onPortfolio: (v) => _soon('Portofolio ${v.name}'),
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              StoryTips(title: story.tipsTitle, tips: story.tips),
-              const SizedBox(height: AppSpacing.md),
-              StoryEngagement(
-                likes: story.likes + (_liked ? 1 : 0),
-                reads: story.reads,
-                liked: _liked,
-                onLike: () => setState(() => _liked = !_liked),
-              ),
+              if (story != null)
+                StoryView(
+                  key: ValueKey(story.id),
+                  story: story,
+                  onPortfolio: (v) => _soon('Portofolio ${v.name}'),
+                  onShare: () => _soon('Bagikan cerita'),
+                  onRelatedPackage: (id) =>
+                      context.push(AppRoutes.packageDetailPath(id)),
+                )
+              else
+                const EmptyState(
+                  message: 'Belum ada cerita.',
+                  icon: Icons.menu_book_outlined,
+                ),
               gap,
               const Divider(color: AppColors.outline),
               gap,
               MoreStoriesList(
                 stories: more,
-                onOpen: (s) => _soon('Cerita "${s.category}"'),
+                onOpen: (s) => context.push(AppRoutes.storyPath(s.id)),
                 onSeeAll: () => setState(() => _category = null),
               ),
             ],
           ],
         ),
-        if (_tab == 1)
+        if (_tab == 1 && d.categories.isNotEmpty)
           Positioned(
             left: 0,
             right: 0,

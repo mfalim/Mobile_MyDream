@@ -87,7 +87,7 @@ class _Content extends StatelessWidget {
               Expanded(
                 child: Text(
                   'Teks contoh untuk prototype. Ketentuan resmi akan diisi '
-                  'oleh tim Aura.',
+                  'oleh tim MyDream.',
                   style: TextStyle(fontSize: 13, height: 1.4),
                 ),
               ),

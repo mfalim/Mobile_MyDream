@@ -121,18 +121,19 @@ abstract final class HomeComposer {
     if (data == null) return const [];
     final story = data.story;
     return [
-      InspirationArticle(
-        id: story.id,
-        category: 'Real Weddings',
-        title: story.title,
-        excerpt: story.excerpt,
-      ),
+      if (story != null)
+        InspirationArticle(
+          id: story.id,
+          category: story.category ?? 'Real Weddings',
+          title: story.title,
+          excerpt: story.excerpt ?? '',
+        ),
       for (final t in data.more)
         InspirationArticle(
           id: t.id,
           category: t.category,
           title: t.title,
-          excerpt: t.dateLabel,
+          excerpt: t.dateLabel ?? '',
         ),
     ].take(maxArticles).toList();
   }

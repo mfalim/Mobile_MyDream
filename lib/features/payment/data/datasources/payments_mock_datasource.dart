@@ -16,13 +16,13 @@ class PaymentsMockDatasource {
           id: 'bca',
           bankName: 'BCA',
           accountNumber: '1234567890',
-          accountHolder: 'PT Aura Wedding (contoh)',
+          accountHolder: 'MyDream (contoh)',
         ),
         BankAccount(
           id: 'mandiri',
           bankName: 'Mandiri',
           accountNumber: '1234567890123',
-          accountHolder: 'PT Aura Wedding (contoh)',
+          accountHolder: 'MyDream (contoh)',
         ),
       ];
 

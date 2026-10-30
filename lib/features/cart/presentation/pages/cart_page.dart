@@ -116,7 +116,7 @@ class _CartPageState extends ConsumerState<CartPage> {
           icon: const Icon(Icons.arrow_back),
         ),
         centerTitle: true,
-        title: Text('Aura Wedding Cart', style: AppTypography.heading(20)),
+        title: Text('MyDream Cart', style: AppTypography.heading(20)),
         actions: [
           IconButton(
             tooltip: 'Menu',

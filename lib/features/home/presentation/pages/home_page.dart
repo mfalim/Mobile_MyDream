@@ -127,6 +127,7 @@ class _HomeContent extends ConsumerWidget {
           InspirationsSection(
             articles: data.articles,
             onSeeAll: () => context.go(AppRoutes.inspirations),
+            onOpen: (a) => context.push(AppRoutes.storyPath(a.id)),
           ),
         ],
       ],

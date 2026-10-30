@@ -38,12 +38,12 @@ Future<void> contactVendor(
   }
 }
 
-/// Chat ke admin Aura Wedding lewat WhatsApp.
+/// Chat ke admin MyDream lewat WhatsApp.
 void contactAdmin(BuildContext context, WidgetRef ref, {String? topic}) {
   final date = ref.read(coupleProvider)?.weddingDate;
   showWhatsAppSheet(
     context,
-    title: 'Chat Admin Aura Wedding',
+    title: 'Chat Admin MyDream',
     phone: AppConfig.adminWhatsApp,
     message: adminInquiryMessage(topic: topic, weddingDate: date),
   );

@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:w51/app/theme/app_colors.dart';
 import 'package:w51/app/theme/app_radius.dart';
 import 'package:w51/app/theme/app_typography.dart';
+import 'package:w51/core/widgets/app_image.dart';
 import 'package:w51/core/widgets/empty_state.dart';
-import 'package:w51/core/widgets/image_placeholder.dart';
 import 'package:w51/features/inspirations/domain/entities/inspiration_entities.dart';
 
 class MoreStoriesList extends StatelessWidget {
@@ -20,6 +20,16 @@ class MoreStoriesList extends StatelessWidget {
 
   String _reads(int n) =>
       n >= 1000 ? '${(n / 1000).toStringAsFixed(1)}k' : '$n';
+
+  String? _meta(StoryTeaser s) {
+    final date = s.dateLabel;
+    final reads = s.reads;
+    final parts = [
+      if (date != null) date,
+      if (reads != null) '${_reads(reads)} dibaca',
+    ];
+    return parts.isEmpty ? null : parts.join(' • ');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,7 +55,7 @@ class MoreStoriesList extends StatelessWidget {
           ],
         ),
         const Text(
-          'Kisah nyata penuh romansa dari para pengantin Aura',
+          'Kisah nyata penuh romansa dari para pengantin MyDream',
           style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
         ),
         const SizedBox(height: 12),
@@ -72,9 +82,9 @@ class MoreStoriesList extends StatelessWidget {
                         SizedBox(
                           width: 88,
                           height: 88,
-                          child: ImagePlaceholder(
-                            icon: Icons.photo_outlined,
+                          child: ClipRRect(
                             borderRadius: BorderRadius.circular(AppRadius.sm),
+                            child: AppImage(url: s.photoUrl),
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -99,14 +109,16 @@ class MoreStoriesList extends StatelessWidget {
                                   height: 1.3,
                                 ),
                               ),
-                              const SizedBox(height: 4),
-                              Text(
-                                '${s.dateLabel} • ${_reads(s.reads)} dibaca',
-                                style: const TextStyle(
-                                  color: AppColors.textSecondary,
-                                  fontSize: 12,
+                              if (_meta(s) != null) ...[
+                                const SizedBox(height: 4),
+                                Text(
+                                  _meta(s)!,
+                                  style: const TextStyle(
+                                    color: AppColors.textSecondary,
+                                    fontSize: 12,
+                                  ),
                                 ),
-                              ),
+                              ],
                             ],
                           ),
                         ),

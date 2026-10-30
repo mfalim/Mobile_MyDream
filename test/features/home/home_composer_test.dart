@@ -48,6 +48,9 @@ class _Packages implements PackagesRepository {
 
 class _Inspirations implements InspirationsRepository {
   _Inspirations({this.fail = false});
+  @override
+  Future<RealWeddingStory> loadStory(String id) =>
+      InspirationsMockDatasource().fetchStory(id);
 
   final bool fail;
 

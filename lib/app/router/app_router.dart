@@ -23,6 +23,7 @@ import '../../features/packages/presentation/pages/packages_page.dart';
 import '../../features/payment/presentation/pages/order_submitted_page.dart';
 import '../../features/account/presentation/pages/account_settings_page.dart';
 import '../../features/support/presentation/pages/report_issue_page.dart';
+import '../../features/inspirations/presentation/pages/story_page.dart';
 import 'app_shell.dart';
 import 'route_names.dart';
 import 'auth_redirect.dart';
@@ -127,6 +128,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.packageDetail,
         builder: (context, state) =>
             PackageDetailPage(packageId: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: AppRoutes.story,
+        builder: (context, state) =>
+            StoryPage(storyId: state.pathParameters['id']!),
       ),
       GoRoute(
         path: AppRoutes.notifications,

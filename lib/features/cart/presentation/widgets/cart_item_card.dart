@@ -340,7 +340,7 @@ class _PointsRow extends StatelessWidget {
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              'Dapatkan ${formatNumber(item.cashbackPoints)} Aura Points',
+              'Dapatkan ${formatNumber(item.cashbackPoints)} MyDream Points',
               style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
             ),
           ),

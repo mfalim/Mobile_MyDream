@@ -62,4 +62,7 @@ abstract final class AppRoutes {
 
   static const account = '/account';
   static const reportIssue = '/report-issue';
+
+  static const story = '/story/:id';
+  static String storyPath(String id) => '/story/$id';
 }

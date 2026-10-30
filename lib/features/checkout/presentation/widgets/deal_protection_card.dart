@@ -23,7 +23,7 @@ class DealProtectionCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Jaminan Bridestory Deal Protection',
+                  'Jaminan MyDream Deal Protection',
                   style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
                 ),
                 SizedBox(height: 4),

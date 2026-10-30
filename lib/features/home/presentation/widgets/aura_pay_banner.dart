@@ -31,7 +31,7 @@ class AuraPayBanner extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     BadgePill(
-                      'AURA PAY • CICILAN 0%',
+                      'MYDREAM PAY • CICILAN 0%',
                       icon: Icons.credit_card,
                       background: Colors.white.withValues(alpha: 0.2),
                       foreground: Colors.white,

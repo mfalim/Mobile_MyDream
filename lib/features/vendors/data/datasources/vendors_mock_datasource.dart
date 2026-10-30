@@ -80,7 +80,7 @@ class VendorsMockDatasource {
           tagIcon: Icons.checkroom_outlined,
           rating: 5.0,
           reviewCount: 89,
-          badge: 'Bridestory Pay',
+          badge: 'MyDream Pay',
           description:
               'Menteng, Jakarta Pusat • Termasuk Veil & Accessories • Flexi Fitting',
           priceLabel: 'Paket D-Day',

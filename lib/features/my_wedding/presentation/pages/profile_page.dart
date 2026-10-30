@@ -146,10 +146,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             SettingsTile(
               icon: Icons.shopping_bag_outlined,
               iconBackground: AppColors.gold,
-              title: 'Aura Pay & Cicilan 0%',
+              title: 'MyDream Pay & Cicilan 0%',
               badge: 'Promo',
               subtitle: 'Rekap DP, escrow aman, tenor s.d 24 bulan',
-              onTap: () => _soon('Aura Pay'),
+              onTap: () => _soon('MyDream Pay'),
             ),
             SettingsTile(
               icon: Icons.qr_code_2,

@@ -271,7 +271,7 @@ class _VendorDetailPageState extends ConsumerState<VendorDetailPage> {
             iconBackground: AppColors.coral.withValues(alpha: 0.25),
             title: 'Cicilan 0% ${installment.months} Bulan',
             subtitle: 'Mulai ${formatRupiah(installment.perMonth)} / bulan via '
-                'Bridestory Pay',
+                'MyDream Pay',
             onTap: () => showInstallmentSheet(
               context,
               price: d.price,
