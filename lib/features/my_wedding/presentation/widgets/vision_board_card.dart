@@ -8,23 +8,26 @@ import 'package:w51/features/my_wedding/domain/entities/profile_data.dart';
 class VisionBoardCard extends StatelessWidget {
   const VisionBoardCard({
     required this.boards,
-    required this.newCollections,
-    required this.lastUpdateLabel,
     required this.onOpen,
     required this.onCreate,
     required this.onOpenAll,
+    this.newCollections,
+    this.lastUpdateLabel,
     super.key,
   });
 
   final List<VisionBoard> boards;
-  final int newCollections;
-  final String lastUpdateLabel;
+  final int? newCollections;
+  final String? lastUpdateLabel;
   final ValueChanged<VisionBoard> onOpen;
   final VoidCallback onCreate;
   final VoidCallback onOpenAll;
 
   @override
   Widget build(BuildContext context) {
+    final collections = newCollections;
+    final lastUpdate = lastUpdateLabel;
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -44,8 +47,10 @@ class VisionBoardCard extends StatelessWidget {
                   style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
                 ),
               ),
-              const SizedBox(width: 8),
-              BadgePill('$newCollections Koleksi Baru'),
+              if (collections != null) ...[
+                const SizedBox(width: 8),
+                BadgePill('$collections Koleksi Baru'),
+              ],
             ],
           ),
           const SizedBox(height: 8),
@@ -74,15 +79,18 @@ class VisionBoardCard extends StatelessWidget {
           const SizedBox(height: 8),
           Row(
             children: [
-              Expanded(
-                child: Text(
-                  'Pembaruan terakhir: $lastUpdateLabel',
-                  style: const TextStyle(
-                    color: AppColors.textSecondary,
-                    fontSize: 12,
+              if (lastUpdate != null)
+                Expanded(
+                  child: Text(
+                    'Pembaruan terakhir: $lastUpdate',
+                    style: const TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 12,
+                    ),
                   ),
-                ),
-              ),
+                )
+              else
+                const Spacer(),
               TextButton(
                 onPressed: onOpenAll,
                 child: const Row(

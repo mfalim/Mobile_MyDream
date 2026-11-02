@@ -17,4 +17,11 @@ abstract final class AppConfig {
     'ADMIN_WA',
     defaultValue: '628000000000',
   );
+
+  /// Nomor versi yang ditampilkan di Profil. Isi lewat
+  /// --dart-define=APP_VERSION=1.0.0 saat membuat build rilis.
+  static const appVersion = String.fromEnvironment(
+    'APP_VERSION',
+    defaultValue: '1.0.0',
+  );
 }
