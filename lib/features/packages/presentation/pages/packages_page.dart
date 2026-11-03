@@ -9,6 +9,7 @@ import 'package:w51/core/widgets/empty_state.dart';
 import 'package:w51/core/widgets/error_state.dart';
 import 'package:w51/features/packages/presentation/providers/packages_provider.dart';
 import 'package:w51/features/packages/presentation/widgets/package_card.dart';
+import 'package:w51/core/errors/app_exceptions.dart';
 
 class PackagesPage extends ConsumerWidget {
   const PackagesPage({super.key});
@@ -37,7 +38,7 @@ class PackagesPage extends ConsumerWidget {
       body: data.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, s) => ErrorState(
-          message: 'Daftar paket gagal dimuat.',
+          message: userMessage(e, fallback: 'Daftar paket gagal dimuat.'),
           onRetry: () => ref.invalidate(packagesProvider),
         ),
         data: (packages) => packages.isEmpty

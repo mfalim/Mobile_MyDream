@@ -67,7 +67,7 @@ class PackageDetailPage extends ConsumerWidget {
         error: (e, s) => ErrorState(
           message: e is NotFoundException
               ? 'Paket tidak ditemukan.'
-              : 'Detail paket gagal dimuat.',
+              : userMessage(e, fallback: 'Detail paket gagal dimuat.'),
           onRetry: e is NotFoundException
               ? null
               : () => ref.invalidate(packageDetailProvider(packageId)),

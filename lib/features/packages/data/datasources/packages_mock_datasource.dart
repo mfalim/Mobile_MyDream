@@ -1,16 +1,19 @@
 import 'package:w51/core/errors/app_exceptions.dart';
 import 'package:w51/features/packages/data/models/wedding_package_model.dart';
 import 'package:w51/features/packages/domain/entities/wedding_package.dart';
+import 'package:w51/features/packages/data/datasources/packages_datasource.dart';
 
 /// MOCK: meniru jawaban server (GET /packages dan GET /packages/{id}).
 /// Bukan data asli. Nama vendor dan harganya sama dengan daftar vendor
 /// contoh (tes memeriksanya). Kolom `price` meniru harga yang nanti
 /// ditetapkan admin lewat API.
-class PackagesMockDatasource {
+class PackagesMockDatasource implements PackagesDatasource {
+  @override
   Future<List<WeddingPackage>> fetchAll() async => [
         for (final json in _packages) WeddingPackageModel.fromJson(json),
       ];
 
+  @override
   Future<WeddingPackage> fetch(String id) async {
     final json = _packages.where((p) => p['id'] == id).firstOrNull;
     if (json == null) throw NotFoundException('package $id');
