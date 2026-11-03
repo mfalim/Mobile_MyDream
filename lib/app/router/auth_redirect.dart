@@ -1,8 +1,34 @@
 import 'route_names.dart';
 
+/// Tujuan internal yang aman dari parameter `from`. Alamat eksternal atau
+/// kosong menjadi Home.
+String safeInternalPath(String? from) {
+  if (from != null && from.startsWith('/') && !from.startsWith('//')) {
+    return from;
+  }
+  return AppRoutes.home;
+}
+
+/// Tujuan setelah berhasil masuk atau daftar: tujuan semula, atau layar data
+/// pasangan dulu bila belum diisi (sekali setelah login).
+String postLoginDestination({
+  String? from,
+  required bool needsCoupleSetup,
+}) {
+  final target = safeInternalPath(from);
+  if (needsCoupleSetup && !target.startsWith(AppRoutes.coupleSetup)) {
+    return AppRoutes.coupleSetupPath(from: target);
+  }
+  return target;
+}
+
 /// Aturan penjaga login. Mengembalikan alamat tujuan baru, atau `null`
 /// bila tidak perlu dialihkan.
-String? authRedirect({required bool loggedIn, required Uri uri}) {
+String? authRedirect({
+  required bool loggedIn,
+  required Uri uri,
+  bool needsCoupleSetup = false,
+}) {
   final path = uri.path;
   final isProtected = AppRoutes.protectedPaths.any(
     (p) => path == p || path.startsWith('$p/'),
@@ -16,14 +42,12 @@ String? authRedirect({required bool loggedIn, required Uri uri}) {
     ).toString();
   }
 
-  // Sudah login tapi berada di Login -> kembali ke tujuan semula.
+  // Sudah login tapi berada di Login/Register -> ke tujuan semula.
   if (loggedIn && AppRoutes.authPaths.contains(path)) {
-    final from = uri.queryParameters['from'];
-    // Hanya alamat internal aplikasi yang diterima.
-    if (from != null && from.startsWith('/') && !from.startsWith('//')) {
-      return from;
-    }
-    return AppRoutes.home;
+    return postLoginDestination(
+      from: uri.queryParameters['from'],
+      needsCoupleSetup: needsCoupleSetup,
+    );
   }
 
   return null;

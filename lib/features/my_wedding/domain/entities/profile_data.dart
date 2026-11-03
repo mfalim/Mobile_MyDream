@@ -4,24 +4,22 @@ class VisionBoard {
   final String label;
 }
 
+/// Data tambahan Profil yang belum punya sumber di database. Semuanya
+/// opsional: yang kosong disembunyikan di layar.
 class ProfileData {
   const ProfileData({
-    required this.coupleNames,
-    required this.isVerified,
-    required this.inspirationBoards,
-    required this.vendorsContacted,
-    required this.boards,
-    required this.newCollections,
-    required this.lastUpdateLabel,
-    required this.appVersion,
+    this.isVerified = false,
+    this.inspirationBoards,
+    this.vendorsContacted,
+    this.boards = const [],
+    this.newCollections,
+    this.lastUpdateLabel,
   });
 
-  final String coupleNames;
   final bool isVerified;
-  final int inspirationBoards;
-  final int vendorsContacted;
+  final int? inspirationBoards;
+  final int? vendorsContacted;
   final List<VisionBoard> boards;
-  final int newCollections;
-  final String lastUpdateLabel;
-  final String appVersion;
+  final int? newCollections;
+  final String? lastUpdateLabel;
 }

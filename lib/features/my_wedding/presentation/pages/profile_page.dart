@@ -4,19 +4,21 @@ import 'package:go_router/go_router.dart';
 import 'package:w51/app/router/route_names.dart';
 import 'package:w51/app/theme/app_colors.dart';
 import 'package:w51/app/theme/app_spacing.dart';
-import 'package:w51/core/widgets/error_state.dart';
+import 'package:w51/core/config/app_config.dart';
+import 'package:w51/core/utils/date_helpers.dart';
+import 'package:w51/core/utils/formatters.dart';
 import 'package:w51/features/auth/presentation/providers/auth_provider.dart';
 import 'package:w51/features/cart/presentation/providers/cart_provider.dart';
 import 'package:w51/features/checkout/presentation/providers/checkout_provider.dart';
+import 'package:w51/features/contact/presentation/contact_actions.dart';
 import 'package:w51/features/my_wedding/domain/entities/profile_data.dart';
+import 'package:w51/features/my_wedding/presentation/providers/couple_provider.dart';
 import 'package:w51/features/my_wedding/presentation/providers/profile_provider.dart';
 import 'package:w51/features/my_wedding/presentation/widgets/profile_footer.dart';
 import 'package:w51/features/my_wedding/presentation/widgets/profile_header_card.dart';
 import 'package:w51/features/my_wedding/presentation/widgets/settings_section.dart';
 import 'package:w51/features/my_wedding/presentation/widgets/vision_board_card.dart';
-import 'package:w51/core/utils/date_helpers.dart';
-import 'package:w51/core/utils/formatters.dart';
-import 'package:w51/features/my_wedding/presentation/providers/wedding_date_provider.dart';
+import 'package:w51/features/payment/presentation/providers/payments_provider.dart';
 
 class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
@@ -30,21 +32,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(SnackBar(content: Text('$feature segera hadir.')));
-  }
-
-  Future<void> _pickWeddingDate() async {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final current = ref.read(weddingDateProvider);
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: current.isBefore(today) ? today : current,
-      firstDate: today,
-      lastDate: today.add(const Duration(days: 365 * 3)),
-      helpText: 'Pilih tanggal pernikahan',
-    );
-    if (picked == null || !mounted) return;
-    ref.read(weddingDateProvider.notifier).setDate(picked);
   }
 
   Future<void> _logout() async {
@@ -77,11 +64,15 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     final auth = ref.read(authProvider.notifier);
     final cart = ref.read(cartProvider.notifier);
     final checkout = ref.read(checkoutProvider.notifier);
+    final couple = ref.read(coupleProvider.notifier);
+    final receipts = ref.read(receiptProvider.notifier);
     final messenger = ScaffoldMessenger.of(context);
     context.go(AppRoutes.home);
     auth.signOut();
     cart.clear();
     checkout.clear();
+    couple.clear();
+    receipts.clear();
     messenger
       ..hideCurrentSnackBar()
       ..showSnackBar(const SnackBar(content: Text('Kamu sudah keluar.')));
@@ -89,24 +80,18 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    final data = ref.watch(profileDataProvider);
-    return SafeArea(
-      bottom: false,
-      child: data.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, s) => ErrorState(
-          message: 'Profil gagal dimuat.',
-          onRetry: () => ref.invalidate(profileDataProvider),
-        ),
-        data: _buildContent,
-      ),
-    );
+    // Data tambahan (papan visi, statistik) hanya pelengkap: bila lambat atau
+    // gagal dimuat, Profil tetap tampil tanpa bagian itu.
+    final extras = ref.watch(profileDataProvider).value ?? const ProfileData();
+    return SafeArea(bottom: false, child: _buildContent(extras));
   }
 
   Widget _buildContent(ProfileData p) {
     const gap = SizedBox(height: AppSpacing.lg);
-    final weddingDate = ref.watch(weddingDateProvider);
-    final cartCount = ref.watch(cartProvider).items.length;
+    final cartCount = ref.watch(cartProvider).orderCount;
+    final couple = ref.watch(coupleProvider);
+    final user = ref.watch(authProvider);
+
     return ListView(
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.screenPadding,
@@ -117,28 +102,36 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       children: [
         ProfileHeaderCard(
           profile: p,
-          weddingDateLabel: formatDateShortId(weddingDate),
-          daysLeft: daysUntil(weddingDate),
+          coupleNames: couple?.profileNames ?? user?.name ?? 'Calon Pengantin',
+          weddingDateLabel:
+              couple == null ? null : formatDateShortId(couple.weddingDate),
+          daysLeft: couple == null ? null : daysUntil(couple.weddingDate),
           cartCount: cartCount,
+          avatarUrl: user?.avatarUrl,
           onEditPhoto: () => _soon('Ganti foto profil'),
-          onSetDate: _pickWeddingDate,
-          onStat: (i) {
-            if (i == 2) {
-              context.push(AppRoutes.cart);
-            } else {
-              _soon(i == 0 ? 'Inspirasi board' : 'Riwayat vendor');
+          onSetDate: () => context.push(AppRoutes.coupleSetup),
+          onStat: (stat) {
+            switch (stat) {
+              case ProfileStat.cart:
+                context.push(AppRoutes.cart);
+              case ProfileStat.boards:
+                _soon('Inspirasi board');
+              case ProfileStat.vendors:
+                _soon('Riwayat vendor');
             }
           },
         ),
-        const SizedBox(height: AppSpacing.md),
-        VisionBoardCard(
-          boards: p.boards,
-          newCollections: p.newCollections,
-          lastUpdateLabel: p.lastUpdateLabel,
-          onOpen: (b) => _soon('Board ${b.label}'),
-          onCreate: () => _soon('Buat board'),
-          onOpenAll: () => _soon('Semua board'),
-        ),
+        if (p.boards.isNotEmpty) ...[
+          const SizedBox(height: AppSpacing.md),
+          VisionBoardCard(
+            boards: p.boards,
+            newCollections: p.newCollections,
+            lastUpdateLabel: p.lastUpdateLabel,
+            onOpen: (b) => _soon('Board ${b.label}'),
+            onCreate: () => _soon('Buat board'),
+            onOpenAll: () => _soon('Semua board'),
+          ),
+        ],
         gap,
         SettingsSection(
           title: 'Akun & Transaksi',
@@ -146,16 +139,16 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             SettingsTile(
               icon: Icons.manage_accounts_outlined,
               title: 'Pengaturan Akun & Profil',
-              subtitle: 'Email, nomor WhatsApp, kata sandi',
-              onTap: () => _soon('Pengaturan akun'),
+              subtitle: 'Nama dan kata sandi',
+              onTap: () => context.push(AppRoutes.account),
             ),
             SettingsTile(
               icon: Icons.shopping_bag_outlined,
               iconBackground: AppColors.gold,
-              title: 'Aura Pay & Cicilan 0%',
+              title: 'MyDream Pay & Cicilan 0%',
               badge: 'Promo',
               subtitle: 'Rekap DP, escrow aman, tenor s.d 24 bulan',
-              onTap: () => _soon('Aura Pay'),
+              onTap: () => _soon('MyDream Pay'),
             ),
             SettingsTile(
               icon: Icons.qr_code_2,
@@ -173,7 +166,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               icon: Icons.notifications_none_rounded,
               title: 'Preferensi Notifikasi',
               subtitle: 'Jadwal konsultasi vendor, diskon eksklusif',
-              onTap: () => _soon('Preferensi notifikasi'),
+              onTap: () => context.push(AppRoutes.notificationSettings),
             ),
             SettingsTile(
               icon: Icons.language,
@@ -214,9 +207,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               icon: Icons.headset_mic_outlined,
               iconBackground: AppColors.coral.withValues(alpha: 0.3),
               title: 'Support & Concierge Planner',
-              badge: '24/7 VIP',
-              subtitle: 'Bantuan kurasi vendor & penawaran harga',
-              onTap: () => _soon('Concierge planner'),
+              subtitle:
+                  'Bantuan kurasi vendor & penawaran harga lewat WhatsApp',
+              onTap: () =>
+                  contactAdmin(context, ref, topic: 'concierge planner'),
             ),
             SettingsTile(
               icon: Icons.star_outline,
@@ -228,13 +222,19 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               icon: Icons.description_outlined,
               title: 'Syarat & Ketentuan Layanan',
               subtitle: 'Perlindungan konsumen, kebijakan garansi DP',
-              onTap: () => _soon('Syarat & ketentuan'),
+              onTap: () => context.push(AppRoutes.infoPath('terms')),
+            ),
+            SettingsTile(
+              icon: Icons.privacy_tip_outlined,
+              title: 'Kebijakan Privasi',
+              subtitle: 'Data yang dikumpulkan dan cara melindunginya',
+              onTap: () => context.push(AppRoutes.infoPath('privacy')),
             ),
             SettingsTile(
               icon: Icons.help_outline,
               title: 'Laporkan Kendala Teknis',
               subtitle: 'Kirimkan masukan atau bug aplikasi',
-              onTap: () => _soon('Laporan kendala'),
+              onTap: () => context.push(AppRoutes.reportIssue),
             ),
           ],
         ),
@@ -266,7 +266,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           ),
         ),
         gap,
-        ProfileFooter(version: p.appVersion),
+        ProfileFooter(version: AppConfig.appVersion),
       ],
     );
   }

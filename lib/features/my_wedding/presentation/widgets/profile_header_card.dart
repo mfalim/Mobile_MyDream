@@ -1,38 +1,51 @@
 import 'package:flutter/material.dart';
 import 'package:w51/app/theme/app_colors.dart';
 import 'package:w51/app/theme/app_typography.dart';
+import 'package:w51/core/widgets/app_image.dart';
 import 'package:w51/core/widgets/badge_pill.dart';
 import 'package:w51/core/widgets/image_placeholder.dart';
 import 'package:w51/features/my_wedding/domain/entities/profile_data.dart';
 
+enum ProfileStat { boards, vendors, cart }
+
 class ProfileHeaderCard extends StatelessWidget {
   const ProfileHeaderCard({
     required this.profile,
-    required this.weddingDateLabel,
-    required this.daysLeft,
+    required this.coupleNames,
     required this.cartCount,
     required this.onEditPhoto,
     required this.onSetDate,
     required this.onStat,
+    this.weddingDateLabel,
+    this.daysLeft,
+    this.avatarUrl,
     super.key,
   });
 
   final ProfileData profile;
-  final String weddingDateLabel;
-  final int daysLeft;
+  final String coupleNames;
+
+  /// Null bila tanggal pernikahan belum diatur.
+  final String? weddingDateLabel;
+  final int? daysLeft;
   final int cartCount;
+  final String? avatarUrl;
   final VoidCallback onEditPhoto;
   final VoidCallback onSetDate;
-
-  /// 0 = inspirasi board, 1 = vendor dihubungi, 2 = keranjang aktif.
-  final ValueChanged<int> onStat;
+  final ValueChanged<ProfileStat> onStat;
 
   @override
   Widget build(BuildContext context) {
-    final stats = [
-      (profile.inspirationBoards, 'Inspirasi Board'),
-      (profile.vendorsContacted, 'Vendor Dihubungi'),
-      (cartCount, 'Keranjang Aktif'),
+    final dateLabel = weddingDateLabel;
+    final days = daysLeft;
+    final boards = profile.inspirationBoards;
+    final vendors = profile.vendorsContacted;
+
+    // Hanya statistik yang punya data; "Keranjang Aktif" selalu nyata.
+    final stats = <(ProfileStat, int, String)>[
+      if (boards != null) (ProfileStat.boards, boards, 'Inspirasi Board'),
+      if (vendors != null) (ProfileStat.vendors, vendors, 'Vendor Dihubungi'),
+      (ProfileStat.cart, cartCount, 'Keranjang Aktif'),
     ];
 
     return Container(
@@ -74,7 +87,9 @@ class ProfileHeaderCard extends StatelessWidget {
                   bottom: 0,
                   left: 0,
                   right: 0,
-                  child: Center(child: _Avatar(onEdit: onEditPhoto)),
+                  child: Center(
+                    child: _Avatar(url: avatarUrl, onEdit: onEditPhoto),
+                  ),
                 ),
               ],
             ),
@@ -91,31 +106,33 @@ class ProfileHeaderCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  profile.coupleNames,
+                  coupleNames,
                   textAlign: TextAlign.center,
                   style: AppTypography.heading(26),
                 ),
-                const SizedBox(height: 6),
-                Wrap(
-                  alignment: WrapAlignment.center,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  spacing: 6,
-                  children: [
-                    const Icon(
-                      Icons.calendar_today_outlined,
-                      size: 16,
-                      color: AppColors.textSecondary,
-                    ),
-                    const Text(
-                      'Hari Bahagia:',
-                      style: TextStyle(color: AppColors.textSecondary),
-                    ),
-                    Text(
-                      weddingDateLabel,
-                      style: const TextStyle(fontWeight: FontWeight.w700),
-                    ),
-                  ],
-                ),
+                if (dateLabel != null) ...[
+                  const SizedBox(height: 6),
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    spacing: 6,
+                    children: [
+                      const Icon(
+                        Icons.calendar_today_outlined,
+                        size: 16,
+                        color: AppColors.textSecondary,
+                      ),
+                      const Text(
+                        'Hari Bahagia:',
+                        style: TextStyle(color: AppColors.textSecondary),
+                      ),
+                      Text(
+                        dateLabel,
+                        style: const TextStyle(fontWeight: FontWeight.w700),
+                      ),
+                    ],
+                  ),
+                ],
                 const SizedBox(height: 14),
                 Container(
                   padding: const EdgeInsets.all(12),
@@ -142,23 +159,27 @@ class ProfileHeaderCard extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'Menuju Hari Akad & Resepsi',
-                              style: TextStyle(
+                            Text(
+                              days == null
+                                  ? 'Tanggal pernikahan belum diatur'
+                                  : 'Menuju Hari Akad & Resepsi',
+                              style: const TextStyle(
                                 color: AppColors.textSecondary,
                                 fontSize: 12,
                               ),
                             ),
                             Text(
-                              daysLeft > 0
-                                  ? '$daysLeft Hari Tersisa'
-                                  : daysLeft == 0
-                                      ? 'Hari Ini!'
-                                      : 'Sudah Terlaksana',
-                              style: const TextStyle(
+                              days == null
+                                  ? 'Atur untuk mulai hitung mundur'
+                                  : days > 0
+                                      ? '$days Hari Tersisa'
+                                      : days == 0
+                                          ? 'Hari Ini!'
+                                          : 'Sudah Terlaksana',
+                              style: TextStyle(
                                 color: AppColors.primary,
                                 fontWeight: FontWeight.w700,
-                                fontSize: 16,
+                                fontSize: days == null ? 14 : 16,
                               ),
                             ),
                           ],
@@ -186,22 +207,22 @@ class ProfileHeaderCard extends StatelessWidget {
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    for (var i = 0; i < stats.length; i++)
+                    for (final s in stats)
                       Expanded(
                         child: InkWell(
-                          onTap: () => onStat(i),
+                          onTap: () => onStat(s.$1),
                           borderRadius: BorderRadius.circular(12),
                           child: Padding(
                             padding: const EdgeInsets.symmetric(vertical: 8),
                             child: Column(
                               children: [
                                 Text(
-                                  '${stats[i].$1}',
+                                  '${s.$2}',
                                   style: AppTypography.heading(26),
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
-                                  stats[i].$2,
+                                  s.$3,
                                   textAlign: TextAlign.center,
                                   style: const TextStyle(
                                     color: AppColors.textSecondary,
@@ -225,8 +246,9 @@ class ProfileHeaderCard extends StatelessWidget {
 }
 
 class _Avatar extends StatelessWidget {
-  const _Avatar({required this.onEdit});
+  const _Avatar({required this.url, required this.onEdit});
 
+  final String? url;
   final VoidCallback onEdit;
 
   @override
@@ -244,8 +266,8 @@ class _Avatar extends StatelessWidget {
               color: AppColors.surface,
               shape: BoxShape.circle,
             ),
-            child: const ClipOval(
-              child: ImagePlaceholder(icon: Icons.person),
+            child: ClipOval(
+              child: AppImage(url: url, icon: Icons.person),
             ),
           ),
           Positioned(

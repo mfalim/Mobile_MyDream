@@ -13,6 +13,7 @@ class PickerField extends StatelessWidget {
     this.required = false,
     this.subtitle,
     this.trailing,
+    this.errorText,
     this.onTap,
     super.key,
   });
@@ -23,12 +24,14 @@ class PickerField extends StatelessWidget {
   final bool required;
   final String? subtitle;
   final Widget? trailing;
+  final String? errorText;
   final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final end = trailing;
     final sub = subtitle;
+    final error = errorText;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -36,7 +39,12 @@ class PickerField extends StatelessWidget {
         const SizedBox(height: 8),
         Material(
           color: AppColors.surfaceTint,
-          borderRadius: AppRadius.button,
+          shape: RoundedRectangleBorder(
+            borderRadius: AppRadius.button,
+            side: BorderSide(
+              color: error == null ? Colors.transparent : AppColors.error,
+            ),
+          ),
           child: InkWell(
             onTap: onTap,
             borderRadius: AppRadius.button,
@@ -69,7 +77,7 @@ class PickerField extends StatelessWidget {
                   ),
                   if (end != null) ...[
                     const SizedBox(width: 8),
-                    end
+                    end,
                   ] else if (onTap != null)
                     const Icon(
                       Icons.arrow_drop_down,
@@ -80,6 +88,14 @@ class PickerField extends StatelessWidget {
             ),
           ),
         ),
+        if (error != null)
+          Padding(
+            padding: const EdgeInsets.only(left: 12, top: 6),
+            child: Text(
+              error,
+              style: const TextStyle(color: AppColors.error, fontSize: 12),
+            ),
+          ),
       ],
     );
   }

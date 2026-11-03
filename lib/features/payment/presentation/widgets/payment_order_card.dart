@@ -130,14 +130,15 @@ class PaymentOrderCard extends StatelessWidget {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Text(
-                      formatRupiah(originalPrice),
-                      style: const TextStyle(
-                        decoration: TextDecoration.lineThrough,
-                        color: AppColors.textSecondary,
-                        fontSize: 11,
+                    if (originalPrice > packagePrice)
+                      Text(
+                        formatRupiah(originalPrice),
+                        style: const TextStyle(
+                          decoration: TextDecoration.lineThrough,
+                          color: AppColors.textSecondary,
+                          fontSize: 11,
+                        ),
                       ),
-                    ),
                     Text(
                       formatRupiah(packagePrice),
                       style: const TextStyle(

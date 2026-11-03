@@ -22,7 +22,7 @@ class ProfileFooter extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         Text(
-          'Aura Wedding & Bridestory Partner',
+          'MyDream',
           textAlign: TextAlign.center,
           style: AppTypography.heading(
             20,

@@ -13,6 +13,17 @@ import '../../features/cart/presentation/pages/cart_page.dart';
 import '../../features/checkout/presentation/pages/checkout_page.dart';
 import '../../features/payment/presentation/pages/payment_page.dart';
 import '../../features/auth/presentation/pages/register_page.dart';
+import '../../features/my_wedding/presentation/pages/couple_setup_page.dart';
+import '../../features/my_wedding/presentation/providers/couple_provider.dart';
+import '../../features/info/presentation/pages/info_page.dart';
+import '../../features/notifications/presentation/pages/notification_settings_page.dart';
+import '../../features/notifications/presentation/pages/notifications_page.dart';
+import '../../features/packages/presentation/pages/package_detail_page.dart';
+import '../../features/packages/presentation/pages/packages_page.dart';
+import '../../features/payment/presentation/pages/order_submitted_page.dart';
+import '../../features/account/presentation/pages/account_settings_page.dart';
+import '../../features/support/presentation/pages/report_issue_page.dart';
+import '../../features/inspirations/presentation/pages/story_page.dart';
 import 'app_shell.dart';
 import 'route_names.dart';
 import 'auth_redirect.dart';
@@ -28,6 +39,7 @@ final routerProvider = Provider<GoRouter>((ref) {
     refreshListenable: refresh,
     redirect: (context, state) => authRedirect(
       loggedIn: ref.read(authProvider) != null,
+      needsCoupleSetup: ref.read(coupleProvider) == null,
       uri: state.uri,
     ),
     routes: [
@@ -71,13 +83,21 @@ final routerProvider = Provider<GoRouter>((ref) {
             RegisterPage(from: state.uri.queryParameters['from']),
       ),
       GoRoute(
-        path: AppRoutes.cart,
+        path: AppRoutes.coupleSetup,
         builder: (context, state) =>
-            CartPage(claimCode: state.uri.queryParameters['claim']),
+            CoupleSetupPage(from: state.uri.queryParameters['from']),
+      ),
+      GoRoute(
+        path: AppRoutes.cart,
+        builder: (context, state) => CartPage(
+          claimCode: state.uri.queryParameters['claim'],
+          initialTab: state.uri.queryParameters['tab'] == 'custom' ? 1 : 0,
+        ),
       ),
       GoRoute(
         path: AppRoutes.checkout,
-        builder: (context, state) => const CheckoutPage(),
+        builder: (context, state) => CheckoutPage(
+            isCustom: state.uri.queryParameters['type'] == 'custom'),
       ),
       GoRoute(
         path: AppRoutes.payment,
@@ -87,6 +107,45 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.vendorDetail,
         builder: (context, state) =>
             VendorDetailPage(vendorId: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: AppRoutes.orderSubmitted,
+        builder: (context, state) => const OrderSubmittedPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.account,
+        builder: (context, state) => const AccountSettingsPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.reportIssue,
+        builder: (context, state) => const ReportIssuePage(),
+      ),
+      GoRoute(
+        path: AppRoutes.packages,
+        builder: (context, state) => const PackagesPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.packageDetail,
+        builder: (context, state) =>
+            PackageDetailPage(packageId: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: AppRoutes.story,
+        builder: (context, state) =>
+            StoryPage(storyId: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: AppRoutes.notifications,
+        builder: (context, state) => const NotificationsPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.notificationSettings,
+        builder: (context, state) => const NotificationSettingsPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.info,
+        builder: (context, state) =>
+            InfoPage(slug: state.pathParameters['slug']!),
       ),
     ],
   );

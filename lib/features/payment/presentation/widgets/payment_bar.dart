@@ -8,12 +8,16 @@ class PaymentBar extends StatelessWidget {
     required this.dueNow,
     required this.buttonLabel,
     required this.onPay,
+    this.loading = false,
     super.key,
   });
 
   final int dueNow;
   final String buttonLabel;
-  final VoidCallback onPay;
+
+  /// Null menonaktifkan tombol (mis. data belum siap atau sedang mengirim).
+  final VoidCallback? onPay;
+  final bool loading;
 
   @override
   Widget build(BuildContext context) {
@@ -34,61 +38,38 @@ class PaymentBar extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
           child: Column(
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'KEWAJIBAN PEMBAYARAN SAAT INI',
-                          style: TextStyle(
-                            color: AppColors.textSecondary,
-                            fontSize: 10,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 0.6,
-                          ),
-                        ),
-                        FittedBox(
-                          fit: BoxFit.scaleDown,
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            formatRupiah(dueNow),
-                            style: AppTypography.heading(
-                              24,
-                            ).copyWith(color: AppColors.primary),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  const Icon(
-                    Icons.verified_user_outlined,
-                    size: 20,
-                    color: AppColors.onGold,
-                  ),
-                  const SizedBox(width: 4),
-                  const Text(
-                    'Bridestory\nProtection',
-                    style: TextStyle(
-                      color: AppColors.onGold,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                      height: 1.2,
-                    ),
-                  ),
-                ],
+              const Text(
+                'JUMLAH YANG HARUS DITRANSFER',
+                style: TextStyle(
+                  color: AppColors.textSecondary,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.6,
+                ),
+              ),
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  formatRupiah(dueNow),
+                  style: AppTypography.heading(
+                    24,
+                  ).copyWith(color: AppColors.primary),
+                ),
               ),
               const SizedBox(height: 12),
               FilledButton.icon(
                 onPressed: onPay,
-                icon: const Icon(Icons.lock_outline, size: 18),
-                label: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Text(buttonLabel),
-                ),
+                icon: loading
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2.5),
+                      )
+                    : const Icon(Icons.send_outlined, size: 18),
+                label: Text(loading ? 'Mengirim...' : buttonLabel),
               ),
             ],
           ),

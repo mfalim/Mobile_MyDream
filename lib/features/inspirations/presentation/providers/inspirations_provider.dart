@@ -11,3 +11,7 @@ final inspirationsRepositoryProvider = Provider<InspirationsRepository>(
 final inspirationsDataProvider = FutureProvider<InspirationsData>(
   (ref) => ref.watch(inspirationsRepositoryProvider).load(),
 );
+
+final storyProvider = FutureProvider.family<RealWeddingStory, String>(
+  (ref, id) => ref.watch(inspirationsRepositoryProvider).loadStory(id),
+);

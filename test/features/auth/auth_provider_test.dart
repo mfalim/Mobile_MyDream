@@ -36,4 +36,26 @@ void main() {
     container.read(authProvider.notifier).signInDemo(email: 'rina@mail.com');
     expect(container.read(authProvider)?.name, 'rina');
   });
+
+  test('masuk lewat Google: tidak punya kata sandi; lewat email: punya', () {
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+
+    container.read(authProvider.notifier).signInDemo(viaGoogle: true);
+    expect(container.read(authProvider)?.hasPassword, isFalse);
+
+    container.read(authProvider.notifier).signInDemo(email: 'a@b.com');
+    expect(container.read(authProvider)?.hasPassword, isTrue);
+  });
+
+  test('updateName hanya mengubah nama', () {
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+
+    container.read(authProvider.notifier).signInDemo(email: 'rina@mail.com');
+    container.read(authProvider.notifier).updateName('Rina Putri');
+    final user = container.read(authProvider)!;
+    expect(user.name, 'Rina Putri');
+    expect(user.email, 'rina@mail.com');
+  });
 }

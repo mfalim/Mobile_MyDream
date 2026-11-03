@@ -105,7 +105,7 @@ class _Brand extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 12),
-        Text('AURA WEDDING', style: AppTypography.eyebrow),
+        Text('MYDREAM', style: AppTypography.eyebrow),
       ],
     );
   }

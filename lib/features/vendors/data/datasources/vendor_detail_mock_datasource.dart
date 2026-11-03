@@ -1,12 +1,13 @@
 import 'package:w51/core/errors/app_exceptions.dart';
 import 'package:w51/features/vendors/data/models/vendor_detail_model.dart';
 import 'package:w51/features/vendors/domain/entities/vendor_detail.dart';
+import 'package:w51/features/vendors/data/datasources/vendor_db_samples.dart';
 
 /// MOCK: meniru jawaban server (GET /vendors/{id}). Bentuk datanya, termasuk
 /// nama kunci snake_case, adalah rancangan kontrak API. Bukan data asli.
 class VendorDetailMockDatasource {
   Future<VendorDetail> fetch(String id) async {
-    final json = _responses[id];
+    final json = _responses[id] ?? kDatabaseShapedVendorDetails[id];
     if (json == null) throw NotFoundException('vendor $id');
     return VendorDetailModel.fromJson(json);
   }
@@ -21,6 +22,8 @@ class VendorDetailMockDatasource {
     'vendor-glasshouse': {
       'id': 'vendor-glasshouse',
       'name': 'The Glasshouse Cliff Sanctuary',
+      'category': 'Venue',
+      'phone': '+628000000001',
       'location': 'Uluwatu, Badung - Bali',
       'package_label': 'All Inclusive 100 Pax',
       'price': 85000000,
@@ -80,6 +83,8 @@ class VendorDetailMockDatasource {
     'vendor-maison': {
       'id': 'vendor-maison',
       'name': "Maison de L'Amour Bridal",
+      'category': 'Bridal & Gown',
+      'phone': '+628000000002',
       'location': 'Menteng, Jakarta Pusat',
       'package_label': 'Paket D-Day',
       'price': 38000000,
@@ -137,6 +142,8 @@ class VendorDetailMockDatasource {
     'vendor-vivaldi': {
       'id': 'vendor-vivaldi',
       'name': 'Vivaldi Floral & Scenery',
+      'category': 'Decoration',
+      'phone': '+628000000003',
       'location': 'Jakarta & Bali',
       'package_label': 'Paket All-In Decor',
       'price': 65000000,
@@ -154,8 +161,8 @@ class VendorDetailMockDatasource {
       'provider': {
         'name': 'Vivaldi Decor Atelier',
         'tagline': 'Floral & Space Design',
-        'rating': 5.0,
-        'review_count': 94,
+        'rating': 4.9,
+        'review_count': 160,
       },
       'sections': [
         {
@@ -195,6 +202,11 @@ class VendorDetailMockDatasource {
     'vendor-sora': {
       'id': 'vendor-sora',
       'name': 'Sora Visual Stories',
+      'category': 'Photography',
+      'phone': '+628000000004',
+      'description':
+          'Tim dokumentasi pernikahan dengan gaya sinematik dan natural.',
+      'instagram': '@contoh.vendor',
       'location': 'Bali',
       'package_label': 'Paket D-Day Photo & Video',
       'price': 18500000,
@@ -252,6 +264,8 @@ class VendorDetailMockDatasource {
     'vendor-ethereal': {
       'id': 'vendor-ethereal',
       'name': 'Ethereal Glow Bridal MUA',
+      'category': 'Hair & Makeup',
+      'phone': '+628000000005',
       'location': 'Jakarta',
       'package_label': 'Paket Bridal Akad + Resepsi',
       'price': 21000000,
@@ -309,6 +323,8 @@ class VendorDetailMockDatasource {
     'vendor-mattana': {
       'id': 'vendor-mattana',
       'name': 'Mattana Wedding Planner',
+      'category': 'Wedding Planner',
+      'phone': '+628000000006',
       'location': 'Bali',
       'package_label': 'Full Planning 100 Pax',
       'price': 45000000,
@@ -366,6 +382,8 @@ class VendorDetailMockDatasource {
     'vendor-lumiere': {
       'id': 'vendor-lumiere',
       'name': 'Lumière Cinematic Films',
+      'category': 'Videography',
+      'phone': '+628000000007',
       'location': 'Jakarta',
       'package_label': 'Paket Cinematic Film',
       'price': 15000000,
@@ -423,6 +441,8 @@ class VendorDetailMockDatasource {
     'vendor-santap': {
       'id': 'vendor-santap',
       'name': 'Santap Rasa Catering',
+      'category': 'Catering',
+      'phone': '+628000000008',
       'location': 'Jakarta & Bali',
       'package_label': 'Paket Buffet 100 Pax',
       'price': 17500000,
@@ -476,6 +496,31 @@ class VendorDetailMockDatasource {
         },
       ],
       'guarantee': _guarantee,
+      // Berbentuk data database asli (kolom vendors saja, harga berupa teks decimal).
+      'vendor-db-katering': {
+        'id': 'vendor-db-katering',
+        'name': 'Katering Jember',
+        'category': 'Catering',
+        'price': '100000000.00',
+        'phone': '+628000000009',
+        'city': null,
+        'address': 'Jl. Contoh No. 1, Jember',
+        'description': null,
+        'instagram': null,
+        'photos': <Object>[],
+      },
+      'vendor-db-dekor': {
+        'id': 'vendor-db-dekor',
+        'name': 'dekor jember',
+        'category': 'Decoration',
+        'price': '10000290.00',
+        'phone': '+628000000010',
+        'city': null,
+        'address': 'Jl. Contoh No. 2, Surabaya',
+        'description': null,
+        'instagram': null,
+        'photos': <Object>[],
+      },
     },
   };
 }

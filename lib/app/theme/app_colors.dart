@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// Palet mengikuti Figma "Aura Wedding" (maroon). Nilai hex masih estimasi
+/// Palet mengikuti Figma "MyDream" (maroon). Nilai hex masih estimasi
 /// dari screenshot; ganti dengan hex asli dari Figma bila ada selisih.
 abstract final class AppColors {
   // Brand

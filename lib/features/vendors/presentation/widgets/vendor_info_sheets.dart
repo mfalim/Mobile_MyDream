@@ -57,7 +57,7 @@ Future<void> showPointsSheet(
 }) =>
     _showFrame(
       context,
-      title: 'Aura Points',
+      title: 'MyDream Points',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -66,14 +66,14 @@ Future<void> showPointsSheet(
               _Row('Nilai paket', formatRupiah(price)),
               _Row('Cashback $percent%', formatRupiah(points * 100)),
               const Divider(height: 20, color: AppColors.outline),
-              _Row('Aura Points yang didapat', formatNumber(points),
+              _Row('MyDream Points yang didapat', formatNumber(points),
                   bold: true),
             ],
           ),
           const SizedBox(height: 12),
           const Text(
             'Contoh prototype: 1 poin = Rp 100. Aturan resmi penukaran poin '
-            'mengikuti kebijakan Aura Pay.',
+            'mengikuti kebijakan MyDream Pay.',
             style: TextStyle(
               color: AppColors.textSecondary,
               fontSize: 12,

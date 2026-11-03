@@ -20,7 +20,17 @@ class StoryVendors extends StatelessWidget {
         StoryVendorKind.planner => Icons.event_note_outlined,
         StoryVendorKind.decor => Icons.local_florist_outlined,
         StoryVendorKind.photographer => Icons.photo_camera_outlined,
+        StoryVendorKind.other => Icons.storefront_outlined,
       };
+
+  String? _rating(StoryVendor v) {
+    final rating = v.rating;
+    if (rating == null) return null;
+    final reviews = v.reviewCount;
+    return reviews == null
+        ? 'Rating $rating'
+        : 'Rating $rating ($reviews review)';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +45,7 @@ class StoryVendors extends StatelessWidget {
             Expanded(child: Text(title, style: AppTypography.heading(20))),
             const SizedBox(width: 8),
             const Text(
-              'Terverifikasi Aura',
+              'Terverifikasi MyDream',
               style: TextStyle(color: AppColors.textSecondary, fontSize: 11),
             ),
           ],
@@ -75,24 +85,27 @@ class StoryVendors extends StatelessWidget {
                             fontSize: 14,
                           ),
                         ),
-                        Text(
-                          v.role,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            color: AppColors.textSecondary,
-                            fontSize: 12,
+                        if (v.role.isNotEmpty)
+                          Text(
+                            v.role,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: AppColors.textSecondary,
+                              fontSize: 12,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          'Rating ${v.rating} (${v.reviewCount} review)',
-                          style: const TextStyle(
-                            color: AppColors.onGold,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
+                        if (_rating(v) != null) ...[
+                          const SizedBox(height: 2),
+                          Text(
+                            _rating(v)!,
+                            style: const TextStyle(
+                              color: AppColors.onGold,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
-                        ),
+                        ],
                       ],
                     ),
                   ),
@@ -109,8 +122,10 @@ class StoryVendors extends StatelessWidget {
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-                    child: const Text('Lihat\nPortofolio',
-                        textAlign: TextAlign.center),
+                    child: const Text(
+                      'Lihat\nPortofolio',
+                      textAlign: TextAlign.center,
+                    ),
                   ),
                 ],
               ),

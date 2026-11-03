@@ -4,17 +4,17 @@ A new Flutter project.
 
 ## API configuration
 
-The shared API client reads its base URL from the `API_BASE_URL` compile-time
-variable. By default it targets a Laravel API running on the Android emulator at
-`http://10.0.2.2:8000/api/`. Override it for another environment:
+The shared API client reads its base URL from `AppConfig.apiBaseUrl`. By default
+it targets a Laravel API running on the Android emulator at
+`http://10.0.2.2:8000/api`. Override it for another environment:
 
 ```shell
-flutter run --dart-define=API_BASE_URL=https://example.com/api/
+flutter run --dart-define=USE_MOCK=false --dart-define=API_BASE_URL=https://example.com/api
 ```
 
-Keep the `/api/` prefix in the base URL and pass endpoint paths without a
-leading slash (for example, `vendors`) so it is only included once. Use your
-computer's LAN IP when testing on a physical device, and HTTPS for production.
+Keep the `/api` prefix in the base URL and pass endpoint paths without a leading
+slash (for example, `vendors`) so it is only included once. Use your computer's
+LAN IP when testing on a physical device, and HTTPS for production.
 
 ## Getting Started
 

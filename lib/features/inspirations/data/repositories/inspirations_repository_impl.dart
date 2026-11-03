@@ -9,4 +9,7 @@ class InspirationsRepositoryImpl implements InspirationsRepository {
 
   @override
   Future<InspirationsData> load() => _datasource.fetch();
+
+  @override
+  Future<RealWeddingStory> loadStory(String id) => _datasource.fetchStory(id);
 }

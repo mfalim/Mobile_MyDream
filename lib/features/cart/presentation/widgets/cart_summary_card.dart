@@ -39,9 +39,10 @@ class CartSummaryCard extends StatelessWidget {
                   style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
                 ),
               ),
-              TextButton(
+              TextButton.icon(
                 onPressed: onTerms,
-                child: const Text(
+                icon: const Icon(Icons.info_outline, size: 16),
+                label: const Text(
                   'Ketentuan Garansi Aman',
                   style: TextStyle(fontSize: 12),
                 ),

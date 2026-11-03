@@ -7,20 +7,22 @@ import 'package:w51/features/inspirations/domain/entities/inspiration_entities.d
 class StoryBody extends StatelessWidget {
   const StoryBody({
     required this.stats,
-    required this.body,
+    required this.paragraphs,
     required this.quote,
     super.key,
   });
 
   final List<StoryStat> stats;
-  final String body;
-  final String quote;
+  final List<String> paragraphs;
+  final String? quote;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
+    final q = quote;
+    final children = <Widget>[];
+
+    if (stats.isNotEmpty) {
+      children.add(
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 14),
           decoration: BoxDecoration(
@@ -56,9 +58,17 @@ class StoryBody extends StatelessWidget {
             ],
           ),
         ),
-        const SizedBox(height: 16),
-        Text(body, style: const TextStyle(fontSize: 15, height: 1.7)),
-        const SizedBox(height: 16),
+      );
+    }
+
+    for (final p in paragraphs) {
+      if (children.isNotEmpty) children.add(const SizedBox(height: 14));
+      children.add(Text(p, style: const TextStyle(fontSize: 15, height: 1.7)));
+    }
+
+    if (q != null) {
+      if (children.isNotEmpty) children.add(const SizedBox(height: 16));
+      children.add(
         Container(
           width: double.infinity,
           padding: const EdgeInsets.all(20),
@@ -67,13 +77,18 @@ class StoryBody extends StatelessWidget {
             borderRadius: AppRadius.card,
           ),
           child: Text(
-            quote,
+            q,
             style: AppTypography.heading(
               20,
             ).copyWith(fontStyle: FontStyle.italic, color: AppColors.primary),
           ),
         ),
-      ],
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: children,
     );
   }
 }

@@ -18,6 +18,9 @@ import 'package:w51/features/vendors/presentation/widgets/vendors_help_banner.da
 import 'package:w51/features/vendors/presentation/widgets/vendors_promo_banner.dart';
 import 'package:w51/features/vendors/presentation/widgets/vendors_search_section.dart';
 import 'package:w51/features/vendors/presentation/widgets/vendors_top_bar.dart';
+import 'package:w51/features/auth/presentation/providers/auth_provider.dart';
+import 'package:w51/features/notifications/presentation/providers/notifications_provider.dart';
+import 'package:w51/features/contact/presentation/contact_actions.dart';
 
 class VendorPage extends ConsumerStatefulWidget {
   const VendorPage({super.key});
@@ -41,11 +44,11 @@ class _VendorPageState extends ConsumerState<VendorPage> {
     super.dispose();
   }
 
-  void _soon(String feature) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text('$feature segera hadir.')));
-  }
+  // void _soon(String feature) {
+  //   ScaffoldMessenger.of(context)
+  //     ..hideCurrentSnackBar()
+  //     ..showSnackBar(SnackBar(content: Text('$feature segera hadir.')));
+  // }
 
   List<FeaturedVendor> _filter(List<FeaturedVendor> all, VendorFilter filter) {
     final q = _search.text.trim().toLowerCase();
@@ -54,7 +57,7 @@ class _VendorPageState extends ConsumerState<VendorPage> {
       if (q.isEmpty) return true;
       return v.name.toLowerCase().contains(q) ||
           v.categoryLabel.toLowerCase().contains(q) ||
-          v.description.toLowerCase().contains(q);
+          (v.description ?? '').toLowerCase().contains(q);
     }).toList();
   }
 
@@ -100,6 +103,8 @@ class _VendorPageState extends ConsumerState<VendorPage> {
     final featured = _filter(data.featured, filter);
     final isFiltering = _search.text.trim().isNotEmpty || filter.isActive;
     final controller = ref.read(vendorFilterProvider.notifier);
+    final loggedIn = ref.watch(authProvider) != null;
+    final unread = loggedIn ? ref.watch(unreadCountProvider) : 0;
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(
@@ -110,8 +115,10 @@ class _VendorPageState extends ConsumerState<VendorPage> {
       ),
       children: [
         VendorsTopBar(
-          onNotifications: () => _soon('Notifikasi'),
-          onChat: () => _soon('Pesan'),
+          unreadCount: unread,
+          onNotifications: () => context.push(AppRoutes.notifications),
+          onChat: () => contactAdmin(context, ref),
+          onProfile: () => context.go(AppRoutes.myWedding),
         ),
         const SizedBox(height: AppSpacing.md),
         VendorsSearchSection(
@@ -187,10 +194,13 @@ class _VendorPageState extends ConsumerState<VendorPage> {
           FeaturedVendorGrid(
             vendors: featured,
             onOpen: (v) => context.push(AppRoutes.vendorDetailPath(v.id)),
-            onChat: (_) => _soon('Chat vendor'),
+            onChat: (v) => contactVendor(context, ref, v.id),
           ),
         gap,
-        VendorsHelpBanner(onAsk: () => _soon('Konsultasi ahli')),
+        VendorsHelpBanner(
+          onAsk: () =>
+              contactAdmin(context, ref, topic: 'konsultasi memilih vendor'),
+        ),
       ],
     );
   }

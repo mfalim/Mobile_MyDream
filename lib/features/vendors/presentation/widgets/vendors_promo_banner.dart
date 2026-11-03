@@ -29,7 +29,7 @@ class VendorsPromoBanner extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Dapatkan cashback Bridestory Pay hingga Rp 15 Juta.',
+            'Dapatkan cashback MyDream Pay hingga Rp 15 Juta.',
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.9),
               fontSize: 13,
