@@ -1,4 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:w51/core/storage/local_storage.dart';
+import 'package:w51/core/storage/storage_keys.dart';
+import 'package:w51/features/cart/data/cart_codec.dart';
 import 'package:w51/features/cart/domain/entities/cart_item.dart';
 import 'package:w51/features/cart/domain/entities/custom_vendor_item.dart';
 import 'package:w51/features/cart/domain/entities/voucher.dart';
@@ -22,6 +25,8 @@ class CartState {
   /// Vendor yang dipilih untuk Custom Order.
   final List<CustomVendorItem> customVendors;
   final Voucher? voucher;
+
+  bool get isEmpty => items.isEmpty && customVendors.isEmpty && voucher == null;
 
   // ---- Paket ----
   List<CartItem> get selected => items.where((i) => i.selected).toList();
@@ -90,8 +95,10 @@ final cartProvider = NotifierProvider<CartController, CartState>(
 );
 
 class CartController extends Notifier<CartState> {
+  /// Keranjang dipulihkan dari perangkat (disimpan oleh appStateSyncProvider).
   @override
-  CartState build() => const CartState();
+  CartState build() =>
+      CartCodec.decode(ref.read(localStorageProvider).getJson(kStorageCart));
 
   /// Paket yang sama tidak ditambahkan dua kali.
   void add(CartItem item) {
