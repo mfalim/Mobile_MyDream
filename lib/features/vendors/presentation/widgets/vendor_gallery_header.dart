@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:w51/app/theme/app_colors.dart';
 import 'package:w51/app/theme/app_radius.dart';
 import 'package:w51/core/widgets/app_image.dart';
 import 'package:w51/core/widgets/badge_pill.dart';
@@ -23,8 +22,6 @@ class VendorGalleryHeader extends StatefulWidget {
 }
 
 class _VendorGalleryHeaderState extends State<VendorGalleryHeader> {
-  // Disimpan hanya di memori (prototype).
-  bool _liked = false;
   int _index = 0;
 
   @override
@@ -71,19 +68,6 @@ class _VendorGalleryHeaderState extends State<VendorGalleryHeader> {
                     ),
                   ],
                 ],
-              ),
-            ),
-            Positioned(
-              right: 12,
-              bottom: 12,
-              child: IconButton.filled(
-                tooltip: _liked ? 'Batal suka' : 'Suka',
-                onPressed: () => setState(() => _liked = !_liked),
-                style: IconButton.styleFrom(
-                  backgroundColor: AppColors.surface,
-                  foregroundColor: AppColors.primary,
-                ),
-                icon: Icon(_liked ? Icons.favorite : Icons.favorite_border),
               ),
             ),
           ],

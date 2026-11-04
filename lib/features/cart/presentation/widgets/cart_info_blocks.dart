@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:w51/app/theme/app_colors.dart';
 import 'package:w51/app/theme/app_radius.dart';
+import 'package:w51/core/config/app_features.dart';
 
 /// "Estimasi Waktu Pelaksanaan".
 class EstimateCard extends StatelessWidget {
@@ -113,6 +114,9 @@ class TrustTiles extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Klaim yang belum diputuskan owner hanya tampil bila AppFeatures.escrowClaims
+    // menyala; selain itu teksnya apa adanya.
+    const claims = AppFeatures.escrowClaims;
     // IntrinsicHeight: tinggi dua kotak disamakan tanpa meminta tinggi tak terhingga.
     return const IntrinsicHeight(
       child: Row(
@@ -120,17 +124,22 @@ class TrustTiles extends StatelessWidget {
         children: [
           Expanded(
             child: _Tile(
-              icon: Icons.lock_outline,
-              title: '100% Escrow Protection',
-              note: 'Dana cair setelah H+1',
+              icon:
+                  claims ? Icons.lock_outline : Icons.account_balance_outlined,
+              title: claims ? '100% Escrow Protection' : 'Transfer Bank',
+              note: claims
+                  ? 'Dana cair setelah H+1'
+                  : 'Bukti transfer diperiksa admin',
             ),
           ),
           SizedBox(width: 12),
           Expanded(
             child: _Tile(
               icon: Icons.headset_mic_outlined,
-              title: 'Wedding Concierge',
-              note: 'Asistensi 24/7 personal',
+              title: claims ? 'Wedding Concierge' : 'Bantuan WhatsApp',
+              note: claims
+                  ? 'Asistensi 24/7 personal'
+                  : 'Tanya admin langsung lewat chat',
             ),
           ),
         ],

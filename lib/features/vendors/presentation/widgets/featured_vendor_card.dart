@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:w51/app/theme/app_colors.dart';
 import 'package:w51/app/theme/app_typography.dart';
 import 'package:w51/core/utils/formatters.dart';
 import 'package:w51/core/widgets/app_image.dart';
 import 'package:w51/core/widgets/badge_pill.dart';
 import 'package:w51/features/vendors/domain/entities/vendor_entities.dart';
+import 'package:w51/features/vendors/presentation/providers/saved_vendors_provider.dart';
 
 /// Dua kartu per baris, tinggi disamakan per baris (aman untuk teks besar).
-class FeaturedVendorGrid extends StatelessWidget {
+/// Status simpan dibaca dari [savedVendorsProvider].
+class FeaturedVendorGrid extends ConsumerWidget {
   const FeaturedVendorGrid({
     required this.vendors,
     required this.onOpen,
@@ -20,7 +23,18 @@ class FeaturedVendorGrid extends StatelessWidget {
   final ValueChanged<FeaturedVendor> onChat;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final saved = ref.watch(savedVendorsProvider);
+    final toggle = ref.read(savedVendorsProvider.notifier).toggle;
+
+    Widget card(FeaturedVendor v) => FeaturedVendorCard(
+          vendor: v,
+          saved: saved.contains(v.id),
+          onToggleSaved: () => toggle(v.id),
+          onOpen: () => onOpen(v),
+          onChat: () => onChat(v),
+        );
+
     final rows = <Widget>[];
     for (var i = 0; i < vendors.length; i += 2) {
       final left = vendors[i];
@@ -32,22 +46,10 @@ class FeaturedVendorGrid extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Expanded(
-                  child: FeaturedVendorCard(
-                    vendor: left,
-                    onOpen: () => onOpen(left),
-                    onChat: () => onChat(left),
-                  ),
-                ),
+                Expanded(child: card(left)),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: right == null
-                      ? const SizedBox.shrink()
-                      : FeaturedVendorCard(
-                          vendor: right,
-                          onOpen: () => onOpen(right),
-                          onChat: () => onChat(right),
-                        ),
+                  child: right == null ? const SizedBox.shrink() : card(right),
                 ),
               ],
             ),
@@ -59,29 +61,25 @@ class FeaturedVendorGrid extends StatelessWidget {
   }
 }
 
-class FeaturedVendorCard extends StatefulWidget {
+class FeaturedVendorCard extends StatelessWidget {
   const FeaturedVendorCard({
     required this.vendor,
+    required this.saved,
+    required this.onToggleSaved,
     required this.onOpen,
     required this.onChat,
     super.key,
   });
 
   final FeaturedVendor vendor;
+  final bool saved;
+  final VoidCallback onToggleSaved;
   final VoidCallback onOpen;
   final VoidCallback onChat;
 
   @override
-  State<FeaturedVendorCard> createState() => _FeaturedVendorCardState();
-}
-
-class _FeaturedVendorCardState extends State<FeaturedVendorCard> {
-  // Status simpan hanya di memori (prototype).
-  bool _saved = false;
-
-  @override
   Widget build(BuildContext context) {
-    final v = widget.vendor;
+    final v = vendor;
     final badge = v.badge;
     final rating = v.rating;
     final reviews = v.reviewCount;
@@ -98,7 +96,7 @@ class _FeaturedVendorCardState extends State<FeaturedVendorCard> {
         borderRadius: BorderRadius.circular(20),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
-          onTap: widget.onOpen,
+          onTap: onOpen,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -123,15 +121,15 @@ class _FeaturedVendorCardState extends State<FeaturedVendorCard> {
                       right: 4,
                       child: IconButton.filled(
                         tooltip:
-                            _saved ? 'Hapus dari simpanan' : 'Simpan vendor',
-                        onPressed: () => setState(() => _saved = !_saved),
+                            saved ? 'Hapus dari simpanan' : 'Simpan vendor',
+                        onPressed: onToggleSaved,
                         visualDensity: VisualDensity.compact,
                         style: IconButton.styleFrom(
                           backgroundColor: AppColors.surface,
                           foregroundColor: AppColors.primary,
                         ),
                         icon: Icon(
-                          _saved ? Icons.bookmark : Icons.bookmark_border,
+                          saved ? Icons.bookmark : Icons.bookmark_border,
                           size: 20,
                         ),
                       ),
@@ -247,7 +245,7 @@ class _FeaturedVendorCardState extends State<FeaturedVendorCard> {
                           height: 40,
                           child: IconButton(
                             tooltip: 'Chat vendor',
-                            onPressed: widget.onChat,
+                            onPressed: onChat,
                             padding: EdgeInsets.zero,
                             style: IconButton.styleFrom(
                               backgroundColor: AppColors.surfaceTint,
@@ -262,12 +260,11 @@ class _FeaturedVendorCardState extends State<FeaturedVendorCard> {
                         const SizedBox(width: 8),
                         Expanded(
                           child: FilledButton(
-                            onPressed: widget.onOpen,
+                            onPressed: onOpen,
                             style: FilledButton.styleFrom(
                               minimumSize: const Size(0, 40),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                              ),
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 8),
                               textStyle: const TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,

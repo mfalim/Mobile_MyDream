@@ -68,7 +68,9 @@ void main() {
     );
   });
 
-  test('bagian terstruktur terbaca, yang rusak dilewati', () {
+// UBAH BAGIAN INI: Berikan deskripsi berupa String pada parameter pertama test()
+  test('parsing data kompleks: stats, gallery, vendors, tips, likes, dan reads',
+      () {
     final s = StoryModel.story({
       'id': 1,
       'title': 'T',
@@ -89,7 +91,9 @@ void main() {
           'role': 'WO',
           'rating': '4.9',
           'review_count': 10,
-          'kind': 'planner'
+          'kind': 'planner',
+          'vendor_id':
+              7, // Pastikan vendor_id juga disertakan di sini jika diperlukan oleh model
         },
         {'name': 'B', 'kind': 'tidak-dikenal'},
         {'role': 'tanpa nama'},
@@ -104,6 +108,8 @@ void main() {
     expect(s.vendors.length, 2);
     expect(s.vendors.first.kind, StoryVendorKind.planner);
     expect(s.vendors.first.rating, 4.9);
+    expect(s.vendors.first.vendorId, '7');
+    expect(s.vendors.last.vendorId, isNull);
     expect(s.vendors.last.kind, StoryVendorKind.other);
     expect(s.vendors.last.rating, isNull);
     expect(s.vendors.last.role, '');

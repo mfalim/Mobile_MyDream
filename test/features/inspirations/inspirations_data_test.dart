@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:w51/core/errors/app_exceptions.dart';
 import 'package:w51/features/inspirations/data/datasources/inspirations_mock_datasource.dart';
 import 'package:w51/features/packages/data/datasources/packages_mock_datasource.dart';
+import 'package:w51/features/vendors/data/datasources/vendors_mock_datasource.dart';
 
 void main() {
   final datasource = InspirationsMockDatasource();
@@ -62,6 +63,15 @@ void main() {
       final id = s.relatedPackageId;
       if (id == null) continue;
       expect(packages.map((p) => p.id), contains(id), reason: s.id);
+    }
+  });
+
+  test('vendor di cerita utama ada di direktori vendor', () async {
+    final data = await datasource.fetch();
+    final vendors = (await VendorsMockDatasource().fetch()).featured;
+    for (final v in data.story!.vendors) {
+      expect(v.vendorId, isNotNull, reason: v.name);
+      expect(vendors.map((x) => x.id), contains(v.vendorId), reason: v.name);
     }
   });
 }

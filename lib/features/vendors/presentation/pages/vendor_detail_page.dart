@@ -7,6 +7,7 @@ import 'package:w51/app/theme/app_colors.dart';
 import 'package:w51/app/theme/app_radius.dart';
 import 'package:w51/app/theme/app_spacing.dart';
 import 'package:w51/app/theme/app_typography.dart';
+import 'package:w51/core/config/app_features.dart';
 import 'package:w51/core/errors/app_exceptions.dart';
 import 'package:w51/core/utils/formatters.dart';
 import 'package:w51/core/utils/links.dart';
@@ -18,6 +19,7 @@ import 'package:w51/features/cart/domain/entities/custom_vendor_item.dart';
 import 'package:w51/features/cart/presentation/providers/cart_provider.dart';
 import 'package:w51/features/contact/presentation/contact_actions.dart';
 import 'package:w51/features/vendors/domain/entities/vendor_detail.dart';
+import 'package:w51/features/vendors/presentation/providers/saved_vendors_provider.dart';
 import 'package:w51/features/vendors/presentation/providers/vendors_provider.dart';
 import 'package:w51/features/vendors/presentation/widgets/deposit_guarantee_card.dart';
 import 'package:w51/features/vendors/presentation/widgets/package_accordion.dart';
@@ -37,15 +39,11 @@ class VendorDetailPage extends ConsumerStatefulWidget {
 }
 
 class _VendorDetailPageState extends ConsumerState<VendorDetailPage> {
-  bool _saved = false;
-
   void _snack(String message) {
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(SnackBar(content: Text(message)));
   }
-
-  void _soon(String feature) => _snack('$feature segera hadir.');
 
   void _back() {
     if (context.canPop()) {
@@ -112,6 +110,7 @@ class _VendorDetailPageState extends ConsumerState<VendorDetailPage> {
   @override
   Widget build(BuildContext context) {
     final detail = ref.watch(vendorDetailProvider(widget.vendorId));
+    final saved = ref.watch(savedVendorsProvider).contains(widget.vendorId);
 
     return Scaffold(
       appBar: AppBar(
@@ -125,17 +124,10 @@ class _VendorDetailPageState extends ConsumerState<VendorDetailPage> {
         title: Text('Vendor Details', style: AppTypography.heading(20)),
         actions: [
           IconButton(
-            tooltip: _saved ? 'Hapus dari simpanan' : 'Simpan vendor',
-            onPressed: () => setState(() => _saved = !_saved),
-            icon: Icon(_saved ? Icons.bookmark : Icons.bookmark_border),
-          ),
-          const Padding(
-            padding: EdgeInsets.only(right: 12),
-            child: CircleAvatar(
-              radius: 16,
-              backgroundColor: AppColors.surfaceTint,
-              child: Icon(Icons.person, size: 18, color: AppColors.primary),
-            ),
+            tooltip: saved ? 'Hapus dari simpanan' : 'Simpan vendor',
+            onPressed: () =>
+                ref.read(savedVendorsProvider.notifier).toggle(widget.vendorId),
+            icon: Icon(saved ? Icons.bookmark : Icons.bookmark_border),
           ),
         ],
       ),
@@ -144,7 +136,7 @@ class _VendorDetailPageState extends ConsumerState<VendorDetailPage> {
         error: (e, s) => ErrorState(
           message: e is NotFoundException
               ? 'Vendor tidak ditemukan.'
-              : 'Detail vendor gagal dimuat.',
+              : userMessage(e, fallback: 'Detail vendor gagal dimuat.'),
           onRetry: e is NotFoundException
               ? null
               : () => ref.invalidate(vendorDetailProvider(widget.vendorId)),
@@ -172,10 +164,10 @@ class _VendorDetailPageState extends ConsumerState<VendorDetailPage> {
     final validUntil = d.validUntil;
     final description = d.description;
     final instagram = d.instagram;
-    final cashback = d.cashback;
-    final installment = d.installment;
+    final cashback = AppFeatures.vendorRewards ? d.cashback : null;
+    final installment = AppFeatures.vendorRewards ? d.installment : null;
     final provider = d.provider;
-    final guarantee = d.guarantee;
+    final guarantee = AppFeatures.escrowClaims ? d.guarantee : null;
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(
@@ -291,10 +283,7 @@ class _VendorDetailPageState extends ConsumerState<VendorDetailPage> {
         ],
         if (provider != null) ...[
           gap,
-          VendorProviderCard(
-            provider: provider,
-            onVisit: () => _soon('Profil vendor'),
-          ),
+          VendorProviderCard(provider: provider),
         ],
         if (d.sections.isNotEmpty) ...[
           const SizedBox(height: AppSpacing.lg),

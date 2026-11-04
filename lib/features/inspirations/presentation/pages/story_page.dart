@@ -14,12 +14,6 @@ class StoryPage extends ConsumerWidget {
 
   final String storyId;
 
-  void _soon(BuildContext context, String feature) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text('$feature segera hadir.')));
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final story = ref.watch(storyProvider(storyId));
@@ -46,7 +40,7 @@ class StoryPage extends ConsumerWidget {
         error: (e, s) => ErrorState(
           message: e is NotFoundException
               ? 'Cerita tidak ditemukan.'
-              : 'Cerita gagal dimuat.',
+              : userMessage(e, fallback: 'Cerita gagal dimuat.'),
           onRetry: e is NotFoundException
               ? null
               : () => ref.invalidate(storyProvider(storyId)),
@@ -61,8 +55,10 @@ class StoryPage extends ConsumerWidget {
           child: StoryView(
             key: ValueKey(s.id),
             story: s,
-            onPortfolio: (v) => _soon(context, 'Portofolio ${v.name}'),
-            onShare: () => _soon(context, 'Bagikan cerita'),
+            onOpenVendor: (v) {
+              final id = v.vendorId;
+              if (id != null) context.push(AppRoutes.vendorDetailPath(id));
+            },
             onRelatedPackage: (id) =>
                 context.push(AppRoutes.packageDetailPath(id)),
           ),

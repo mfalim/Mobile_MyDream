@@ -12,6 +12,8 @@ import 'package:w51/features/my_wedding/data/couple_codec.dart';
 import 'package:w51/features/my_wedding/domain/entities/couple_profile.dart';
 import 'package:w51/features/my_wedding/presentation/providers/couple_provider.dart';
 import 'package:w51/features/payment/presentation/providers/payments_provider.dart';
+import 'package:w51/features/vendors/presentation/providers/saved_vendors_provider.dart';
+import 'package:w51/features/my_wedding/presentation/providers/avatar_provider.dart';
 
 /// Dipantau terus oleh MyApp. Tugasnya:
 /// 1. menyimpan sesi, data pasangan, dan keranjang setiap kali berubah;
@@ -31,6 +33,8 @@ final appStateSyncProvider = Provider<void>((ref) {
       ref.read(coupleProvider.notifier).clear();
       ref.read(checkoutProvider.notifier).clear();
       ref.read(receiptProvider.notifier).clear();
+      ref.read(savedVendorsProvider.notifier).clear();
+      ref.read(avatarPathProvider.notifier).remove().ignore();
     }
   });
 

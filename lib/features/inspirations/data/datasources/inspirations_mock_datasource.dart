@@ -56,13 +56,15 @@ class InspirationsMockDatasource {
       'vendors': [
         {
           'name': 'Mattana Wedding Planner',
+          'vendor_id': 'vendor-mattana',
           'role': 'Wedding Organizer • Bali',
           'rating': 4.9,
           'review_count': 128,
           'kind': 'planner',
         },
         {
-          'name': 'Vivaldi Decor Atelier',
+          'name': 'Vivaldi Floral & Scenery',
+          'vendor_id': 'vendor-vivaldi',
           'role': 'Floral & Space Design',
           'rating': 4.9,
           'review_count': 160,
@@ -70,6 +72,7 @@ class InspirationsMockDatasource {
         },
         {
           'name': 'Sora Visual Stories',
+          'vendor_id': 'vendor-sora',
           'role': 'Dokumentasi & Cinematic Film',
           'rating': 4.9,
           'review_count': 142,

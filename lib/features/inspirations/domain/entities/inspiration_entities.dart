@@ -19,6 +19,7 @@ class StoryVendor {
     required this.name,
     required this.role,
     required this.kind,
+    this.vendorId,
     this.rating,
     this.reviewCount,
   });
@@ -26,6 +27,9 @@ class StoryVendor {
   final String name;
   final String role;
   final StoryVendorKind kind;
+
+  /// Id vendor di direktori; bila ada, tombol "Lihat Vendor" membuka detailnya.
+  final String? vendorId;
   final double? rating;
   final int? reviewCount;
 }
