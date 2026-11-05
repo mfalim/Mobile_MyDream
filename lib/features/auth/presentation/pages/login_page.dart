@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:w51/app/router/route_names.dart';
 import 'package:w51/app/theme/app_colors.dart';
+import 'package:w51/core/errors/app_exceptions.dart';
 import 'package:w51/core/widgets/app_text_field.dart';
 import 'package:w51/features/auth/domain/validators.dart';
 import 'package:w51/features/auth/presentation/providers/auth_provider.dart';
@@ -37,43 +39,74 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     super.dispose();
   }
 
-  void _soon(String feature) {
+  void _showError(String message) {
+    if (!mounted) return;
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text('$feature segera hadir.')));
+      ..showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: Colors.red.shade700,
+        ),
+      );
   }
 
-  Future<void> _run(String action, void Function() signIn) async {
+  /// Login dengan Google via API Laravel.
+  Future<void> _google() async {
     if (_busy != null) return;
-    setState(() => _busy = action);
-    // PROTOTYPE: meniru jeda jaringan. Autentikasi sungguhan menggantikan
-    // bagian ini.
-    await Future<void>.delayed(const Duration(milliseconds: 500));
-    if (!mounted) return;
+    setState(() => _busy = 'google');
 
-    // Ambil dulu: halaman ini bisa hilang begitu status login berubah.
-    final router = GoRouter.of(context);
-    final destination = postLoginDestination(
-      from: widget.from,
-      needsCoupleSetup: ref.read(coupleProvider) == null,
-    );
-    setState(() => _busy = null);
-    signIn();
-    // Pindah halaman secara eksplisit, tidak bergantung pada penyegaran router.
-    router.go(destination);
+    try {
+      final result =
+          await ref.read(authProvider.notifier).signInWithGoogle();
+
+      if (!mounted) return;
+      final router = GoRouter.of(context);
+
+      // Tentukan tujuan navigasi berdasarkan next_step dari API
+      if (result.nextStep == 'complete_profile') {
+        // Belum lengkapi profil → arahkan ke couple setup (untuk client)
+        // atau home (role lain); router akan menjaga halaman terproteksi
+        final dest = result.user.role == 'client'
+            ? AppRoutes.coupleSetupPath(from: widget.from ?? AppRoutes.home)
+            : safeInternalPath(widget.from);
+        router.go(dest);
+      } else {
+        // Profil sudah lengkap → ke tujuan semula atau home
+        final dest = postLoginDestination(
+          from: widget.from,
+          needsCoupleSetup: ref.read(coupleProvider) == null &&
+              result.user.role == 'client',
+        );
+        router.go(dest);
+      }
+    } on UnauthorizedException catch (e) {
+      _showError(e.message);
+    } on ServerException catch (e) {
+      _showError(e.message);
+    } on NetworkException catch (e) {
+      _showError(e.message);
+    } on GoogleSignInException catch (e) {
+      _showError(
+        e.description ??
+            (e.code == GoogleSignInExceptionCode.canceled
+                ? 'Login dibatalkan atau SHA-1 belum cocok di Google Cloud Console.'
+                : 'Google Sign-In gagal: ${e.code.name}'),
+      );
+    } catch (e) {
+      _showError('Login Google gagal: $e');
+    } finally {
+      if (mounted) setState(() => _busy = null);
+    }
   }
 
   void _submit() {
     if (!(_formKey.currentState?.validate() ?? false)) return;
-    _run(
-      'email',
-      () =>
-          ref.read(authProvider.notifier).signInDemo(email: _email.text.trim()),
+    // Email/password login belum terhubung ke API — tampilkan info
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Login email belum tersedia. Gunakan Google.')),
     );
   }
-
-  void _google() => _run('google',
-      () => ref.read(authProvider.notifier).signInDemo(viaGoogle: true));
 
   @override
   Widget build(BuildContext context) {
@@ -114,7 +147,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
-                  onPressed: busy ? null : () => _soon('Pemulihan kata sandi'),
+                  onPressed: busy ? null : () {},
                   child: const Text('Lupa kata sandi?'),
                 ),
               ),
@@ -131,12 +164,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         ),
                       )
                     : const Text('Masuk'),
-              ),
-              const SizedBox(height: 10),
-              const Text(
-                'Mode prototype: login belum terhubung ke server.',
-                textAlign: TextAlign.center,
-                style: TextStyle(color: AppColors.textSecondary, fontSize: 11),
               ),
             ],
           ),

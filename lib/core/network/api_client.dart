@@ -159,6 +159,12 @@ Exception _fromResponse(DioException e) {
             serverMessage ?? 'Email atau kata sandi salah.',
           );
   }
+  if (status == 403) {
+    // Akun pending atau ditolak admin (dari API Google auth Laravel)
+    return UnauthorizedException(
+      serverMessage ?? 'Akun tidak diizinkan mengakses aplikasi.',
+    );
+  }
   if (status == 404) return NotFoundException(e.requestOptions.path);
   if (status == 422) {
     final errors = _fieldErrorsOf(body);

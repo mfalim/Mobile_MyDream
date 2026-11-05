@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:w51/core/config/app_config.dart';
 import 'package:w51/core/storage/local_storage.dart';
 import 'package:w51/core/storage/storage_keys.dart';
 import 'package:w51/features/auth/data/user_codec.dart';
@@ -22,10 +21,13 @@ final appStateSyncProvider = Provider<void>((ref) {
 
   ref.listen<AppUser?>(authProvider, (previous, next) {
     if (next == null) {
+      // Keluar: hapus data user dari penyimpanan lokal
       storage.remove(kStorageUser);
-    } else if (AppConfig.useMockData) {
+    } else {
+      // Simpan sesi di SharedPreferences agar UI instan saat aplikasi dibuka kembali
       storage.setJson(kStorageUser, UserCodec.encode(next));
     }
+
     if (previous != null && next == null) {
       ref.read(cartProvider.notifier).clear();
       ref.read(coupleProvider.notifier).clear();
@@ -37,7 +39,7 @@ final appStateSyncProvider = Provider<void>((ref) {
   ref.listen<CoupleProfile?>(coupleProvider, (previous, next) {
     if (next == null) {
       storage.remove(kStorageCouple);
-    } else if (AppConfig.useMockData) {
+    } else {
       storage.setJson(kStorageCouple, CoupleCodec.encode(next));
     }
   });

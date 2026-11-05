@@ -10,6 +10,7 @@ abstract final class UserCodec {
         'email': user.email,
         'has_password': user.hasPassword,
         'avatar': user.avatarUrl,
+        'role': user.role,
       };
 
   /// Null bila data tidak ada, berformat lama, atau tidak lengkap.
@@ -25,6 +26,21 @@ abstract final class UserCodec {
       email: email,
       hasPassword: jsonBool(json['has_password'], fallback: true),
       avatarUrl: jsonString(json['avatar']),
+      role: jsonString(json['role']),
+    );
+  }
+
+  /// Buat AppUser dari respons JSON /api/auth/google (isi dari key "data").
+  /// [data] adalah isi dari {"data": { "user": {...}, "token": "...", ... }}
+  static AppUser fromApiResponse(Map<String, dynamic> data) {
+    final userMap = data['user'] as Map<String, dynamic>? ?? {};
+    return AppUser(
+      id: userMap['id']?.toString() ?? '',
+      name: jsonString(userMap['name']) ?? '',
+      email: jsonString(userMap['email']) ?? '',
+      hasPassword: false,
+      avatarUrl: jsonString(userMap['avatar']),
+      role: jsonString(data['role']),
     );
   }
 }

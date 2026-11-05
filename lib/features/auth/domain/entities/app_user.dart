@@ -5,6 +5,7 @@ class AppUser {
     required this.email,
     this.hasPassword = true,
     this.avatarUrl,
+    this.role,
   });
 
   final String id;
@@ -17,11 +18,15 @@ class AppUser {
   /// URL foto akun; null memakai ikon bawaan.
   final String? avatarUrl;
 
-  AppUser copyWith({String? name}) => AppUser(
+  /// Role dari Laravel: 'client', 'member', 'admin', 'vendor'.
+  final String? role;
+
+  AppUser copyWith({String? name, String? role}) => AppUser(
         id: id,
         name: name ?? this.name,
         email: email,
         hasPassword: hasPassword,
         avatarUrl: avatarUrl,
+        role: role ?? this.role,
       );
 }
