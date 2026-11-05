@@ -185,7 +185,10 @@ class _VendorDetailPageState extends ConsumerState<VendorDetailPage> {
             runSpacing: 8,
             children: [
               if (badge != null) ...[
-                const BadgePill('Best Price Guarantee', icon: Icons.verified),
+                if (AppFeatures.escrowClaims)
+                  if (AppFeatures.escrowClaims)
+                    const BadgePill('Best Price Guarantee',
+                        icon: Icons.verified),
                 BadgePill(
                   badge,
                   background: AppColors.error,

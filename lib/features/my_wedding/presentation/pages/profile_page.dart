@@ -314,7 +314,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             SettingsTile(
               icon: Icons.description_outlined,
               title: 'Syarat & Ketentuan Layanan',
-              subtitle: 'Perlindungan konsumen, kebijakan garansi DP',
+              subtitle: 'Ketentuan penggunaan layanan MyDream',
               onTap: () => context.push(AppRoutes.infoPath('terms')),
             ),
             SettingsTile(
