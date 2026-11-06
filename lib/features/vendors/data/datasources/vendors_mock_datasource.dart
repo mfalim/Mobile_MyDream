@@ -138,7 +138,6 @@ class VendorsMockDatasource {
           price: 21000000,
           originalPrice: 28500000,
           startingBudget: 21000000,
-          promoBadge: 'Best Price',
           promoNote: 'Termasuk Retouch',
         ),
         FeaturedVendor(

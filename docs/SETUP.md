@@ -110,3 +110,27 @@ Layar, router, dan state tidak berubah.
 ## Yang belum ada
 
 Menunggu API: data asli, login Google sungguhan, pengiriman pesanan dan unggah bukti transfer. Menunggu desain: tab Inspirasi & Tips, Papan Visi, ganti foto profil, profil vendor dan portofolio, virtual tour. Menunggu keputusan owner: escrow, cicilan, poin dan cashback, MyDream Pay, QR tamu, ulasan di toko aplikasi, dan teks resmi Syarat & Ketentuan serta Kebijakan Privasi.
+
+## Pengaturan fitur (`AppFeatures`)
+
+`lib/core/config/app_features.dart` berisi saklar untuk fitur yang belum diputuskan owner, belum ada desainnya, atau menunggu API. `false` berarti **disembunyikan dari layar** (tidak ada tombol "segera hadir" yang pura-pura berfungsi). Ubah menjadi `true` begitu siap.
+
+| Saklar | Mengatur |
+|---|---|
+| `payAndInstallments` | Banner MyDream Pay di Home, baris di Profil |
+| `vendorRewards` | Poin cashback dan cicilan di detail vendor |
+| `escrowClaims` | Klaim escrow, "dana cair H+1", biaya GRATIS, jaminan deposit, "Best Price" di Keranjang, Checkout, dan detail vendor |
+| `guestQr` | QR code tamu dan e-undangan di Profil |
+| `storeReview` | Ajakan ulasan di toko aplikasi |
+| `languageSwitch` | Pilihan bahasa |
+| `visionBoard` | Papan Visi di Profil |
+| `passwordRecovery` | "Lupa kata sandi?" di Login |
+
+## Data yang tersimpan di perangkat
+
+Lewat `shared_preferences` (`lib/core/storage/local_storage.dart`), dipulihkan saat aplikasi dibuka dan dihapus saat keluar akun:
+
+- keranjang (paket, Custom Order, voucher), data pasangan, vendor tersimpan, dan foto profil;
+- sesi masuk **hanya di mode data contoh**. Dengan API sungguhan, sesi dipulihkan dari token (penyimpanan aman) dan `GET /me`.
+
+`appStateSyncProvider` (`lib/app/providers/app_state_sync.dart`) menyimpan perubahan dan membersihkan data pengguna begitu ia keluar, termasuk saat server menolak token. Token masuk tidak pernah disimpan di `shared_preferences`.
