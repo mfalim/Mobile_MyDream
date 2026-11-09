@@ -16,9 +16,10 @@ import 'package:w51/features/cart/presentation/widgets/cart_summary_card.dart';
 import 'package:w51/features/cart/presentation/widgets/cart_tab_switcher.dart';
 import 'package:w51/features/cart/presentation/widgets/custom_order_section.dart';
 import 'package:w51/features/cart/presentation/widgets/voucher_sheet.dart';
+import 'package:w51/features/contact/presentation/contact_actions.dart';
 import 'package:w51/features/my_wedding/domain/entities/couple_profile.dart';
 import 'package:w51/features/my_wedding/presentation/providers/couple_provider.dart';
-import 'package:w51/features/contact/presentation/contact_actions.dart';
+import 'package:w51/core/config/app_features.dart';
 
 class CartPage extends ConsumerStatefulWidget {
   const CartPage({this.claimCode, this.initialTab = 0, super.key});
@@ -34,8 +35,6 @@ class CartPage extends ConsumerStatefulWidget {
 }
 
 class _CartPageState extends ConsumerState<CartPage> {
-  static const _filters = ['Semua', 'Menunggu Review', 'Tawaran Negosiasi'];
-
   late int _tab = widget.initialTab;
 
   @override
@@ -52,8 +51,6 @@ class _CartPageState extends ConsumerState<CartPage> {
       ..hideCurrentSnackBar()
       ..showSnackBar(SnackBar(content: Text(message)));
   }
-
-  void _soon(String feature) => _snack('$feature segera hadir.');
 
   Future<void> _claim(String code) async {
     final vouchers = await ref.read(vouchersProvider.future);
@@ -117,13 +114,6 @@ class _CartPageState extends ConsumerState<CartPage> {
         ),
         centerTitle: true,
         title: Text('MyDream Cart', style: AppTypography.heading(20)),
-        actions: [
-          IconButton(
-            tooltip: 'Menu',
-            onPressed: () => _soon('Menu keranjang'),
-            icon: const Icon(Icons.more_vert),
-          ),
-        ],
       ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(
@@ -212,29 +202,6 @@ class _CartPageState extends ConsumerState<CartPage> {
       ];
     }
     return [
-      SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: [
-            for (final f in _filters)
-              Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: ChoiceChip(
-                  label: Text(f),
-                  selected: f == _filters.first,
-                  onSelected: (_) {
-                    if (f != _filters.first) _soon('Filter "$f"');
-                  },
-                  selectedColor: AppColors.coral.withValues(alpha: 0.3),
-                  backgroundColor: AppColors.surfaceTint,
-                  side: BorderSide.none,
-                  shape: const StadiumBorder(),
-                ),
-              ),
-          ],
-        ),
-      ),
-      const SizedBox(height: 12),
       for (final item in cart.items)
         Padding(
           padding: const EdgeInsets.only(bottom: 12),
@@ -258,7 +225,9 @@ class _CartPageState extends ConsumerState<CartPage> {
         discount: cart.discount,
         total: cart.total,
         deposit: kDownPayment,
-        onTerms: () => context.push(AppRoutes.infoPath('guarantee')),
+        onTerms: () => context.push(
+          AppRoutes.infoPath(AppFeatures.escrowClaims ? 'guarantee' : 'terms'),
+        ),
       ),
       const SizedBox(height: 12),
       const TrustTiles(),
@@ -312,7 +281,9 @@ class _CartPageState extends ConsumerState<CartPage> {
         discount: cart.customDiscount,
         total: cart.customTotal,
         deposit: kDownPayment,
-        onTerms: () => context.push(AppRoutes.infoPath('guarantee')),
+        onTerms: () => context.push(
+          AppRoutes.infoPath(AppFeatures.escrowClaims ? 'guarantee' : 'terms'),
+        ),
       ),
       const SizedBox(height: 12),
       const TrustTiles(),

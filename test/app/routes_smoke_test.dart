@@ -23,6 +23,7 @@ void main() {
     '/info/terms',
     '/login',
     '/register',
+    '/saved',
   ];
 
   Future<void> open(WidgetTester tester, String path) async {

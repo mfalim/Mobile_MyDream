@@ -79,17 +79,7 @@ class NotificationsPage extends ConsumerWidget {
                     onTap: () {
                       controller.markRead(n.id);
                       final route = n.route;
-                      if (route != null) {
-                        context.push(safeInternalPath(route));
-                      } else {
-                        ScaffoldMessenger.of(context)
-                          ..hideCurrentSnackBar()
-                          ..showSnackBar(
-                            const SnackBar(
-                              content: Text('Halaman detail segera hadir.'),
-                            ),
-                          );
-                      }
+                      if (route != null) context.push(safeInternalPath(route));
                     },
                   );
                 },

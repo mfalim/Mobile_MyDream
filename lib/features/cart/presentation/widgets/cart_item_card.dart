@@ -6,6 +6,7 @@ import 'package:w51/core/utils/formatters.dart';
 import 'package:w51/core/widgets/badge_pill.dart';
 import 'package:w51/core/widgets/image_placeholder.dart';
 import 'package:w51/features/cart/domain/entities/cart_item.dart';
+import 'package:w51/core/config/app_features.dart';
 
 class CartItemCard extends StatelessWidget {
   const CartItemCard({
@@ -220,7 +221,9 @@ class _Package extends StatelessWidget {
                   spacing: 6,
                   runSpacing: 4,
                   children: [
-                    const BadgePill('Best Price', icon: Icons.verified),
+                    if (AppFeatures.escrowClaims)
+                      if (AppFeatures.escrowClaims)
+                        const BadgePill('Best Price', icon: Icons.verified),
                     BadgePill(
                       item.savingsBadge,
                       background: AppColors.coral.withValues(alpha: 0.4),

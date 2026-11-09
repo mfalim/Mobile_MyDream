@@ -8,13 +8,15 @@ class StoryVendors extends StatelessWidget {
   const StoryVendors({
     required this.title,
     required this.vendors,
-    required this.onPortfolio,
+    required this.onOpen,
     super.key,
   });
 
   final String title;
   final List<StoryVendor> vendors;
-  final ValueChanged<StoryVendor> onPortfolio;
+
+  /// Dipanggil untuk vendor yang punya `vendorId`.
+  final ValueChanged<StoryVendor> onOpen;
 
   IconData _icon(StoryVendorKind kind) => switch (kind) {
         StoryVendorKind.planner => Icons.event_note_outlined,
@@ -109,24 +111,26 @@ class StoryVendors extends StatelessWidget {
                       ],
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  FilledButton(
-                    onPressed: () => onPortfolio(v),
-                    style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.surfaceTint,
-                      foregroundColor: AppColors.primary,
-                      minimumSize: const Size(0, 40),
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      textStyle: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
+                  if (v.vendorId != null) ...[
+                    const SizedBox(width: 8),
+                    FilledButton(
+                      onPressed: () => onOpen(v),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: AppColors.surfaceTint,
+                        foregroundColor: AppColors.primary,
+                        minimumSize: const Size(0, 40),
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        textStyle: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      child: const Text(
+                        'Lihat\nVendor',
+                        textAlign: TextAlign.center,
                       ),
                     ),
-                    child: const Text(
-                      'Lihat\nPortofolio',
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
+                  ],
                 ],
               ),
             ),

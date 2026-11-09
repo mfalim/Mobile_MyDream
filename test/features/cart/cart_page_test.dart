@@ -10,7 +10,7 @@ import 'package:w51/features/cart/presentation/pages/cart_page.dart';
 import 'package:w51/features/cart/presentation/providers/cart_provider.dart';
 import 'package:w51/features/packages/data/datasources/packages_mock_datasource.dart';
 import 'package:w51/features/vendors/data/datasources/vendor_detail_mock_datasource.dart';
-
+import 'package:w51/core/config/app_features.dart';
 import '../../helpers/test_app.dart';
 
 /// Lumière 15.000.000 + Santap Rasa 17.500.000 + Sora 18.500.000 = 51.000.000
@@ -441,5 +441,19 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Chat Admin MyDream'), findsOneWidget);
+  });
+
+  testWidgets('klaim yang belum diputuskan mengikuti AppFeatures.escrowClaims',
+      (tester) async {
+    controller().add(await _intimatePackage());
+    await pumpCart(tester);
+
+    Matcher shown(bool on) => on ? findsOneWidget : findsNothing;
+    expect(
+        find.text('100% Escrow Protection'), shown(AppFeatures.escrowClaims));
+    expect(find.text('Biaya Layanan Escrow Concierge'),
+        shown(AppFeatures.escrowClaims));
+    expect(find.text('Transfer Bank'), shown(!AppFeatures.escrowClaims));
+    expect(find.text('Ketentuan Layanan'), shown(!AppFeatures.escrowClaims));
   });
 }

@@ -5,17 +5,17 @@ import 'package:w51/core/widgets/image_placeholder.dart';
 import 'package:w51/features/vendors/domain/entities/vendor_detail.dart';
 
 class VendorProviderCard extends StatelessWidget {
-  const VendorProviderCard({
-    required this.provider,
-    required this.onVisit,
-    super.key,
-  });
+  const VendorProviderCard({required this.provider, this.onVisit, super.key});
 
   final VendorProviderInfo provider;
-  final VoidCallback onVisit;
+
+  /// Tombol "Kunjungi Profil Vendor" hanya tampil bila diisi (halaman profil
+  /// vendor belum ada).
+  final VoidCallback? onVisit;
 
   @override
   Widget build(BuildContext context) {
+    final visit = onVisit;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -65,22 +65,24 @@ class VendorProviderCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 14),
-          FilledButton(
-            onPressed: onVisit,
-            style: FilledButton.styleFrom(
-              backgroundColor: AppColors.surfaceTint,
-              foregroundColor: AppColors.textPrimary,
+          if (visit != null) ...[
+            const SizedBox(height: 14),
+            FilledButton(
+              onPressed: visit,
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.surfaceTint,
+                foregroundColor: AppColors.textPrimary,
+              ),
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text('Kunjungi Profil Vendor'),
+                  SizedBox(width: 8),
+                  Icon(Icons.arrow_forward, size: 18),
+                ],
+              ),
             ),
-            child: const Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text('Kunjungi Profil Vendor'),
-                SizedBox(width: 8),
-                Icon(Icons.arrow_forward, size: 18),
-              ],
-            ),
-          ),
+          ],
         ],
       ),
     );

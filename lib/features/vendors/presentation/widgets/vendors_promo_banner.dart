@@ -29,7 +29,7 @@ class VendorsPromoBanner extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Dapatkan cashback MyDream Pay hingga Rp 15 Juta.',
+            'Diskon 10% hingga Rp 15 Juta dengan voucher BRIDALEXPO (belanja minimal Rp 300 Juta).',
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.9),
               fontSize: 13,

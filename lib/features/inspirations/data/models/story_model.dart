@@ -116,6 +116,7 @@ abstract final class StoryModel {
       vendors.add(
         StoryVendor(
           name: name,
+          vendorId: jsonString(v['vendor_id']),
           role: jsonString(v['role']) ?? '',
           kind: _kind(jsonString(v['kind'])),
           rating: jsonDouble(v['rating']),
