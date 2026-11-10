@@ -24,6 +24,8 @@ import '../../features/payment/presentation/pages/order_submitted_page.dart';
 import '../../features/account/presentation/pages/account_settings_page.dart';
 import '../../features/support/presentation/pages/report_issue_page.dart';
 import '../../features/inspirations/presentation/pages/story_page.dart';
+import '../../features/member/presentation/pages/member_complete_profile_page.dart';
+import '../../features/member/presentation/pages/member_dashboard_page.dart';
 import 'app_shell.dart';
 import 'route_names.dart';
 import 'auth_redirect.dart';
@@ -37,11 +39,17 @@ final routerProvider = Provider<GoRouter>((ref) {
   final router = GoRouter(
     initialLocation: AppRoutes.home,
     refreshListenable: refresh,
-    redirect: (context, state) => authRedirect(
-      loggedIn: ref.read(authProvider) != null,
-      needsCoupleSetup: ref.read(coupleProvider) == null,
-      uri: state.uri,
-    ),
+    redirect: (context, state) {
+      final user = ref.read(authProvider);
+      return authRedirect(
+        loggedIn: user != null,
+        role: user?.role,
+        needsCoupleSetup: ref.read(coupleProvider) == null,
+        needsMemberSetup: user?.role == 'member' &&
+            (user?.callSign == null || user!.callSign!.trim().isEmpty),
+        uri: state.uri,
+      );
+    },
     routes: [
       StatefulShellRoute.indexedStack(
         builder: (context, state, shell) => AppShell(navigationShell: shell),
@@ -146,6 +154,14 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.info,
         builder: (context, state) =>
             InfoPage(slug: state.pathParameters['slug']!),
+      ),
+      GoRoute(
+        path: AppRoutes.memberDashboard,
+        builder: (context, state) => const MemberDashboardPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.memberCompleteProfile,
+        builder: (context, state) => const MemberCompleteProfilePage(),
       ),
     ],
   );

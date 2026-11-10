@@ -63,23 +63,32 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       if (!mounted) return;
       final router = GoRouter.of(context);
 
-      // Tentukan tujuan navigasi berdasarkan next_step dari API
-      if (result.nextStep == 'complete_profile') {
-        // Belum lengkapi profil → arahkan ke couple setup (untuk client)
-        // atau home (role lain); router akan menjaga halaman terproteksi
-        final dest = result.user.role == 'client'
-            ? AppRoutes.coupleSetupPath(from: widget.from ?? AppRoutes.home)
-            : safeInternalPath(widget.from);
+      // Tentukan tujuan navigasi berdasarkan next_step & role dari API
+      if (result.user.role == 'member') {
+        if (result.nextStep == 'complete_profile' ||
+            result.user.callSign == null ||
+            result.user.callSign!.isEmpty) {
+          router.go(AppRoutes.memberCompleteProfile);
+        } else {
+          router.go(AppRoutes.memberDashboard);
+        }
+      } else if (result.nextStep == 'complete_profile') {
+        // Belum lengkapi profil client → arahkan ke couple setup
+        final dest = AppRoutes.coupleSetupPath(from: widget.from ?? AppRoutes.home);
         router.go(dest);
       } else {
-        // Profil sudah lengkap → ke tujuan semula atau home
+        // Profil client sudah lengkap → ke tujuan semula atau home
         final dest = postLoginDestination(
           from: widget.from,
+          role: result.user.role,
           needsCoupleSetup: ref.read(coupleProvider) == null &&
               result.user.role == 'client',
         );
         router.go(dest);
       }
+    } on RoleRestrictedException catch (e) {
+      if (!mounted) return;
+      _showRoleRestrictedDialog(e.role);
     } on UnauthorizedException catch (e) {
       _showError(e.message);
     } on ServerException catch (e) {
@@ -98,6 +107,74 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     } finally {
       if (mounted) setState(() => _busy = null);
     }
+  }
+
+  Future<void> _showRoleRestrictedDialog(String role) async {
+    final title = role == 'admin' ? 'Portal Administrator' : 'Portal Vendor Partner';
+    final roleName = role == 'admin' ? 'Admin (Administrator)' : 'Vendor Rekanan';
+
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        icon: Container(
+          width: 56,
+          height: 56,
+          decoration: const BoxDecoration(
+            color: AppColors.surfaceTint,
+            shape: BoxShape.circle,
+          ),
+          child: const Icon(
+            Icons.laptop_chromebook_rounded,
+            size: 30,
+            color: AppColors.primary,
+          ),
+        ),
+        title: Text(
+          title,
+          textAlign: TextAlign.center,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Akun Anda terdaftar sebagai $roleName.',
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontWeight: FontWeight.w600,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 10),
+            const Text(
+              'Aplikasi mobile MyDream saat ini dikhususkan untuk '
+              'Calon Pengantin (Client) dan Kru Lapangan (Member).\n\n'
+              'Silakan kelola sistem melalui Dashboard Web MyDream di komputer / laptop Anda.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 13.5,
+                color: AppColors.textSecondary,
+                height: 1.45,
+              ),
+            ),
+          ],
+        ),
+        actionsAlignment: MainAxisAlignment.center,
+        actions: [
+          FilledButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            style: FilledButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            ),
+            child: const Text('Saya Mengerti'),
+          ),
+        ],
+      ),
+    );
   }
 
   void _submit() {

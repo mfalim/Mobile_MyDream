@@ -5,18 +5,23 @@ class AppBottomNavigation extends StatelessWidget {
   const AppBottomNavigation({
     required this.selectedIndex,
     required this.onItemSelected,
+    this.isMember = false,
     super.key,
   });
 
   final int selectedIndex;
   final ValueChanged<int> onItemSelected;
+  final bool isMember;
 
-  static const _items = [
-    (Icons.home_outlined, Icons.home_rounded, 'Home'),
-    (Icons.storefront_outlined, Icons.storefront_rounded, 'Vendors'),
-    (Icons.auto_awesome_outlined, Icons.auto_awesome, 'Inspirations'),
-    (Icons.favorite_border_rounded, Icons.favorite_rounded, 'My Wedding'),
-  ];
+  List<(IconData, IconData, String)> get _items => [
+        const (Icons.home_outlined, Icons.home_rounded, 'Home'),
+        const (Icons.storefront_outlined, Icons.storefront_rounded, 'Vendors'),
+        const (Icons.auto_awesome_outlined, Icons.auto_awesome, 'Inspirations'),
+        if (isMember)
+          const (Icons.badge_outlined, Icons.badge_rounded, 'Workspace')
+        else
+          const (Icons.favorite_border_rounded, Icons.favorite_rounded, 'My Wedding'),
+      ];
 
   @override
   Widget build(BuildContext context) {
@@ -45,7 +50,9 @@ class AppBottomNavigation extends StatelessWidget {
   Widget _buildItem(int index) {
     final item = _items[index];
     final selected = selectedIndex == index;
-    final color = selected ? AppColors.coralDark : AppColors.muted;
+    final color = selected
+        ? (isMember && index == 3 ? AppColors.primary : AppColors.coralDark)
+        : AppColors.muted;
 
     return Expanded(
       child: InkWell(

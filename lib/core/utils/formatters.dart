@@ -63,3 +63,41 @@ const _monthShort = [
 /// DateTime(2026, 10, 24) -> "24 Okt 2026"
 String formatDateShortId(DateTime d) =>
     '${d.day} ${_monthShort[d.month - 1]} ${d.year}';
+
+/// Format string waktu (misal "2026-11-09T09:00:00.000000Z" -> "09:00", "09:30:00" -> "09:30")
+String formatTimeString(String? raw) {
+  if (raw == null || raw.trim().isEmpty) return '';
+  final trimmed = raw.trim();
+
+  // Jika format ISO datetime
+  final parsed = DateTime.tryParse(trimmed);
+  if (parsed != null && trimmed.contains('T')) {
+    final local = parsed.toLocal();
+    final h = local.hour.toString().padLeft(2, '0');
+    final m = local.minute.toString().padLeft(2, '0');
+    return '$h:$m';
+  }
+
+  // Jika format "HH:mm:ss" atau "HH:mm"
+  final timeRegex = RegExp(r'^(\d{1,2}):(\d{2})');
+  final match = timeRegex.firstMatch(trimmed);
+  if (match != null) {
+    final h = match.group(1)!.padLeft(2, '0');
+    final m = match.group(2)!;
+    return '$h:$m';
+  }
+
+  return trimmed;
+}
+
+/// Format string tanggal (misal "2026-10-24T00:00:00.000000Z" -> "24 Okt 2026")
+String formatDateString(String? raw) {
+  if (raw == null || raw.trim().isEmpty) return '';
+  final trimmed = raw.trim();
+  final parsed = DateTime.tryParse(trimmed);
+  if (parsed != null) {
+    return formatDateShortId(parsed.toLocal());
+  }
+  return trimmed;
+}
+

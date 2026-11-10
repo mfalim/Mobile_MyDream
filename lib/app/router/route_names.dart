@@ -28,8 +28,14 @@ abstract final class AppRoutes {
     notificationSettings,
     orderSubmitted,
     account,
-    reportIssue
+    reportIssue,
+    memberDashboard,
+    memberCompleteProfile,
   ];
+
+  // Modul Member (Kru EO / Wedding Organizer)
+  static const memberDashboard = '/member/dashboard';
+  static const memberCompleteProfile = '/member/complete-profile';
   static const register = '/register';
   static const coupleSetup = '/couple-setup';
   static String coupleSetupPath({String? from}) => _authPath(coupleSetup, from);

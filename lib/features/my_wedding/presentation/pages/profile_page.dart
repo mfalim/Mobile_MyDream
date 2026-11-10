@@ -100,6 +100,67 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         AppSpacing.lg,
       ),
       children: [
+        if (user?.role == 'member') ...[
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppColors.primary,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.primary.withValues(alpha: 0.2),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(Icons.badge_rounded, color: Colors.white, size: 24),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Workspace Kru WO',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                        ),
+                      ),
+                      Text(
+                        'Call Sign: ${user!.callSign ?? '-'} • Tugas Lapangan',
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.85),
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                FilledButton(
+                  onPressed: () => context.go(AppRoutes.memberDashboard),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppColors.gold,
+                    foregroundColor: AppColors.onGold,
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                  ),
+                  child: const Text('Buka'),
+                ),
+              ],
+            ),
+          ),
+          gap,
+        ],
         ProfileHeaderCard(
           profile: p,
           coupleNames: couple?.profileNames ?? user?.name ?? 'Calon Pengantin',

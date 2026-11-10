@@ -49,6 +49,13 @@ class AuthController extends Notifier<AppUser?> {
             ? raw['user'] as Map<String, dynamic>
             : raw;
         final role = (raw['role'] ?? userMap['role'])?.toString() ?? 'client';
+
+        // Cegah admin dan vendor login di aplikasi mobile
+        if (role == 'admin' || role == 'vendor') {
+          await signOut();
+          return;
+        }
+
         final clientData = raw['client'] is Map<String, dynamic>
             ? raw['client'] as Map<String, dynamic>
             : (userMap['client'] is Map<String, dynamic>
@@ -63,6 +70,7 @@ class AuthController extends Notifier<AppUser?> {
         final updatedUser = UserCodec.fromApiResponse({
           'user': userMap,
           'role': role,
+          'member': raw['member'] ?? userMap['member'],
         });
         state = updatedUser;
         ref
@@ -109,12 +117,24 @@ class AuthController extends Notifier<AppUser?> {
 
   /// Simpan Sanctum token, sinkronkan profil `clients` dari MySQL, dan perbarui state `authProvider`.
   Future<GoogleAuthResult> _applyAuthData(Map<String, dynamic> data) async {
-    // 1. Simpan Sanctum token ke penyimpanan aman (dipakai oleh middleware auth:sanctum)
+    // 1. Bangun AppUser dan periksa role
+    final user = UserCodec.fromApiResponse(data);
+    final role = user.role ?? 'client';
+
+    // 2. Cegah admin dan vendor login ke mobile
+    if (role == 'admin' || role == 'vendor') {
+      await ref.read(tokenStorageProvider).clear();
+      try {
+        await GoogleSignIn.instance.signOut();
+      } catch (_) {}
+      state = null;
+      throw RoleRestrictedException(role);
+    }
+
+    // 3. Simpan Sanctum token ke penyimpanan aman (dipakai oleh middleware auth:sanctum)
     final sanctumToken = data['token'] as String;
     await ref.read(tokenStorageProvider).write(sanctumToken);
 
-    // 2. Bangun AppUser dan ambil status kelengkapan profil dari MySQL
-    final user = UserCodec.fromApiResponse(data);
     final nextStep = data['next_step'] as String? ?? 'dashboard';
 
     final userMap = data['user'] is Map<String, dynamic>
@@ -126,15 +146,18 @@ class AuthController extends Notifier<AppUser?> {
             ? userMap['client'] as Map<String, dynamic>
             : null);
 
-    // 3. Sinkronkan `coupleProvider` SEBELUM mengubah `state = user`
+    // 4. Sinkronkan `coupleProvider` SEBELUM mengubah `state = user`
     //    agar GoRouter redirect langsung mengenali apakah profil mempelai sudah ada di MySQL
     ref.read(coupleProvider.notifier).syncFromServer(
           nextStep == 'complete_profile' ? null : clientData,
           isClientRole: user.role == 'client',
         );
 
-    // 4. Update state authProvider
+    // 5. Update state authProvider & cache lokal
     state = user;
+    ref
+        .read(localStorageProvider)
+        .setJson(kStorageUser, UserCodec.encode(user));
 
     return GoogleAuthResult(user: user, nextStep: nextStep);
   }
@@ -177,6 +200,14 @@ class AuthController extends Notifier<AppUser?> {
     final user = state;
     if (user == null) return;
     state = user.copyWith(name: name);
+  }
+
+  void updateCallSign(String callSign) {
+    final user = state;
+    if (user == null) return;
+    final updated = user.copyWith(callSign: callSign);
+    state = updated;
+    ref.read(localStorageProvider).setJson(kStorageUser, UserCodec.encode(updated));
   }
 }
 
