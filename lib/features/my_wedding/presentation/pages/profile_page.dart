@@ -5,6 +5,7 @@ import 'package:w51/app/router/route_names.dart';
 import 'package:w51/app/theme/app_colors.dart';
 import 'package:w51/app/theme/app_spacing.dart';
 import 'package:w51/core/config/app_config.dart';
+import 'package:w51/core/config/app_features.dart';
 import 'package:w51/core/utils/date_helpers.dart';
 import 'package:w51/core/utils/formatters.dart';
 import 'package:w51/features/auth/presentation/providers/auth_provider.dart';
@@ -19,6 +20,12 @@ import 'package:w51/features/my_wedding/presentation/widgets/profile_header_card
 import 'package:w51/features/my_wedding/presentation/widgets/settings_section.dart';
 import 'package:w51/features/my_wedding/presentation/widgets/vision_board_card.dart';
 import 'package:w51/features/payment/presentation/providers/payments_provider.dart';
+import 'package:w51/features/vendors/presentation/providers/saved_vendors_provider.dart';
+import 'package:w51/core/media/photo_picker.dart';
+import 'package:w51/core/utils/image_rules.dart';
+import 'package:w51/features/my_wedding/presentation/providers/avatar_provider.dart';
+
+enum _PhotoChoice { gallery, camera, remove }
 
 class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
@@ -32,6 +39,77 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(SnackBar(content: Text('$feature segera hadir.')));
+  }
+
+  Future<void> _editPhoto() async {
+    final hasPhoto = ref.read(avatarPathProvider) != null;
+    final choice = await showModalBottomSheet<_PhotoChoice>(
+      context: context,
+      showDragHandle: true,
+      backgroundColor: AppColors.surface,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_library_outlined),
+              title: const Text('Pilih dari galeri'),
+              onTap: () => Navigator.of(ctx).pop(_PhotoChoice.gallery),
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_camera_outlined),
+              title: const Text('Ambil foto'),
+              onTap: () => Navigator.of(ctx).pop(_PhotoChoice.camera),
+            ),
+            if (hasPhoto)
+              ListTile(
+                leading:
+                    const Icon(Icons.delete_outline, color: AppColors.error),
+                title: const Text(
+                  'Hapus foto',
+                  style: TextStyle(color: AppColors.error),
+                ),
+                onTap: () => Navigator.of(ctx).pop(_PhotoChoice.remove),
+              ),
+          ],
+        ),
+      ),
+    );
+    if (choice == null || !mounted) return;
+
+    final messenger = ScaffoldMessenger.of(context);
+    void snack(String message) => messenger
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(message)));
+
+    if (choice == _PhotoChoice.remove) {
+      await ref.read(avatarPathProvider.notifier).remove();
+      return;
+    }
+
+    try {
+      final photo = await ref.read(photoPickerProvider).pick(
+            choice == _PhotoChoice.camera
+                ? PhotoSource.camera
+                : PhotoSource.gallery,
+          );
+      if (photo == null) return;
+      final error = validateImageFile(name: photo.name, bytes: photo.bytes);
+      if (error != null) {
+        snack(error);
+        return;
+      }
+      await ref.read(avatarPathProvider.notifier).change(photo.path);
+      snack('Foto profil diperbarui.');
+    } on PhotoUnavailableException catch (e) {
+      snack(
+        'Tidak bisa membuka '
+        '${e.source == PhotoSource.camera ? 'kamera' : 'galeri'}. '
+        'Periksa izin aplikasi.',
+      );
+    } catch (_) {
+      snack('Foto gagal disimpan. Coba lagi.');
+    }
   }
 
   Future<void> _logout() async {
@@ -80,8 +158,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    // Data tambahan (papan visi, statistik) hanya pelengkap: bila lambat atau
-    // gagal dimuat, Profil tetap tampil tanpa bagian itu.
+    // Data tambahan (lencana, statistik, papan visi) hanya pelengkap: bila
+    // lambat atau gagal dimuat, Profil tetap tampil tanpa bagian itu.
     final extras = ref.watch(profileDataProvider).value ?? const ProfileData();
     return SafeArea(bottom: false, child: _buildContent(extras));
   }
@@ -89,6 +167,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   Widget _buildContent(ProfileData p) {
     const gap = SizedBox(height: AppSpacing.lg);
     final cartCount = ref.watch(cartProvider).orderCount;
+    final savedCount = ref.watch(savedVendorsProvider).length;
     final couple = ref.watch(coupleProvider);
     final user = ref.watch(authProvider);
 
@@ -168,13 +247,17 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               couple == null ? null : formatDateShortId(couple.weddingDate),
           daysLeft: couple == null ? null : daysUntil(couple.weddingDate),
           cartCount: cartCount,
+          savedCount: savedCount,
           avatarUrl: user?.avatarUrl,
-          onEditPhoto: () => _soon('Ganti foto profil'),
+          avatarPath: ref.watch(avatarPathProvider),
+          onEditPhoto: _editPhoto,
           onSetDate: () => context.push(AppRoutes.coupleSetup),
           onStat: (stat) {
             switch (stat) {
               case ProfileStat.cart:
                 context.push(AppRoutes.cart);
+              case ProfileStat.saved:
+                context.push(AppRoutes.saved);
               case ProfileStat.boards:
                 _soon('Inspirasi board');
               case ProfileStat.vendors:
@@ -182,7 +265,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             }
           },
         ),
-        if (p.boards.isNotEmpty) ...[
+        if (AppFeatures.visionBoard && p.boards.isNotEmpty) ...[
           const SizedBox(height: AppSpacing.md),
           VisionBoardCard(
             boards: p.boards,
@@ -204,19 +287,27 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               onTap: () => context.push(AppRoutes.account),
             ),
             SettingsTile(
-              icon: Icons.shopping_bag_outlined,
-              iconBackground: AppColors.gold,
-              title: 'MyDream Pay & Cicilan 0%',
-              badge: 'Promo',
-              subtitle: 'Rekap DP, escrow aman, tenor s.d 24 bulan',
-              onTap: () => _soon('MyDream Pay'),
+              icon: Icons.bookmark_border,
+              title: 'Vendor Tersimpan',
+              subtitle: 'Vendor yang kamu simpan untuk dibandingkan',
+              onTap: () => context.push(AppRoutes.saved),
             ),
-            SettingsTile(
-              icon: Icons.qr_code_2,
-              title: 'QR Code Tamu & E-Undangan',
-              subtitle: 'Check-in resepsi, sinkronisasi buku tamu',
-              onTap: () => _soon('QR code tamu'),
-            ),
+            if (AppFeatures.payAndInstallments)
+              SettingsTile(
+                icon: Icons.shopping_bag_outlined,
+                iconBackground: AppColors.gold,
+                title: 'MyDream Pay & Cicilan 0%',
+                badge: 'Promo',
+                subtitle: 'Rekap DP, escrow aman, tenor s.d 24 bulan',
+                onTap: () => _soon('MyDream Pay'),
+              ),
+            if (AppFeatures.guestQr)
+              SettingsTile(
+                icon: Icons.qr_code_2,
+                title: 'QR Code Tamu & E-Undangan',
+                subtitle: 'Check-in resepsi, sinkronisasi buku tamu',
+                onTap: () => _soon('QR code tamu'),
+              ),
           ],
         ),
         gap,
@@ -229,35 +320,36 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               subtitle: 'Jadwal konsultasi vendor, diskon eksklusif',
               onTap: () => context.push(AppRoutes.notificationSettings),
             ),
-            SettingsTile(
-              icon: Icons.language,
-              title: 'Bahasa Tampilan',
-              subtitle: 'Bahasa Indonesia / English',
-              trailing: PopupMenuButton<String>(
-                tooltip: 'Pilih bahasa',
-                onSelected: (value) {
-                  if (value == 'en') _soon('Bahasa English');
-                },
-                itemBuilder: (context) => const [
-                  PopupMenuItem(value: 'id', child: Text('ID (Indonesia)')),
-                  PopupMenuItem(value: 'en', child: Text('EN (English)')),
-                ],
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'ID (Indonesia)',
-                      style: TextStyle(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 13,
-                      ),
-                    ),
-                    Icon(Icons.keyboard_arrow_down, color: AppColors.primary),
+            if (AppFeatures.languageSwitch)
+              SettingsTile(
+                icon: Icons.language,
+                title: 'Bahasa Tampilan',
+                subtitle: 'Bahasa Indonesia / English',
+                trailing: PopupMenuButton<String>(
+                  tooltip: 'Pilih bahasa',
+                  onSelected: (value) {
+                    if (value == 'en') _soon('Bahasa English');
+                  },
+                  itemBuilder: (context) => const [
+                    PopupMenuItem(value: 'id', child: Text('ID (Indonesia)')),
+                    PopupMenuItem(value: 'en', child: Text('EN (English)')),
                   ],
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'ID (Indonesia)',
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13,
+                        ),
+                      ),
+                      Icon(Icons.keyboard_arrow_down, color: AppColors.primary),
+                    ],
+                  ),
                 ),
               ),
-            ),
           ],
         ),
         gap,
@@ -273,16 +365,17 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               onTap: () =>
                   contactAdmin(context, ref, topic: 'concierge planner'),
             ),
-            SettingsTile(
-              icon: Icons.star_outline,
-              title: 'Beri Ulasan di Play Store / App Store',
-              subtitle: 'Dukung kami mendampingi lebih banyak pasangan',
-              onTap: () => _soon('Ulasan toko aplikasi'),
-            ),
+            if (AppFeatures.storeReview)
+              SettingsTile(
+                icon: Icons.star_outline,
+                title: 'Beri Ulasan di Play Store / App Store',
+                subtitle: 'Dukung kami mendampingi lebih banyak pasangan',
+                onTap: () => _soon('Ulasan toko aplikasi'),
+              ),
             SettingsTile(
               icon: Icons.description_outlined,
               title: 'Syarat & Ketentuan Layanan',
-              subtitle: 'Perlindungan konsumen, kebijakan garansi DP',
+              subtitle: 'Ketentuan penggunaan layanan MyDream',
               onTap: () => context.push(AppRoutes.infoPath('terms')),
             ),
             SettingsTile(

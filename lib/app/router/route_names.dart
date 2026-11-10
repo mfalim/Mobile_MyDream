@@ -71,4 +71,6 @@ abstract final class AppRoutes {
 
   static const story = '/story/:id';
   static String storyPath(String id) => '/story/$id';
+
+  static const saved = '/saved';
 }

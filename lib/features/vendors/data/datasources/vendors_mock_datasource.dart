@@ -67,8 +67,6 @@ class VendorsMockDatasource {
           originalPrice: 92000000,
           priceNote: '≈ Rp 850.000 / tamu',
           startingBudget: 85000000,
-          promoBadge: 'Cashback 8%',
-          promoNote: 'Cicilan 0% 12 Bln',
         ),
         FeaturedVendor(
           id: 'vendor-maison',
@@ -80,7 +78,6 @@ class VendorsMockDatasource {
           tagIcon: Icons.checkroom_outlined,
           rating: 5.0,
           reviewCount: 89,
-          badge: 'MyDream Pay',
           description:
               'Menteng, Jakarta Pusat • Termasuk Veil & Accessories • Flexi Fitting',
           priceLabel: 'Paket D-Day',
@@ -88,7 +85,6 @@ class VendorsMockDatasource {
           originalPrice: 45000000,
           startingBudget: 38000000,
           promoBadge: 'Hemat 7jt',
-          promoNote: 'Cicilan 0% 12 Bln',
         ),
         FeaturedVendor(
           id: 'vendor-vivaldi',
@@ -142,7 +138,6 @@ class VendorsMockDatasource {
           price: 21000000,
           originalPrice: 28500000,
           startingBudget: 21000000,
-          promoBadge: 'Best Price',
           promoNote: 'Termasuk Retouch',
         ),
         FeaturedVendor(
@@ -160,7 +155,6 @@ class VendorsMockDatasource {
           price: 45000000,
           originalPrice: 52000000,
           startingBudget: 45000000,
-          promoBadge: 'Konsultasi Gratis',
           promoNote: 'Slot 2027 dibuka',
         ),
         FeaturedVendor(

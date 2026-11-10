@@ -44,12 +44,6 @@ class _VendorPageState extends ConsumerState<VendorPage> {
     super.dispose();
   }
 
-  // void _soon(String feature) {
-  //   ScaffoldMessenger.of(context)
-  //     ..hideCurrentSnackBar()
-  //     ..showSnackBar(SnackBar(content: Text('$feature segera hadir.')));
-  // }
-
   List<FeaturedVendor> _filter(List<FeaturedVendor> all, VendorFilter filter) {
     final q = _search.text.trim().toLowerCase();
     return all.where((v) {

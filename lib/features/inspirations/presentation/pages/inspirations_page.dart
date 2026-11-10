@@ -5,11 +5,11 @@ import 'package:w51/app/router/route_names.dart';
 import 'package:w51/app/theme/app_colors.dart';
 import 'package:w51/app/theme/app_spacing.dart';
 import 'package:w51/app/theme/app_typography.dart';
+import 'package:w51/core/errors/app_exceptions.dart';
 import 'package:w51/core/widgets/empty_state.dart';
 import 'package:w51/core/widgets/error_state.dart';
 import 'package:w51/features/inspirations/domain/entities/inspiration_entities.dart';
 import 'package:w51/features/inspirations/presentation/providers/inspirations_provider.dart';
-import 'package:w51/features/inspirations/presentation/widgets/inspiration_tabs.dart';
 import 'package:w51/features/inspirations/presentation/widgets/more_stories_list.dart';
 import 'package:w51/features/inspirations/presentation/widgets/story_view.dart';
 
@@ -21,15 +21,8 @@ class InspirationsPage extends ConsumerStatefulWidget {
 }
 
 class _InspirationsPageState extends ConsumerState<InspirationsPage> {
-  // Status ini hanya di memori (prototype).
-  int _tab = 1; // 0 = Inspirasi & Tips, 1 = Real Weddings (sesuai Figma)
+  // Hanya di memori.
   String? _category;
-
-  void _soon(String feature) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text('$feature segera hadir.')));
-  }
 
   Future<void> _pickCategory(List<String> categories) async {
     final result = await showModalBottomSheet<String>(
@@ -78,7 +71,7 @@ class _InspirationsPageState extends ConsumerState<InspirationsPage> {
       child: data.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, s) => ErrorState(
-          message: 'Cerita gagal dimuat.',
+          message: userMessage(e, fallback: 'Cerita gagal dimuat.'),
           onRetry: () => ref.invalidate(inspirationsDataProvider),
         ),
         data: _buildContent,
@@ -103,47 +96,35 @@ class _InspirationsPageState extends ConsumerState<InspirationsPage> {
             96,
           ),
           children: [
-            InspirationTabs(
-              labels: const ['Inspirasi & Tips', 'Real Weddings'],
-              selected: _tab,
-              onChanged: (i) => setState(() => _tab = i),
-            ),
+            Text('Real Weddings', style: AppTypography.heading(28)),
             const SizedBox(height: AppSpacing.md),
-            if (_tab == 0)
-              const Padding(
-                padding: EdgeInsets.only(top: 48),
-                child: EmptyState(
-                  message: 'Inspirasi & Tips segera hadir.',
-                  icon: Icons.auto_awesome_outlined,
-                ),
+            if (story != null)
+              StoryView(
+                key: ValueKey(story.id),
+                story: story,
+                onOpenVendor: (v) {
+                  final id = v.vendorId;
+                  if (id != null) context.push(AppRoutes.vendorDetailPath(id));
+                },
+                onRelatedPackage: (id) =>
+                    context.push(AppRoutes.packageDetailPath(id)),
               )
-            else ...[
-              if (story != null)
-                StoryView(
-                  key: ValueKey(story.id),
-                  story: story,
-                  onPortfolio: (v) => _soon('Portofolio ${v.name}'),
-                  onShare: () => _soon('Bagikan cerita'),
-                  onRelatedPackage: (id) =>
-                      context.push(AppRoutes.packageDetailPath(id)),
-                )
-              else
-                const EmptyState(
-                  message: 'Belum ada cerita.',
-                  icon: Icons.menu_book_outlined,
-                ),
-              gap,
-              const Divider(color: AppColors.outline),
-              gap,
-              MoreStoriesList(
-                stories: more,
-                onOpen: (s) => context.push(AppRoutes.storyPath(s.id)),
-                onSeeAll: () => setState(() => _category = null),
+            else
+              const EmptyState(
+                message: 'Belum ada cerita.',
+                icon: Icons.menu_book_outlined,
               ),
-            ],
+            gap,
+            const Divider(color: AppColors.outline),
+            gap,
+            MoreStoriesList(
+              stories: more,
+              onOpen: (s) => context.push(AppRoutes.storyPath(s.id)),
+              onSeeAll: () => setState(() => _category = null),
+            ),
           ],
         ),
-        if (_tab == 1 && d.categories.isNotEmpty)
+        if (d.categories.isNotEmpty)
           Positioned(
             left: 0,
             right: 0,

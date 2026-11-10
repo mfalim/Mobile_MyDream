@@ -26,6 +26,7 @@ import '../../features/support/presentation/pages/report_issue_page.dart';
 import '../../features/inspirations/presentation/pages/story_page.dart';
 import '../../features/member/presentation/pages/member_complete_profile_page.dart';
 import '../../features/member/presentation/pages/member_dashboard_page.dart';
+import '../../features/vendors/presentation/pages/saved_vendors_page.dart';
 import 'app_shell.dart';
 import 'route_names.dart';
 import 'auth_redirect.dart';
@@ -162,6 +163,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.memberCompleteProfile,
         builder: (context, state) => const MemberCompleteProfilePage(),
+      ),
+      GoRoute(
+        path: AppRoutes.saved,
+        builder: (context, state) => const SavedVendorsPage(),
       ),
     ],
   );

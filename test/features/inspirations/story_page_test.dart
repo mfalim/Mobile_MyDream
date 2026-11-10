@@ -30,6 +30,13 @@ void main() {
                 child: Text('HALAMAN PAKET ${state.pathParameters['id']}')),
           ),
         ),
+        GoRoute(
+          path: '/vendor/:id',
+          builder: (context, state) => Scaffold(
+            body: Center(
+                child: Text('HALAMAN VENDOR ${state.pathParameters['id']}')),
+          ),
+        ),
       ],
     );
     await tester.pumpAndSettle();
@@ -45,6 +52,15 @@ void main() {
         findsOneWidget);
     expect(find.textContaining('Terinspirasi'), findsOneWidget);
     expect(find.text('Paket terkait'), findsOneWidget);
+  });
+
+  testWidgets('tidak ada tombol palsu: simpan, bagikan, dan suka',
+      (tester) async {
+    await pumpStory(tester, 'story-dewi-dimas');
+
+    expect(find.byTooltip('Simpan cerita'), findsNothing);
+    expect(find.byTooltip('Bagikan'), findsNothing);
+    expect(find.byIcon(Icons.favorite_border), findsNothing);
   });
 
   testWidgets('cerita berbentuk database menyembunyikan bagian yang kosong',
@@ -66,11 +82,21 @@ void main() {
   testWidgets('paket terkait membuka detail paket', (tester) async {
     await pumpStory(tester, 'story-pinus');
 
-    expect(find.text('Paket terkait'), findsOneWidget);
     await tester.tap(find.text('Lihat Paket'));
     await tester.pumpAndSettle();
 
     expect(find.text('HALAMAN PAKET pkg-garden-jakarta'), findsOneWidget);
+  });
+
+  testWidgets('tombol vendor di cerita membuka detail vendornya',
+      (tester) async {
+    await pumpStory(tester, 'story-dewi-dimas');
+
+    expect(find.text('Lihat\nVendor'), findsNWidgets(3));
+    await tester.tap(find.text('Lihat\nVendor').first);
+    await tester.pumpAndSettle();
+
+    expect(find.text('HALAMAN VENDOR vendor-mattana'), findsOneWidget);
   });
 
   testWidgets('id tidak dikenal: pesan tidak ditemukan', (tester) async {

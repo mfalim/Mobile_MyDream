@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:w51/app/theme/app_colors.dart';
 import 'package:w51/app/theme/app_radius.dart';
 import 'package:w51/app/theme/app_typography.dart';
+import 'package:w51/core/config/app_features.dart';
 import 'package:w51/core/utils/formatters.dart';
 
 class CartSummaryCard extends StatelessWidget {
@@ -22,6 +23,8 @@ class CartSummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const claims = AppFeatures.escrowClaims;
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -39,12 +42,11 @@ class CartSummaryCard extends StatelessWidget {
                   style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
                 ),
               ),
-              TextButton.icon(
+              TextButton(
                 onPressed: onTerms,
-                icon: const Icon(Icons.info_outline, size: 16),
-                label: const Text(
-                  'Ketentuan Garansi Aman',
-                  style: TextStyle(fontSize: 12),
+                child: Text(
+                  claims ? 'Ketentuan Garansi Aman' : 'Ketentuan Layanan',
+                  style: const TextStyle(fontSize: 12),
                 ),
               ),
             ],
@@ -53,33 +55,36 @@ class CartSummaryCard extends StatelessWidget {
           _Line('Subtotal Item Terpilih', formatRupiah(subtotal)),
           _Line(
             'Potongan Kupon Promo',
-            discount > 0 ? '- ${formatRupiah(discount)}' : '-',
-            valueColor: discount > 0 ? AppColors.primary : null,
+            '- ${formatRupiah(discount)}',
+            valueColor: AppColors.primary,
           ),
-          const _Line(
-            'Biaya Layanan Escrow Concierge',
-            'GRATIS',
-            valueColor: AppColors.success,
-          ),
+          if (claims)
+            const _Line(
+              'Biaya Layanan Escrow Concierge',
+              'GRATIS',
+              valueColor: AppColors.success,
+            ),
           const Divider(height: 24, color: AppColors.outline),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Expanded(
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    const Text(
                       'Total Nilai Kontrak',
                       style: TextStyle(
                         fontWeight: FontWeight.w700,
                         fontSize: 16,
                       ),
                     ),
-                    SizedBox(height: 2),
+                    const SizedBox(height: 2),
                     Text(
-                      'Termasuk pajak & asuransi venue',
-                      style: TextStyle(
+                      claims
+                          ? 'Termasuk pajak & asuransi venue'
+                          : 'Nilai akhir dihitung saat pesanan dikirim',
+                      style: const TextStyle(
                         color: AppColors.textSecondary,
                         fontSize: 12,
                       ),
@@ -101,29 +106,38 @@ class CartSummaryCard extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(
-                  Icons.verified_outlined,
+                Icon(
+                  claims ? Icons.verified_outlined : Icons.info_outline,
                   size: 20,
                   color: AppColors.primary,
                 ),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: Text.rich(
-                    TextSpan(
-                      style: const TextStyle(fontSize: 13, height: 1.4),
-                      children: [
-                        const TextSpan(text: 'Cukup bayar DP '),
-                        TextSpan(
-                          text: formatRupiah(deposit),
-                          style: const TextStyle(fontWeight: FontWeight.w700),
+                  child: claims
+                      ? Text.rich(
+                          TextSpan(
+                            style: const TextStyle(fontSize: 13, height: 1.4),
+                            children: [
+                              const TextSpan(text: 'Cukup bayar DP '),
+                              TextSpan(
+                                text: formatRupiah(deposit),
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              const TextSpan(
+                                text:
+                                    ' hari ini untuk mengunci tanggal & harga '
+                                    'spesial vendor!',
+                              ),
+                            ],
+                          ),
+                        )
+                      : const Text(
+                          'Pembayaran lewat transfer bank dengan unggah bukti. '
+                          'Pilih DP atau pelunasan di langkah berikutnya.',
+                          style: TextStyle(fontSize: 13, height: 1.4),
                         ),
-                        const TextSpan(
-                          text: ' hari ini untuk mengunci tanggal & harga '
-                              'spesial vendor!',
-                        ),
-                      ],
-                    ),
-                  ),
                 ),
               ],
             ),

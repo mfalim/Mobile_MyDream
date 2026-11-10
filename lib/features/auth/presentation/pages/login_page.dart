@@ -13,6 +13,7 @@ import 'package:w51/features/auth/presentation/widgets/google_sign_in_button.dar
 import 'package:w51/core/widgets/password_field.dart';
 import 'package:w51/app/router/auth_redirect.dart';
 import 'package:w51/features/my_wedding/presentation/providers/couple_provider.dart';
+import 'package:w51/core/config/app_features.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({this.from, super.key});
@@ -177,6 +178,12 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     );
   }
 
+  void _soon(String feature) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Fitur $feature akan segera hadir.')),
+    );
+  }
+
   void _submit() {
     if (!(_formKey.currentState?.validate() ?? false)) return;
     // Email/password login belum terhubung ke API — tampilkan info
@@ -221,13 +228,17 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 validator: validateLoginPassword,
                 onSubmitted: (_) => busy ? null : _submit(),
               ),
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton(
-                  onPressed: busy ? null : () {},
-                  child: const Text('Lupa kata sandi?'),
-                ),
-              ),
+              if (AppFeatures.passwordRecovery)
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed:
+                        busy ? null : () => _soon('Pemulihan kata sandi'),
+                    child: const Text('Lupa kata sandi?'),
+                  ),
+                )
+              else
+                const SizedBox(height: 10),
               const SizedBox(height: 4),
               FilledButton(
                 onPressed: busy ? null : _submit,

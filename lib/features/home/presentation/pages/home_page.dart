@@ -23,6 +23,7 @@ import 'package:w51/features/home/presentation/widgets/service_grid.dart';
 import 'package:w51/features/home/presentation/widgets/wedding_countdown_card.dart';
 import 'package:w51/features/my_wedding/presentation/providers/couple_provider.dart';
 import 'package:w51/features/vendors/presentation/providers/vendor_filter_provider.dart';
+import 'package:w51/core/config/app_features.dart';
 
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
@@ -116,8 +117,7 @@ class _HomeContent extends ConsumerWidget {
             },
           ),
         ],
-        gap,
-        const AuraPayBanner(),
+        if (AppFeatures.payAndInstallments) ...[gap, const AuraPayBanner()],
         if (data.vendors.isNotEmpty) ...[
           gap,
           CuratedVendorsSection(

@@ -1,24 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:w51/app/theme/app_colors.dart';
 import 'package:w51/app/theme/app_typography.dart';
-import 'package:w51/core/widgets/app_image.dart';
+import 'package:w51/core/widgets/avatar_image.dart';
 import 'package:w51/core/widgets/badge_pill.dart';
 import 'package:w51/core/widgets/image_placeholder.dart';
 import 'package:w51/features/my_wedding/domain/entities/profile_data.dart';
 
-enum ProfileStat { boards, vendors, cart }
+enum ProfileStat { boards, vendors, saved, cart }
 
 class ProfileHeaderCard extends StatelessWidget {
   const ProfileHeaderCard({
     required this.profile,
     required this.coupleNames,
     required this.cartCount,
+    required this.savedCount,
     required this.onEditPhoto,
     required this.onSetDate,
     required this.onStat,
     this.weddingDateLabel,
     this.daysLeft,
     this.avatarUrl,
+    this.avatarPath,
     super.key,
   });
 
@@ -29,7 +31,9 @@ class ProfileHeaderCard extends StatelessWidget {
   final String? weddingDateLabel;
   final int? daysLeft;
   final int cartCount;
+  final int savedCount;
   final String? avatarUrl;
+  final String? avatarPath;
   final VoidCallback onEditPhoto;
   final VoidCallback onSetDate;
   final ValueChanged<ProfileStat> onStat;
@@ -45,9 +49,9 @@ class ProfileHeaderCard extends StatelessWidget {
     final stats = <(ProfileStat, int, String)>[
       if (boards != null) (ProfileStat.boards, boards, 'Inspirasi Board'),
       if (vendors != null) (ProfileStat.vendors, vendors, 'Vendor Dihubungi'),
+      (ProfileStat.saved, savedCount, 'Vendor Disimpan'),
       (ProfileStat.cart, cartCount, 'Keranjang Aktif'),
     ];
-
     return Container(
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
@@ -88,7 +92,11 @@ class ProfileHeaderCard extends StatelessWidget {
                   left: 0,
                   right: 0,
                   child: Center(
-                    child: _Avatar(url: avatarUrl, onEdit: onEditPhoto),
+                    child: _Avatar(
+                      url: avatarUrl,
+                      path: avatarPath,
+                      onEdit: onEditPhoto,
+                    ),
                   ),
                 ),
               ],
@@ -246,11 +254,11 @@ class ProfileHeaderCard extends StatelessWidget {
 }
 
 class _Avatar extends StatelessWidget {
-  const _Avatar({required this.url, required this.onEdit});
+  const _Avatar({required this.url, required this.path, required this.onEdit});
 
   final String? url;
+  final String? path;
   final VoidCallback onEdit;
-
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -267,7 +275,7 @@ class _Avatar extends StatelessWidget {
               shape: BoxShape.circle,
             ),
             child: ClipOval(
-              child: AppImage(url: url, icon: Icons.person),
+              child: AvatarImage(path: path, url: url),
             ),
           ),
           Positioned(

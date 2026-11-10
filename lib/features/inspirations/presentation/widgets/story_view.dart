@@ -12,50 +12,33 @@ import 'package:w51/features/inspirations/presentation/widgets/story_vendors.dar
 
 /// Satu cerita lengkap. Dipakai di tab Inspirations (cerita utama) dan di
 /// halaman cerita. Bagian yang datanya kosong tidak ditampilkan.
-class StoryView extends StatefulWidget {
+class StoryView extends StatelessWidget {
   const StoryView({
     required this.story,
-    required this.onPortfolio,
-    required this.onShare,
+    required this.onOpenVendor,
     this.onRelatedPackage,
     super.key,
   });
 
   final RealWeddingStory story;
-  final ValueChanged<StoryVendor> onPortfolio;
-  final VoidCallback onShare;
+  final ValueChanged<StoryVendor> onOpenVendor;
 
   /// Dipanggil dengan id paket terkait; null menyembunyikan kartu paket.
   final ValueChanged<String>? onRelatedPackage;
 
   @override
-  State<StoryView> createState() => _StoryViewState();
-}
-
-class _StoryViewState extends State<StoryView> {
-  // Hanya di memori (prototype).
-  bool _saved = false;
-  bool _liked = false;
-
-  @override
   Widget build(BuildContext context) {
-    final s = widget.story;
+    final s = story;
     const gap = SizedBox(height: AppSpacing.lg);
     final hasBody =
         s.stats.isNotEmpty || s.paragraphs.isNotEmpty || s.quote != null;
-    final baseLikes = s.likes;
     final packageId = s.relatedPackageId;
-    final onPackage = widget.onRelatedPackage;
+    final onPackage = onRelatedPackage;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        StoryHeader(
-          story: s,
-          saved: _saved,
-          onSave: () => setState(() => _saved = !_saved),
-          onShare: widget.onShare,
-        ),
+        StoryHeader(story: s),
         if (hasBody) ...[
           const SizedBox(height: AppSpacing.md),
           StoryBody(stats: s.stats, paragraphs: s.paragraphs, quote: s.quote),
@@ -66,7 +49,7 @@ class _StoryViewState extends State<StoryView> {
           StoryVendors(
             title: s.vendorsTitle ?? 'Vendor Pilihan',
             vendors: s.vendors,
-            onPortfolio: widget.onPortfolio,
+            onOpen: onOpenVendor,
           ),
         ],
         if (s.tips.isNotEmpty) ...[
@@ -77,14 +60,9 @@ class _StoryViewState extends State<StoryView> {
           gap,
           _RelatedPackageCard(onOpen: () => onPackage(packageId)),
         ],
-        if (baseLikes != null || s.reads != null) ...[
+        if (s.likes != null || s.reads != null) ...[
           const SizedBox(height: AppSpacing.md),
-          StoryEngagement(
-            likes: baseLikes == null ? null : baseLikes + (_liked ? 1 : 0),
-            reads: s.reads,
-            liked: _liked,
-            onLike: () => setState(() => _liked = !_liked),
-          ),
+          StoryEngagement(likes: s.likes, reads: s.reads),
         ],
       ],
     );

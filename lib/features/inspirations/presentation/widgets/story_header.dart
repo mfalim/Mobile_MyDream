@@ -7,18 +7,9 @@ import 'package:w51/core/widgets/badge_pill.dart';
 import 'package:w51/features/inspirations/domain/entities/inspiration_entities.dart';
 
 class StoryHeader extends StatelessWidget {
-  const StoryHeader({
-    required this.story,
-    required this.saved,
-    required this.onSave,
-    required this.onShare,
-    super.key,
-  });
+  const StoryHeader({required this.story, super.key});
 
   final RealWeddingStory story;
-  final bool saved;
-  final VoidCallback onSave;
-  final VoidCallback onShare;
 
   String _initials(String name) => name
       .split(' ')
@@ -46,42 +37,33 @@ class StoryHeader extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            if (tag != null)
-              BadgePill(
-                tag.toUpperCase(),
-                background: AppColors.coral.withValues(alpha: 0.25),
-                foreground: AppColors.primary,
-              ),
-            if (location != null) ...[
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  tag != null ? '• $location' : location,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: AppColors.textSecondary,
-                    fontSize: 13,
+        if (tag != null || location != null) ...[
+          Row(
+            children: [
+              if (tag != null)
+                BadgePill(
+                  tag.toUpperCase(),
+                  background: AppColors.coral.withValues(alpha: 0.25),
+                  foreground: AppColors.primary,
+                ),
+              if (location != null) ...[
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    tag != null ? '• $location' : location,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 13,
+                    ),
                   ),
                 ),
-              ),
-            ] else
-              const Spacer(),
-            IconButton(
-              tooltip: saved ? 'Hapus dari simpanan' : 'Simpan cerita',
-              onPressed: onSave,
-              icon: Icon(saved ? Icons.bookmark : Icons.bookmark_border),
-            ),
-            IconButton(
-              tooltip: 'Bagikan',
-              onPressed: onShare,
-              icon: const Icon(Icons.share_outlined),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
+              ],
+            ],
+          ),
+          const SizedBox(height: 12),
+        ],
         Text(story.title, style: AppTypography.heading(26)),
         if (excerpt != null) ...[
           const SizedBox(height: 10),
