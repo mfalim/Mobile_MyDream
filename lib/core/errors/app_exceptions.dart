@@ -62,6 +62,19 @@ class ServerException implements Exception {
   String toString() => 'ServerException($statusCode): $message';
 }
 
+/// Akun pengguna tidak diizinkan masuk ke aplikasi mobile (mis. Admin atau Vendor).
+class RoleRestrictedException implements Exception {
+  const RoleRestrictedException(this.role, [
+    this.message = 'Akun Admin dan Vendor hanya dapat diakses melalui portal Web MyDream di browser.',
+  ]);
+
+  final String role;
+  final String message;
+
+  @override
+  String toString() => 'RoleRestrictedException ($role): $message';
+}
+
 /// Pesan untuk pengguna dari sebuah kegagalan. Kegagalan jaringan dan server
 /// punya pesan sendiri; selain itu memakai [fallback].
 String userMessage(Object error, {required String fallback}) => switch (error) {
@@ -69,5 +82,6 @@ String userMessage(Object error, {required String fallback}) => switch (error) {
       UnauthorizedException(:final message) => message,
       ServerException(:final message) => message,
       ValidationException(:final message) => message,
+      RoleRestrictedException(:final message) => message,
       _ => fallback,
     };

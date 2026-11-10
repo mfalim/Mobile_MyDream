@@ -3,11 +3,17 @@ class CoupleProfile {
     required this.brideName,
     required this.groomName,
     required this.weddingDate,
+    this.bridePhone,
+    this.groomPhone,
+    this.email,
   });
 
   final String brideName;
   final String groomName;
   final DateTime weddingDate;
+  final String? bridePhone;
+  final String? groomPhone;
+  final String? email;
 
   /// "Clarissa & Adrian" (nama depan keduanya), untuk kartu Home.
   String get shortNames => '${_first(brideName)} & ${_first(groomName)}';

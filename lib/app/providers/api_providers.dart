@@ -11,12 +11,9 @@ final tokenStorageProvider = Provider<TokenStorage>(
       AppConfig.useMockData ? MemoryTokenStorage() : const SecureTokenStorage(),
 );
 
-/// Hanya dibaca oleh fitur yang sedang memakai API sungguhan.
+/// Klien API tunggal untuk seluruh app. Selalu tersedia meski mode mock aktif
+/// (beberapa fitur mungkin tetap memanggil API meski mock=true).
 final apiClientProvider = Provider<ApiClient>((ref) {
-  assert(
-    AppConfig.apiBaseUrl.isNotEmpty,
-    'Isi --dart-define=API_BASE_URL=https://.../api',
-  );
   final tokens = ref.watch(tokenStorageProvider);
   final client = ApiClient(
     baseUrl: AppConfig.apiBaseUrl,

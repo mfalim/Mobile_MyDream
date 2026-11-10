@@ -5,6 +5,8 @@ class AppUser {
     required this.email,
     this.hasPassword = true,
     this.avatarUrl,
+    this.role,
+    this.callSign,
   });
 
   final String id;
@@ -17,11 +19,24 @@ class AppUser {
   /// URL foto akun; null memakai ikon bawaan.
   final String? avatarUrl;
 
-  AppUser copyWith({String? name}) => AppUser(
+  /// Role dari Laravel: 'client', 'member', 'admin', 'vendor'.
+  final String? role;
+
+  /// Call Sign radio HT untuk akun dengan role 'member'.
+  final String? callSign;
+
+  AppUser copyWith({
+    String? name,
+    String? role,
+    String? callSign,
+  }) =>
+      AppUser(
         id: id,
         name: name ?? this.name,
         email: email,
         hasPassword: hasPassword,
         avatarUrl: avatarUrl,
+        role: role ?? this.role,
+        callSign: callSign ?? this.callSign,
       );
 }
