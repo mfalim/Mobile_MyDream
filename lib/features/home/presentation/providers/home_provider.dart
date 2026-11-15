@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:w51/core/config/app_config.dart';
 import 'package:w51/features/home/data/datasources/home_mock_datasource.dart';
 import 'package:w51/features/home/data/repositories/home_repository_impl.dart';
 import 'package:w51/features/home/domain/entities/home_entities.dart';
@@ -12,7 +13,7 @@ final homeRepositoryProvider = Provider<HomeRepository>(
     vendors: ref.watch(vendorsRepositoryProvider),
     packages: ref.watch(packagesRepositoryProvider),
     inspirations: ref.watch(inspirationsRepositoryProvider),
-    progress: const HomeMockDatasource(),
+    progress: AppConfig.useMockData ? const HomeMockDatasource() : null,
   ),
 );
 

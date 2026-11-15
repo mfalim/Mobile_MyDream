@@ -1,11 +1,13 @@
 import 'package:w51/core/errors/app_exceptions.dart';
+import 'package:w51/features/vendors/data/datasources/vendor_detail_datasource.dart';
 import 'package:w51/features/vendors/data/models/vendor_detail_model.dart';
 import 'package:w51/features/vendors/domain/entities/vendor_detail.dart';
 import 'package:w51/features/vendors/data/datasources/vendor_db_samples.dart';
 
 /// MOCK: meniru jawaban server (GET /vendors/{id}). Bentuk datanya, termasuk
 /// nama kunci snake_case, adalah rancangan kontrak API. Bukan data asli.
-class VendorDetailMockDatasource {
+class VendorDetailMockDatasource implements VendorDetailDatasource {
+  @override
   Future<VendorDetail> fetch(String id) async {
     final json = _responses[id] ?? kDatabaseShapedVendorDetails[id];
     if (json == null) throw NotFoundException('vendor $id');

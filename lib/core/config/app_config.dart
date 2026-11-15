@@ -20,9 +20,9 @@ abstract final class AppConfig {
   /// Web Client ID dari Google Cloud Console (OAuth 2.0 → "Web application").
   /// Harus sama dengan nilai GOOGLE_CLIENT_ID di file .env Laravel.
   /// Tanpa nilai ini, Google Sign-In tidak dapat menghasilkan ID token yang valid.
-  static const googleServerClientId = String.fromEnvironment(
+  static const googleServerClientId = String.fromEnvironment( 
     'GOOGLE_SERVER_CLIENT_ID',
-    defaultValue: '948802797315-o7b3p6fjeje28kf7vqr3mppoq59kf3df.apps.googleusercontent.com',
+    defaultValue: '948802797315-ht84ukn6mfvku1u2uhga0862bqrq3t6a.apps.googleusercontent.com',
   );
 
   /// Nomor WhatsApp admin, format internasional tanpa "+". Nomor bawaan di

@@ -16,7 +16,7 @@ class HomeRepositoryImpl implements HomeRepository {
     required VendorsRepository vendors,
     required PackagesRepository packages,
     required InspirationsRepository inspirations,
-    required HomeMockDatasource progress,
+    HomeMockDatasource? progress,
   })  : _vendors = vendors,
         _packages = packages,
         _inspirations = inspirations,
@@ -25,7 +25,7 @@ class HomeRepositoryImpl implements HomeRepository {
   final VendorsRepository _vendors;
   final PackagesRepository _packages;
   final InspirationsRepository _inspirations;
-  final HomeMockDatasource _progress;
+  final HomeMockDatasource? _progress;
 
   // Mengganti catchError dengan try-catch async agar aman dari error tipe data Future
   static Future<T> _orElse<T>(Future<T> future, T fallback) async {
@@ -48,10 +48,9 @@ class HomeRepositoryImpl implements HomeRepository {
       _inspirations.load(),
       null,
     );
-    final progressFuture = _orElse<WeddingCountdown?>(
-      _progress.fetchProgress(),
-      null,
-    );
+    final progressFuture = _progress == null
+        ? Future<WeddingCountdown?>.value()
+        : _orElse<WeddingCountdown?>(_progress.fetchProgress(), null);
 
     return HomeComposer.compose(
       vendors: await vendorsFuture,

@@ -1,8 +1,9 @@
 import 'package:w51/core/errors/app_exceptions.dart';
+import 'package:w51/features/support/data/datasources/support_datasource.dart';
 import 'package:w51/features/support/domain/entities/support_report.dart';
 
 /// MOCK: meniru server (POST /support/reports). Nomor tiket nanti dari server.
-class SupportMockDatasource {
+class SupportMockDatasource implements SupportDatasource {
   const SupportMockDatasource({
     this.delay = const Duration(milliseconds: 600),
   });
@@ -10,6 +11,7 @@ class SupportMockDatasource {
   final Duration delay;
   static int _sequence = 1000;
 
+  @override
   Future<String> submit(SupportReport report) async {
     await Future<void>.delayed(delay);
     if (!kReportCategories.contains(report.category)) {

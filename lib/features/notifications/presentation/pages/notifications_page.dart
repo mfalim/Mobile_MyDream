@@ -46,7 +46,21 @@ class NotificationsPage extends ConsumerWidget {
         title: Text('Notifikasi', style: AppTypography.heading(20)),
         actions: [
           TextButton(
-            onPressed: unread == 0 ? null : controller.markAllRead,
+            onPressed: unread == 0
+                ? null
+                : () async {
+                    try {
+                      await controller.markAllRead();
+                    } catch (_) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Notifikasi gagal diperbarui.'),
+                          ),
+                        );
+                      }
+                    }
+                  },
             child: const Text('Tandai dibaca'),
           ),
         ],
@@ -73,13 +87,25 @@ class NotificationsPage extends ConsumerWidget {
                 separatorBuilder: (context, i) => const SizedBox(height: 10),
                 itemBuilder: (context, i) {
                   final n = items[i];
+                  final router = GoRouter.of(context);
                   return _NotificationTile(
                     item: n,
                     icon: _icon(n.kind),
-                    onTap: () {
-                      controller.markRead(n.id);
+                    onTap: () async {
+                      try {
+                        await controller.markRead(n.id);
+                      } catch (_) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Notifikasi gagal diperbarui.'),
+                            ),
+                          );
+                        }
+                        return;
+                      }
                       final route = n.route;
-                      if (route != null) context.push(safeInternalPath(route));
+                      if (route != null) router.push(safeInternalPath(route));
                     },
                   );
                 },

@@ -1,7 +1,9 @@
+import 'package:w51/features/cart/data/datasources/voucher_datasource.dart';
 import 'package:w51/features/cart/domain/entities/voucher.dart';
 
 /// MOCK DATA: contoh untuk prototype, BUKAN data dari server.
-class VoucherMockDatasource {
+class VoucherMockDatasource implements VoucherDatasource {
+  @override
   Future<List<Voucher>> fetch() async => const [
         Voucher(
           code: 'DREAMWEDDING',

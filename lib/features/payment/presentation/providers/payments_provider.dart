@@ -1,12 +1,19 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:w51/app/providers/api_providers.dart';
+import 'package:w51/core/config/app_config.dart';
 import 'package:w51/features/payment/data/datasources/payments_mock_datasource.dart';
+import 'package:w51/features/payment/data/datasources/payments_remote_datasource.dart';
 import 'package:w51/features/payment/data/repositories/payments_repository_impl.dart';
 import 'package:w51/features/payment/domain/entities/bank_account.dart';
 import 'package:w51/features/payment/domain/entities/order_submission.dart';
 import 'package:w51/features/payment/domain/repositories/payments_repository.dart';
 
 final paymentsRepositoryProvider = Provider<PaymentsRepository>(
-  (ref) => PaymentsRepositoryImpl(PaymentsMockDatasource()),
+  (ref) => PaymentsRepositoryImpl(
+    AppConfig.useMockData
+        ? PaymentsMockDatasource()
+        : PaymentsRemoteDatasource(ref.watch(apiClientProvider)),
+  ),
 );
 
 final bankAccountsProvider = FutureProvider<List<BankAccount>>(

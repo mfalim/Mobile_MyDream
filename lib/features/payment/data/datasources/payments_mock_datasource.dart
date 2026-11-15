@@ -1,16 +1,18 @@
 import 'package:w51/core/errors/app_exceptions.dart';
+import 'package:w51/features/payment/data/datasources/payments_datasource.dart';
 import 'package:w51/features/payment/domain/entities/bank_account.dart';
 import 'package:w51/features/payment/domain/entities/order_submission.dart';
 
 /// MOCK: meniru server. Nomor rekening di bawah adalah contoh, BUKAN rekening
 /// asli. Daftar rekening dan nomor invoice nanti dari server.
-class PaymentsMockDatasource {
+class PaymentsMockDatasource implements PaymentsDatasource {
   PaymentsMockDatasource({DateTime Function()? clock})
       : _clock = clock ?? DateTime.now;
 
   final DateTime Function() _clock;
   static int _sequence = 1000;
 
+  @override
   Future<List<BankAccount>> fetchBankAccounts() async => const [
         BankAccount(
           id: 'bca',
@@ -26,6 +28,7 @@ class PaymentsMockDatasource {
         ),
       ];
 
+  @override
   Future<OrderReceipt> submit(OrderSubmission s) async {
     await Future<void>.delayed(const Duration(milliseconds: 800));
 

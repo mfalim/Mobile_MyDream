@@ -22,6 +22,7 @@ class FakeAdapter implements HttpClientAdapter {
     Future<void>? cancelFuture,
   ) async {
     requests.add(options);
+    await requestStream?.drain<void>();
     return handler(options);
   }
 
