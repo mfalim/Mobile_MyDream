@@ -2,4 +2,6 @@ import 'package:w51/features/notifications/domain/entities/notification_item.dar
 
 abstract interface class NotificationsRepository {
   Future<List<NotificationItem>> load();
+  Future<void> markRead(String id);
+  Future<void> markAllRead();
 }

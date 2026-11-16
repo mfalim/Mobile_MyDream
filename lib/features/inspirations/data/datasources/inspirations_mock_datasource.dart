@@ -1,16 +1,19 @@
 import 'package:w51/core/errors/app_exceptions.dart';
+import 'package:w51/features/inspirations/data/datasources/inspirations_datasource.dart';
 import 'package:w51/features/inspirations/data/models/story_model.dart';
 import 'package:w51/features/inspirations/domain/entities/inspiration_entities.dart';
 
 /// MOCK: meniru server (GET /articles dan GET /articles/{id}). Bukan data asli.
 /// Cerita pertama berisi semua bagian opsional; tiga cerita lain berbentuk data
 /// database (hanya kolom `articles`) untuk menguji tampilan minimal.
-class InspirationsMockDatasource {
+class InspirationsMockDatasource implements InspirationsDatasource {
+  @override
   Future<InspirationsData> fetch() async => InspirationsData(
         story: StoryModel.story(_stories.first),
         more: [for (final json in _stories.skip(1)) StoryModel.teaser(json)],
       );
 
+  @override
   Future<RealWeddingStory> fetchStory(String id) async {
     final json = _stories.where((j) => j['id'] == id).firstOrNull;
     if (json == null) throw NotFoundException('story $id');

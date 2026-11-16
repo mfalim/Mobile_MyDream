@@ -27,6 +27,7 @@ class OrderSubmission {
     required this.proofName,
     required this.proofPath,
     required this.checkout,
+    this.vendorIds = const [],
     this.voucherCode,
   });
 
@@ -39,6 +40,7 @@ class OrderSubmission {
   final String bankAccountId;
   final String proofName;
   final String proofPath;
+  final List<String> vendorIds;
   final String? voucherCode;
   final CheckoutDetails checkout;
 }

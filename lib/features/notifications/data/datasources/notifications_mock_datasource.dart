@@ -1,8 +1,10 @@
+import 'package:w51/features/notifications/data/datasources/notifications_datasource.dart';
 import 'package:w51/features/notifications/domain/entities/notification_item.dart';
 
 /// MOCK DATA: contoh untuk prototype, BUKAN data dari server.
 /// `route` meniru alamat tujuan yang nanti dikirim server.
-class NotificationsMockDatasource {
+class NotificationsMockDatasource implements NotificationsDatasource {
+  @override
   Future<List<NotificationItem>> fetch() async => const [
         NotificationItem(
           id: 'n-1',
@@ -45,4 +47,10 @@ class NotificationsMockDatasource {
           read: true,
         ),
       ];
+
+  @override
+  Future<void> markRead(String id) async {}
+
+  @override
+  Future<void> markAllRead() async {}
 }

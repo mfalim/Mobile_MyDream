@@ -1,9 +1,11 @@
 import 'package:w51/core/errors/app_exceptions.dart';
+import 'package:w51/features/info/data/datasources/info_datasource.dart';
 import 'package:w51/features/info/domain/entities/info_document.dart';
 
 /// MOCK: teks contoh untuk prototype, BUKAN ketentuan resmi. Teks resmi
 /// nanti diisi oleh tim dan diambil dari server.
-class InfoMockDatasource {
+class InfoMockDatasource implements InfoDatasource {
+  @override
   Future<InfoDocument> fetch(String slug) async {
     final doc = _documents[slug];
     if (doc == null) throw NotFoundException('info $slug');

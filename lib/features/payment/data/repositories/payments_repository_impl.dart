@@ -1,4 +1,4 @@
-import 'package:w51/features/payment/data/datasources/payments_mock_datasource.dart';
+import 'package:w51/features/payment/data/datasources/payments_datasource.dart';
 import 'package:w51/features/payment/domain/entities/bank_account.dart';
 import 'package:w51/features/payment/domain/entities/order_submission.dart';
 import 'package:w51/features/payment/domain/repositories/payments_repository.dart';
@@ -6,7 +6,7 @@ import 'package:w51/features/payment/domain/repositories/payments_repository.dar
 class PaymentsRepositoryImpl implements PaymentsRepository {
   const PaymentsRepositoryImpl(this._datasource);
 
-  final PaymentsMockDatasource _datasource;
+  final PaymentsDatasource _datasource;
 
   @override
   Future<List<BankAccount>> loadBankAccounts() =>

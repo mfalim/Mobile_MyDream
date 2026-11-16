@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:w51/features/vendors/data/datasources/vendors_datasource.dart';
 import 'package:w51/features/vendors/domain/entities/vendor_entities.dart';
 
 /// MOCK DATA: contoh untuk prototype, BUKAN data dari server.
 /// Harga, nama, dan label paket harus sama dengan data detail
 /// (vendor_detail_mock_datasource.dart); tes memeriksanya.
-class VendorsMockDatasource {
+class VendorsMockDatasource implements VendorsDatasource {
+  @override
   Future<VendorsData> fetch() async {
     return const VendorsData(
       popularSearches: ['Glasshouse Bali', 'Intimate Jakarta', 'Garden Party'],

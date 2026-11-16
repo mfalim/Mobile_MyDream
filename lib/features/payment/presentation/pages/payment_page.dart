@@ -144,6 +144,13 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
           bankAccountId: bankId,
           proofName: proof.name,
           proofPath: proof.path,
+          vendorIds: item.isCustom
+              ? ref
+                  .read(cartProvider)
+                  .customVendors
+                  .map((vendor) => vendor.vendorId)
+                  .toList()
+              : const [],
           voucherCode: voucherCode,
           checkout: details,
         ),

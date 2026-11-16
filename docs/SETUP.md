@@ -26,8 +26,8 @@ Semua pengaturan ada di `lib/core/config/app_config.dart`.
 
 | Nama | Bawaan | Fungsi |
 |---|---|---|
-| `USE_MOCK` | `true` | `true` memakai data contoh. `false` memakai API untuk fitur yang sudah punya versi API |
-| `API_BASE_URL` | kosong | Alamat dasar API, mis. `https://example.com/api` |
+| `USE_MOCK` | `false` | `true` memakai data contoh. `false` memakai API untuk fitur yang sudah punya versi API |
+| `API_BASE_URL` | `http://127.0.0.1:8000/api` | Alamat dasar API |
 | `ADMIN_WA` | `628000000000` (contoh) | Nomor WhatsApp admin, format internasional tanpa `+` |
 | `APP_VERSION` | `1.0.0` | Nomor versi yang tampil di Profil |
 
@@ -37,11 +37,11 @@ Contoh:
 flutter run -d <id> --dart-define=USE_MOCK=false --dart-define=API_BASE_URL=https://example.com/api
 ```
 
-Fitur yang **belum** punya versi API tetap memakai data contoh meskipun `USE_MOCK=false`. Saat ini hanya **Paket** yang sudah punya versi API.
+Dengan `USE_MOCK=false`, Home dirakit dari katalog vendor/kategori, paket, dan artikel API. Versi API juga tersedia untuk detail vendor, halaman informasi, voucher, rekening bank dan pengiriman pesanan, laporan kendala, serta notifikasi. Notifikasi, voucher, pengiriman pesanan, dan laporan kendala memerlukan sesi pengguna. Data kemajuan Home yang belum punya endpoint tidak ditampilkan pada mode API. Fitur tanpa endpoint tetap memakai penyimpanan lokal atau tidak menampilkan data contoh.
 
 ### Server palsu untuk uji lokal
 
-`tool/fake_api.py` menyajikan `GET /api/packages` dan `GET /api/packages/{id}`:
+`tool/fake_api.py` menyajikan endpoint paket untuk uji lokal:
 
 ```bash
 python3 tool/fake_api.py                       # terminal 1
