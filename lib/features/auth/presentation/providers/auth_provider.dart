@@ -115,6 +115,49 @@ class AuthController extends Notifier<AppUser?> {
     return _applyAuthData(data);
   }
 
+  /// Login dengan Username / Email + Password (`POST /api/auth/login`).
+  Future<GoogleAuthResult> signInWithCredentials({
+    required String login,
+    required String password,
+  }) async {
+    final client = ref.read(apiClientProvider);
+    final dynamic raw = await client.post(
+      '/auth/login',
+      body: {
+        'login': login.trim(),
+        'password': password,
+        'device_name': 'Flutter Mobile',
+      },
+    );
+    final data = raw as Map<String, dynamic>;
+    return _applyAuthData(data);
+  }
+
+  /// Registrasi akun Klien baru dengan Username (+ Email opsional) & Password (`POST /api/auth/register`).
+  Future<GoogleAuthResult> registerWithCredentials({
+    required String name,
+    required String username,
+    String? email,
+    required String password,
+    required String passwordConfirmation,
+  }) async {
+    final client = ref.read(apiClientProvider);
+    final trimmedEmail = email?.trim() ?? '';
+    final dynamic raw = await client.post(
+      '/auth/register',
+      body: {
+        'name': name.trim(),
+        'username': username.trim(),
+        if (trimmedEmail.isNotEmpty) 'email': trimmedEmail,
+        'password': password,
+        'password_confirmation': passwordConfirmation,
+        'device_name': 'Flutter Mobile',
+      },
+    );
+    final data = raw as Map<String, dynamic>;
+    return _applyAuthData(data);
+  }
+
   /// Simpan Sanctum token, sinkronkan profil `clients` dari MySQL, dan perbarui state `authProvider`.
   Future<GoogleAuthResult> _applyAuthData(Map<String, dynamic> data) async {
     // 1. Bangun AppUser dan periksa role

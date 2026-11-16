@@ -172,9 +172,9 @@ class _AccountSettingsPageState extends ConsumerState<AccountSettingsPage> {
                 const SizedBox(height: 8),
                 BadgePill(
                   user.hasPassword
-                      ? 'Masuk dengan email'
+                      ? 'Masuk dengan Username / Password'
                       : 'Masuk dengan Google',
-                  icon: user.hasPassword ? Icons.mail_outline : Icons.verified,
+                  icon: user.hasPassword ? Icons.lock_outline : Icons.verified,
                   background: AppColors.surfaceTint,
                   foreground: AppColors.primary,
                 ),
@@ -196,18 +196,34 @@ class _AccountSettingsPageState extends ConsumerState<AccountSettingsPage> {
                       textCapitalization: TextCapitalization.words,
                       validator: validateName,
                     ),
-                    const SizedBox(height: 14),
-                    PickerField(
-                      label: 'Email',
-                      icon: Icons.mail_outline,
-                      value: user.email,
-                      subtitle: 'Email tidak dapat diubah',
-                      trailing: const Icon(
-                        Icons.lock_outline,
-                        size: 18,
-                        color: AppColors.textSecondary,
+                    if (user.username != null && user.username!.isNotEmpty) ...[
+                      const SizedBox(height: 14),
+                      PickerField(
+                        label: 'Username',
+                        icon: Icons.alternate_email,
+                        value: '@${user.username}',
+                        subtitle: 'Digunakan untuk masuk ke aplikasi',
+                        trailing: const Icon(
+                          Icons.lock_outline,
+                          size: 18,
+                          color: AppColors.textSecondary,
+                        ),
                       ),
-                    ),
+                    ],
+                    if (user.email.isNotEmpty && !user.email.startsWith('@')) ...[
+                      const SizedBox(height: 14),
+                      PickerField(
+                        label: 'Email',
+                        icon: Icons.mail_outline,
+                        value: user.email,
+                        subtitle: 'Email tidak dapat diubah',
+                        trailing: const Icon(
+                          Icons.lock_outline,
+                          size: 18,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
                     const SizedBox(height: 16),
                     ListenableBuilder(
                       listenable: _name,

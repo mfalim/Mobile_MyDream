@@ -8,7 +8,8 @@ import 'package:w51/features/my_wedding/domain/entities/couple_profile.dart';
 
 /// Satu-satunya sumber nama dan tanggal pernikahan untuk semua layar.
 /// `null` berarti belum diisi. Di mode data contoh disimpan di perangkat;
-/// dengan API sungguhan dibaca dan disimpan lewat /client/profile.
+/// dengan API sungguhan dibaca dan disimpan lewat /me/couple.
+/// `null` berarti belum diisi (di MySQL tabel `clients` belum ada).
 final coupleProvider = NotifierProvider<CoupleController, CoupleProfile?>(
   CoupleController.new,
 );
@@ -21,52 +22,39 @@ class CoupleController extends Notifier<CoupleProfile?> {
     );
   }
 
-  /// Sinkronkan profil dari data MySQL (tabel `clients`).
-  void syncFromServer(Map<String, dynamic>? clientData, {required bool isClientRole}) {
-    if (!isClientRole || clientData == null) {
-      if (!isClientRole) state = null;
-      return;
-    }
-    final profile = CoupleCodec.fromApiClient(clientData, existing: state);
-    if (profile != null) {
-      state = profile;
-      ref
-          .read(localStorageProvider)
-          .setJson(kStorageCouple, CoupleCodec.encode(profile));
-    }
-  }
-
-  /// Simpan data mempelai baik lokal maupun ke API Laravel (`/client/profile`).
+  /// Simpan profil mempelai ke lokal dan ke server Laravel (`PUT /api/client/profile`).
   Future<void> save(CoupleProfile profile) async {
     final d = profile.weddingDate;
-    final updated = CoupleProfile(
+    final normalized = CoupleProfile(
       brideName: profile.brideName.trim(),
       groomName: profile.groomName.trim(),
+      weddingDate: DateTime(d.year, d.month, d.day),
       bridePhone: profile.bridePhone?.trim(),
       groomPhone: profile.groomPhone?.trim(),
       email: profile.email?.trim(),
-      weddingDate: DateTime(d.year, d.month, d.day),
     );
 
-    state = updated;
+    state = normalized;
     ref
         .read(localStorageProvider)
-        .setJson(kStorageCouple, CoupleCodec.encode(updated));
+        .setJson(kStorageCouple, CoupleCodec.encode(normalized));
 
-    // Jika mode API dan user login sebagai client, kirim ke PUT /client/profile
     if (!AppConfig.useMockData) {
       final token = await ref.read(tokenStorageProvider).read();
       if (token != null && token.isNotEmpty) {
         try {
           final client = ref.read(apiClientProvider);
+          final emailVal = normalized.email?.trim() ?? '';
+          final validEmail =
+              emailVal.isNotEmpty && !emailVal.startsWith('@') ? emailVal : null;
           await client.put(
             '/client/profile',
             body: {
-              'groom_name': updated.groomName,
-              'bride_name': updated.brideName,
-              'groom_phone': updated.groomPhone ?? '',
-              'bride_phone': updated.bridePhone ?? '',
-              'email': updated.email ?? '',
+              'groom_name': normalized.groomName,
+              'bride_name': normalized.brideName,
+              'groom_phone': normalized.groomPhone ?? '',
+              'bride_phone': normalized.bridePhone ?? '',
+              if (validEmail != null) 'email': validEmail,
             },
           );
         } catch (_) {
@@ -74,6 +62,17 @@ class CoupleController extends Notifier<CoupleProfile?> {
         }
       }
     }
+  }
+
+  /// Sinkronkan state dari data `client` yang dikembalikan oleh API Laravel (`/auth/google` atau `/me`).
+  void syncFromServer(Map<String, dynamic>? clientJson, {required bool isClientRole}) {
+    if (!isClientRole) return;
+    if (clientJson == null) {
+      state = null;
+      return;
+    }
+    final mapped = CoupleCodec.fromApiClient(clientJson, existing: state);
+    state = mapped;
   }
 
   void clear() => state = null;

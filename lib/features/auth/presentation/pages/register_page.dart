@@ -27,6 +27,7 @@ class RegisterPage extends ConsumerStatefulWidget {
 class _RegisterPageState extends ConsumerState<RegisterPage> {
   final _formKey = GlobalKey<FormState>();
   final _name = TextEditingController();
+  final _username = TextEditingController();
   final _email = TextEditingController();
   final _password = TextEditingController();
   final _confirm = TextEditingController();
@@ -37,6 +38,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   @override
   void dispose() {
     _name.dispose();
+    _username.dispose();
     _email.dispose();
     _password.dispose();
     _confirm.dispose();
@@ -55,6 +57,23 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
       );
   }
 
+  void _navigateAfterAuth(GoogleAuthResult result) {
+    final router = GoRouter.of(context);
+    if (result.nextStep == 'complete_profile') {
+      final dest = result.user.role == 'client'
+          ? AppRoutes.coupleSetupPath(from: widget.from ?? AppRoutes.home)
+          : safeInternalPath(widget.from);
+      router.go(dest);
+    } else {
+      final dest = postLoginDestination(
+        from: widget.from,
+        needsCoupleSetup:
+            ref.read(coupleProvider) == null && result.user.role == 'client',
+      );
+      router.go(dest);
+    }
+  }
+
   /// Daftar/masuk dengan Google — sama dengan LoginPage, karena API Laravel
   /// menggunakan createOrLogin (buat akun baru bila belum ada).
   Future<void> _google() async {
@@ -66,21 +85,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
           await ref.read(authProvider.notifier).signInWithGoogle();
 
       if (!mounted) return;
-      final router = GoRouter.of(context);
-
-      if (result.nextStep == 'complete_profile') {
-        final dest = result.user.role == 'client'
-            ? AppRoutes.coupleSetupPath(from: widget.from ?? AppRoutes.home)
-            : safeInternalPath(widget.from);
-        router.go(dest);
-      } else {
-        final dest = postLoginDestination(
-          from: widget.from,
-          needsCoupleSetup: ref.read(coupleProvider) == null &&
-              result.user.role == 'client',
-        );
-        router.go(dest);
-      }
+      _navigateAfterAuth(result);
     } on UnauthorizedException catch (e) {
       _showError(e.message);
     } on ServerException catch (e) {
@@ -101,12 +106,37 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     }
   }
 
-  void _submit() {
+  Future<void> _submit() async {
+    if (_busy != null) return;
     if (!(_formKey.currentState?.validate() ?? false)) return;
-    // Email/password register belum terhubung ke API — tampilkan info
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Daftar email belum tersedia. Gunakan Google.')),
-    );
+
+    setState(() => _busy = 'email');
+    try {
+      final result = await ref
+          .read(authProvider.notifier)
+          .registerWithCredentials(
+            name: _name.text,
+            username: _username.text,
+            email: _email.text,
+            password: _password.text,
+            passwordConfirmation: _confirm.text,
+          );
+
+      if (!mounted) return;
+      _navigateAfterAuth(result);
+    } on ValidationException catch (e) {
+      _showError(e.message);
+    } on UnauthorizedException catch (e) {
+      _showError(e.message);
+    } on ServerException catch (e) {
+      _showError(e.message);
+    } on NetworkException catch (e) {
+      _showError(e.message);
+    } catch (e) {
+      _showError('Pendaftaran gagal: $e');
+    } finally {
+      if (mounted) setState(() => _busy = null);
+    }
   }
 
   @override
@@ -119,37 +149,46 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
       onBack: context.canPop() ? context.pop : null,
       fields: [
         GoogleSignInButton(
-          label: 'Daftar dengan Google',
+          label: 'Daftar Instan dengan Google',
           loading: _busy == 'google',
           onPressed: busy ? null : _google,
         ),
-        const AuthDivider('atau daftar dengan email'),
+        const AuthDivider('atau daftar manual'),
         Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               AppTextField(
-                label: 'Nama Lengkap',
+                label: 'Nama Panggilan / Lengkap',
+                required: true,
                 controller: _name,
-                hint: 'Nama kamu',
+                hint: 'Contoh: Surya & Putri',
                 textCapitalization: TextCapitalization.words,
                 validator: validateName,
               ),
               const SizedBox(height: 14),
               AppTextField(
-                label: 'Email',
+                label: 'Username',
+                required: true,
+                controller: _username,
+                hint: 'Contoh: suryaputri',
+                validator: validateUsername,
+              ),
+              const SizedBox(height: 14),
+              AppTextField(
+                label: 'Email (Opsional)',
                 controller: _email,
-                hint: 'nama@email.com',
+                hint: 'nama@email.com (boleh dikosongkan)',
                 keyboardType: TextInputType.emailAddress,
-                validator: validateEmail,
+                validator: validateOptionalEmail,
               ),
               const SizedBox(height: 14),
               PasswordField(
                 label: 'Kata Sandi',
                 controller: _password,
-                hint: 'Buat kata sandi',
-                helperText: 'Minimal 8 karakter, kombinasi huruf dan angka.',
+                hint: 'Buat kata sandi (min. 6 karakter)',
+                helperText: 'Minimal 6 karakter.',
                 textInputAction: TextInputAction.next,
                 validator: validateNewPassword,
               ),

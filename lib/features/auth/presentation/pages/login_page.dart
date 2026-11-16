@@ -52,6 +52,30 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       );
   }
 
+  void _navigateAfterAuth(GoogleAuthResult result) {
+    final router = GoRouter.of(context);
+    if (result.user.role == 'member') {
+      if (result.nextStep == 'complete_profile' ||
+          result.user.callSign == null ||
+          result.user.callSign!.isEmpty) {
+        router.go(AppRoutes.memberCompleteProfile);
+      } else {
+        router.go(AppRoutes.memberDashboard);
+      }
+    } else if (result.nextStep == 'complete_profile') {
+      final dest = AppRoutes.coupleSetupPath(from: widget.from ?? AppRoutes.home);
+      router.go(dest);
+    } else {
+      final dest = postLoginDestination(
+        from: widget.from,
+        role: result.user.role,
+        needsCoupleSetup:
+            ref.read(coupleProvider) == null && result.user.role == 'client',
+      );
+      router.go(dest);
+    }
+  }
+
   /// Login dengan Google via API Laravel.
   Future<void> _google() async {
     if (_busy != null) return;
@@ -62,31 +86,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           await ref.read(authProvider.notifier).signInWithGoogle();
 
       if (!mounted) return;
-      final router = GoRouter.of(context);
-
-      // Tentukan tujuan navigasi berdasarkan next_step & role dari API
-      if (result.user.role == 'member') {
-        if (result.nextStep == 'complete_profile' ||
-            result.user.callSign == null ||
-            result.user.callSign!.isEmpty) {
-          router.go(AppRoutes.memberCompleteProfile);
-        } else {
-          router.go(AppRoutes.memberDashboard);
-        }
-      } else if (result.nextStep == 'complete_profile') {
-        // Belum lengkapi profil client → arahkan ke couple setup
-        final dest = AppRoutes.coupleSetupPath(from: widget.from ?? AppRoutes.home);
-        router.go(dest);
-      } else {
-        // Profil client sudah lengkap → ke tujuan semula atau home
-        final dest = postLoginDestination(
-          from: widget.from,
-          role: result.user.role,
-          needsCoupleSetup: ref.read(coupleProvider) == null &&
-              result.user.role == 'client',
-        );
-        router.go(dest);
-      }
+      _navigateAfterAuth(result);
     } on RoleRestrictedException catch (e) {
       if (!mounted) return;
       _showRoleRestrictedDialog(e.role);
@@ -184,12 +184,37 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     );
   }
 
-  void _submit() {
+  Future<void> _submit() async {
+    if (_busy != null) return;
     if (!(_formKey.currentState?.validate() ?? false)) return;
-    // Email/password login belum terhubung ke API — tampilkan info
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Login email belum tersedia. Gunakan Google.')),
-    );
+
+    setState(() => _busy = 'email');
+    try {
+      final result = await ref
+          .read(authProvider.notifier)
+          .signInWithCredentials(
+            login: _email.text,
+            password: _password.text,
+          );
+
+      if (!mounted) return;
+      _navigateAfterAuth(result);
+    } on RoleRestrictedException catch (e) {
+      if (!mounted) return;
+      _showRoleRestrictedDialog(e.role);
+    } on UnauthorizedException catch (e) {
+      _showError(e.message);
+    } on ValidationException catch (e) {
+      _showError(e.message);
+    } on ServerException catch (e) {
+      _showError(e.message);
+    } on NetworkException catch (e) {
+      _showError(e.message);
+    } catch (e) {
+      _showError('Login gagal: $e');
+    } finally {
+      if (mounted) setState(() => _busy = null);
+    }
   }
 
   @override
@@ -207,18 +232,18 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           loading: _busy == 'google',
           onPressed: busy ? null : _google,
         ),
-        const AuthDivider('atau masuk dengan email'),
+        const AuthDivider('atau masuk dengan akun'),
         Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               AppTextField(
-                label: 'Email',
+                label: 'Username atau Email',
                 controller: _email,
-                hint: 'nama@email.com',
+                hint: 'Ketik username atau email kamu',
                 keyboardType: TextInputType.emailAddress,
-                validator: validateEmail,
+                validator: validateLoginIdentifier,
               ),
               const SizedBox(height: 14),
               PasswordField(
