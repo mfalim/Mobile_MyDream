@@ -11,13 +11,14 @@ class PackagesRemoteDatasource implements PackagesDatasource {
 
   @override
   Future<List<WeddingPackage>> fetchAll() async {
-    final items = await _api.getList('/packages');
+    final items = await _api.getList('/catalog/packages');
     return [for (final json in items) WeddingPackageModel.fromJson(json)];
   }
 
   @override
   Future<WeddingPackage> fetch(String id) async {
-    final json = await _api.getObject('/packages/${Uri.encodeComponent(id)}');
+    final json =
+        await _api.getObject('/catalog/packages/${Uri.encodeComponent(id)}');
     return WeddingPackageModel.fromJson(json);
   }
 }

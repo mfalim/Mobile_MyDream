@@ -13,17 +13,38 @@ class SecureTokenStorage implements TokenStorage {
   const SecureTokenStorage([this._storage = const FlutterSecureStorage()]);
 
   static const _key = 'auth_token';
+  static String? _fallbackToken;
 
   final FlutterSecureStorage _storage;
 
   @override
-  Future<String?> read() => _storage.read(key: _key);
+  Future<String?> read() async {
+    try {
+      return await _storage.read(key: _key) ?? _fallbackToken;
+    } catch (_) {
+      return _fallbackToken;
+    }
+  }
 
   @override
-  Future<void> write(String token) => _storage.write(key: _key, value: token);
+  Future<void> write(String token) async {
+    _fallbackToken = token;
+    try {
+      await _storage.write(key: _key, value: token);
+    } catch (_) {
+      // Gunakan fallback memori bila keystore perangkat bermasalah
+    }
+  }
 
   @override
-  Future<void> clear() => _storage.delete(key: _key);
+  Future<void> clear() async {
+    _fallbackToken = null;
+    try {
+      await _storage.delete(key: _key);
+    } catch (_) {
+      // Abaikan bila gagal menghapus dari keystore
+    }
+  }
 }
 
 /// Hanya di memori: untuk mode data contoh dan tes.

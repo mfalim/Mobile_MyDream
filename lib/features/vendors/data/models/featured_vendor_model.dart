@@ -28,8 +28,27 @@ abstract final class FeaturedVendorModel {
       priceNote: jsonString(json['price_note']),
       promoBadge: jsonString(json['promo_badge']),
       promoNote: jsonString(json['promo_note']),
-      photoUrl: jsonString(json['photo']),
+      photoUrl: _coverPhoto(json),
     );
+  }
+
+  static String? _coverPhoto(Map<String, dynamic> json) {
+    final direct = jsonString(json['photo']);
+    if (direct != null) return direct;
+    final photos = json['photos'];
+    if (photos is List && photos.isNotEmpty) {
+      for (final item in photos) {
+        if (item is Map && (item['is_cover'] == true || item['is_cover'] == 1)) {
+          final url = jsonString(item['url'] ?? item['photo']);
+          if (url != null) return url;
+        }
+      }
+      final first = photos.first;
+      if (first is Map) {
+        return jsonString(first['url'] ?? first['photo']);
+      }
+    }
+    return null;
   }
 
   static List<String> _cities(Map<String, dynamic> json) {

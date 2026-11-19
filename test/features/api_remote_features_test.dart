@@ -20,7 +20,7 @@ import '../helpers/fake_api.dart';
 void main() {
   test('katalog vendor memuat kategori dan vendor dari API', () async {
     final adapter = FakeAdapter((request) {
-      if (request.uri.path == '/api/categories') {
+      if (request.uri.path == '/api/catalog/categories') {
         return jsonResponse({
           'data': [
             {'id': 1, 'name': 'Photography', 'icon': 'camera'},
@@ -50,7 +50,7 @@ void main() {
     expect(data.featured.single.price, 18500000);
     expect(
       adapter.requests.map((request) => request.uri.path).toSet(),
-      {'/api/categories', '/api/vendors'},
+      {'/api/catalog/categories', '/api/vendors'},
     );
   });
 
@@ -78,7 +78,7 @@ void main() {
 
   test('artikel dimuat untuk Home dan halaman detail', () async {
     final adapter = FakeAdapter((request) => jsonResponse({
-          'data': request.uri.path == '/api/articles'
+          'data': request.uri.path == '/api/content/articles'
               ? [
                   {
                     'id': 7,
@@ -103,7 +103,7 @@ void main() {
 
     expect(list.story?.title, 'Kisah Pernikahan');
     expect(detail.paragraphs, ['Cerita lengkap dari server.']);
-    expect(adapter.requests.last.uri.path, '/api/articles/7');
+    expect(adapter.requests.last.uri.path, '/api/content/articles/7');
   });
 
   test('halaman informasi dan nomor tiket berasal dari API', () async {
@@ -195,26 +195,37 @@ void main() {
       () async {
     final directory = await Directory.systemTemp.createTemp('mydream-proof');
     addTearDown(() => directory.delete(recursive: true));
-    final proof = File('${directory.path}\\proof.jpg');
+    final proof = File('${directory.path}/proof.jpg');
     await proof.writeAsBytes([1, 2, 3]);
     FormData? sentForm;
     final adapter = FakeAdapter((request) {
+      if (request.uri.path == '/api/client/bookings') {
+        return jsonResponse({
+          'data': {
+            'id': 42,
+            'total_price': 60000000,
+            'status': 'pending',
+          },
+        });
+      }
       sentForm = request.data as FormData;
       return jsonResponse({
         'data': {
-          'invoice_number': 'INV-20261112-1001',
-          'title': 'Custom Order',
-          'event_date': '2026-12-01',
-          'status': 'pending',
-          'payment_status': 'pending',
-          'total_price': 60000000,
           'payment': {
+            'id': 1,
             'type': 'dp',
             'amount': 1000000,
-            'bank_name': 'BCA',
+            'bank_info': 'BCA 1234567890 MyDream',
             'status': 'pending',
+            'created_at': '2026-11-12T10:00:00+07:00',
           },
-          'created_at': '2026-11-12T10:00:00+07:00',
+          'booking': {
+            'id': 42,
+            'invoice_number': 'INV-20261112-1001',
+            'status': 'pending',
+            'payment_status': 'awaiting_verification',
+            'total_price': 60000000,
+          },
         },
       });
     });
@@ -253,24 +264,15 @@ void main() {
       ),
     );
 
-    expect(adapter.requests.single.uri.path, '/api/bookings');
     expect(
-      sentForm!.fields.any(
-        (field) => field.key == 'event_date' && field.value == '2026-12-01',
-      ),
-      isTrue,
+      adapter.requests.map((r) => r.uri.path).toList(),
+      ['/api/client/bookings', '/api/client/bookings/42/payments'],
     );
     expect(
       sentForm!.fields.any(
-        (field) => field.key == 'payment_type' && field.value == 'dp',
+        (field) => field.key == 'scheme' && field.value == 'dp',
       ),
       isTrue,
-    );
-    expect(
-      sentForm!.fields
-          .where((field) => field.key == 'vendor_ids[]')
-          .map((field) => field.value),
-      ['4', '5', '6'],
     );
     expect(sentForm!.files.single.key, 'proof');
     expect(receipt.invoiceNumber, 'INV-20261112-1001');

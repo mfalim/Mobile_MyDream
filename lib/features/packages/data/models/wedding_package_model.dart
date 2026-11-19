@@ -11,6 +11,19 @@ abstract final class WeddingPackageModel {
     final vendors =
         rawVendors is List ? rawVendors.whereType<Map>() : const <Map>[];
 
+    final vendorList = [
+      for (final v in vendors)
+        PackageVendor(
+          id: '${v['id']}',
+          name: jsonString(v['name']) ?? '',
+          category: jsonNameOf(v['category']) ?? '',
+          city: jsonString(v['city']),
+          price: jsonInt(v['price']),
+        ),
+    ];
+    final vendorsSum =
+        vendorList.fold<int>(0, (sum, v) => sum + (v.price ?? 0));
+
     return WeddingPackage(
       id: '${json['id']}',
       slug: json['slug'] as String,
@@ -21,18 +34,9 @@ abstract final class WeddingPackageModel {
       eventPeriod: jsonString(json['event_period']),
       guestCapacity: jsonInt(json['guest_capacity']),
       isFeatured: jsonBool(json['is_featured']),
-      photoUrl: jsonString(json['photo']),
-      price: jsonInt(json['price']) ?? 0,
-      vendors: [
-        for (final v in vendors)
-          PackageVendor(
-            id: '${v['id']}',
-            name: jsonString(v['name']) ?? '',
-            category: jsonNameOf(v['category']) ?? '',
-            city: jsonString(v['city']),
-            price: jsonInt(v['price']),
-          ),
-      ],
+      photoUrl: jsonString(json['photo'] ?? json['cover_photo']),
+      price: jsonInt(json['price']) ?? vendorsSum,
+      vendors: vendorList,
     );
   }
 }

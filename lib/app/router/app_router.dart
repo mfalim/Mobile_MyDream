@@ -26,6 +26,8 @@ import '../../features/support/presentation/pages/report_issue_page.dart';
 import '../../features/inspirations/presentation/pages/story_page.dart';
 import '../../features/member/presentation/pages/member_complete_profile_page.dart';
 import '../../features/member/presentation/pages/member_dashboard_page.dart';
+import '../../features/my_wedding/presentation/pages/client_bookings_page.dart';
+import '../../features/my_wedding/presentation/pages/client_rundown_page.dart';
 import '../../features/vendors/presentation/pages/saved_vendors_page.dart';
 import 'app_shell.dart';
 import 'route_names.dart';
@@ -167,6 +169,14 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.saved,
         builder: (context, state) => const SavedVendorsPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.clientBookings,
+        builder: (context, state) => const ClientBookingsPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.clientRundown,
+        builder: (context, state) => const ClientRundownPage(),
       ),
     ],
   );

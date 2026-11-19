@@ -71,11 +71,11 @@ void main() {
   testWidgets('kirim tanpa bukti transfer ditolak', (tester) async {
     await pumpPayment(tester);
 
-    await tester.tap(find.text('Kirim Pesanan'));
+    await tester.tap(find.text('Konfirmasi Pembayaran'));
     await tester.pumpAndSettle();
 
     expect(
-      find.text('Unggah bukti transfer terlebih dahulu.'),
+      find.text('Klik Bayar via Midtrans terlebih dahulu untuk melanjutkan.'),
       findsWidgets,
     );
     expect(find.text('HALAMAN PESANAN TERKIRIM'), findsNothing);

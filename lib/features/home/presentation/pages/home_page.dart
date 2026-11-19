@@ -22,6 +22,8 @@ import 'package:w51/features/home/presentation/widgets/inspirations_section.dart
 import 'package:w51/features/home/presentation/widgets/service_grid.dart';
 import 'package:w51/features/home/presentation/widgets/wedding_countdown_card.dart';
 import 'package:w51/features/my_wedding/presentation/providers/couple_provider.dart';
+import 'package:w51/features/payment/presentation/providers/payments_provider.dart';
+import 'package:w51/features/payment/presentation/widgets/dp_reminder_card.dart';
 import 'package:w51/features/vendors/presentation/providers/vendor_filter_provider.dart';
 import 'package:w51/core/config/app_features.dart';
 
@@ -57,6 +59,13 @@ class _HomeContent extends ConsumerWidget {
     final user = ref.watch(authProvider);
     final isGuest = user == null;
     final isMember = user?.role == 'member';
+    final activeBooking = (!isGuest && !isMember)
+        ? ref
+            .watch(clientBookingsProvider)
+            .value
+            ?.where((b) => b.needsPayment)
+            .firstOrNull
+        : null;
 
     void goVendors() {
       ref.read(vendorFilterProvider.notifier).reset();
@@ -97,6 +106,17 @@ class _HomeContent extends ConsumerWidget {
             isGuest: isGuest,
             onStart: () => context.push(AppRoutes.coupleSetup),
           ),
+        if (activeBooking != null) ...[
+          gap,
+          DpReminderCard(booking: activeBooking),
+        ],
+        if (!isGuest && !isMember) ...[
+          const SizedBox(height: AppSpacing.md),
+          _ClientPortalQuickActions(
+            onBookings: () => context.push(AppRoutes.clientBookings),
+            onRundown: () => context.push(AppRoutes.clientRundown),
+          ),
+        ],
         gap,
         ServiceGrid(services: data.services, onSelected: openCategory),
         if (data.deals.isNotEmpty) ...[
@@ -235,6 +255,110 @@ class _MemberWorkspaceCtaCard extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _ClientPortalQuickActions extends StatelessWidget {
+  const _ClientPortalQuickActions({
+    required this.onBookings,
+    required this.onRundown,
+  });
+
+  final VoidCallback onBookings;
+  final VoidCallback onRundown;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: _PortalShortcutTile(
+            icon: Icons.receipt_long_outlined,
+            title: 'Riwayat & Tagihan',
+            subtitle: 'Invoice & status bayar',
+            onTap: onBookings,
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: _PortalShortcutTile(
+            icon: Icons.event_note_outlined,
+            title: 'Rundown & Vendor',
+            subtitle: 'Timeline & konfirmasi',
+            onTap: onRundown,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _PortalShortcutTile extends StatelessWidget {
+  const _PortalShortcutTile({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: AppColors.surface,
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: AppColors.outline.withValues(alpha: 0.45),
+            ),
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(9),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(icon, color: AppColors.primary, size: 20),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 12.5,
+                      ),
+                    ),
+                    Text(
+                      subtitle,
+                      style: const TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 11,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

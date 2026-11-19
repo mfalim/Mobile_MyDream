@@ -5,17 +5,17 @@ class CheckoutDetails {
     required this.brideName,
     required this.groomName,
     required this.eventDate,
-    required this.ceremonyMinutes,
-    required this.receptionMinutes,
     required this.venueName,
     required this.venueAddress,
     required this.venueCity,
     required this.venueProvince,
     required this.guestCount,
-    required this.concept,
-    required this.picName,
-    required this.whatsapp,
-    required this.notes,
+    this.ceremonyMinutes = 540, // 09:00 default jadwal di Laravel
+    this.receptionMinutes = 1020, // 17:00 default jadwal di Laravel
+    this.concept = '',
+    this.picName = '',
+    this.whatsapp = '',
+    this.notes = '',
     this.venueMaps,
   });
 

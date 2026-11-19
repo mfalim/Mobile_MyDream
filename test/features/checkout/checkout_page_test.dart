@@ -18,8 +18,6 @@ final _venueAddress =
     find.widgetWithText(TextFormField, 'Jalan, nomor, kelurahan, kecamatan');
 final _venueCity = find.widgetWithText(TextFormField, 'Contoh: Badung');
 final _guests = find.widgetWithText(TextFormField, 'Contoh: 150');
-final _pic = find.widgetWithText(TextFormField, 'Nama penanggung jawab');
-final _whatsapp = find.widgetWithText(TextFormField, '812 9874 3210');
 final _submit = find.text('Konfirmasi & Lanjut');
 
 void main() {
@@ -79,8 +77,6 @@ void main() {
       'Kota wajib diisi',
       'Provinsi wajib dipilih',
       'Jumlah tamu wajib diisi',
-      'Nama PIC wajib diisi',
-      'Nomor WhatsApp wajib diisi',
     ]) {
       expect(find.text(message), findsOneWidget, reason: message);
     }
@@ -98,19 +94,6 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Maksimal 100 tamu untuk paket ini'), findsOneWidget);
-  });
-
-  testWidgets('WhatsApp tidak boleh diawali 0', (tester) async {
-    await pumpCheckout(tester);
-
-    await tester.enterText(_whatsapp, '0812345678');
-    await tester.tap(_submit);
-    await tester.pumpAndSettle();
-
-    expect(
-      find.text('Tulis tanpa angka 0 di depan (contoh: 811...)'),
-      findsOneWidget,
-    );
   });
 
   testWidgets('data pasangan mengisi nama dan tanggal otomatis',
@@ -161,8 +144,6 @@ void main() {
     await tester.pumpAndSettle();
 
     await tester.enterText(_guests, '80');
-    await tester.enterText(_pic, 'Dewi');
-    await tester.enterText(_whatsapp, '81298743210');
     await tester.tap(_submit);
     await tester.pumpAndSettle();
 
@@ -176,15 +157,15 @@ void main() {
       d.eventDate,
       DateTime(weddingDate.year, weddingDate.month, weddingDate.day),
     );
-    expect(d.ceremonyMinutes, 930);
-    expect(d.receptionMinutes, 1110);
+    expect(d.ceremonyMinutes, 540);
+    expect(d.receptionMinutes, 1020);
     expect(d.venueName, 'Gedung Nusa');
     expect(d.venueAddress, 'Jalan Raya No. 1, Kecamatan Kuta');
     expect(d.venueCity, 'Badung');
     expect(d.venueProvince, 'Aceh');
     expect(d.venueMaps, isNull);
     expect(d.guestCount, 80);
-    expect(d.picName, 'Dewi');
-    expect(d.whatsapp, '+6281298743210');
+    expect(d.picName, isEmpty);
+    expect(d.whatsapp, isEmpty);
   });
 }

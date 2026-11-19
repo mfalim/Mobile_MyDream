@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:w51/app/providers/api_providers.dart';
@@ -86,6 +88,14 @@ class AuthController extends Notifier<AppUser?> {
 
   /// Login dengan Google secara native dan autentikasi ke Laravel Sanctum (`/api/auth/google`).
   Future<GoogleAuthResult> signInWithGoogle() async {
+    final isSupportedPlatform = kIsWeb || Platform.isAndroid || Platform.isIOS;
+    if (!isSupportedPlatform) {
+      throw const ServerException(
+        'Login Google native hanya didukung di Android dan iOS. '
+        'Gunakan login Username/Email & Password pada Linux Desktop.',
+      );
+    }
+
     // 1. Autentikasi via Google Sign-In native
     final GoogleSignInAccount account =
         await GoogleSignIn.instance.authenticate();

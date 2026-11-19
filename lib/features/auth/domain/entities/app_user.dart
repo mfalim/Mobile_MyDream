@@ -43,4 +43,30 @@ class AppUser {
         role: role ?? this.role,
         callSign: callSign ?? this.callSign,
       );
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is AppUser &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          name == other.name &&
+          email == other.email &&
+          username == other.username &&
+          hasPassword == other.hasPassword &&
+          avatarUrl == other.avatarUrl &&
+          role == other.role &&
+          callSign == other.callSign;
+
+  @override
+  int get hashCode => Object.hash(
+        id,
+        name,
+        email,
+        username,
+        hasPassword,
+        avatarUrl,
+        role,
+        callSign,
+      );
 }

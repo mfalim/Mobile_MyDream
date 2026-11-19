@@ -3,26 +3,26 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:w51/app/router/route_names.dart';
 import 'package:w51/app/theme/app_colors.dart';
 import 'package:w51/app/theme/app_spacing.dart';
 import 'package:w51/app/theme/app_typography.dart';
+import 'package:w51/core/config/app_config.dart';
 import 'package:w51/core/errors/app_exceptions.dart';
 import 'package:w51/core/utils/formatters.dart';
 import 'package:w51/core/widgets/empty_state.dart';
-import 'package:w51/core/widgets/error_state.dart';
 import 'package:w51/core/widgets/step_progress_header.dart';
 import 'package:w51/features/cart/domain/entities/cart_item.dart';
 import 'package:w51/features/cart/presentation/providers/cart_provider.dart';
 import 'package:w51/features/checkout/domain/entities/checkout_details.dart';
 import 'package:w51/features/checkout/presentation/providers/checkout_provider.dart';
-import 'package:w51/features/payment/domain/entities/bank_account.dart';
 import 'package:w51/features/payment/domain/entities/order_submission.dart';
 import 'package:w51/features/payment/domain/entities/payment_options.dart';
 import 'package:w51/features/payment/domain/entities/payment_summary.dart';
 import 'package:w51/features/payment/domain/proof_rules.dart';
 import 'package:w51/features/payment/presentation/providers/payments_provider.dart';
-import 'package:w51/features/payment/presentation/widgets/bank_accounts_card.dart';
+import 'package:w51/features/payment/presentation/widgets/midtrans_gateway_card.dart';
 import 'package:w51/features/payment/presentation/widgets/payment_bar.dart';
 import 'package:w51/features/payment/presentation/widgets/payment_order_card.dart';
 import 'package:w51/features/payment/presentation/widgets/payment_total_card.dart';
@@ -41,10 +41,11 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
   final _proofKey = GlobalKey();
 
   PaymentScheme _scheme = PaymentScheme.downPayment;
-  String? _bankId;
+  MidtransSnapSession? _midtransSession;
   XFile? _proof;
   bool _proofError = false;
   bool _busy = false;
+  bool _openingMidtrans = false;
 
   void _snack(String message) {
     ScaffoldMessenger.of(context)
@@ -96,69 +97,126 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
     }
   }
 
+  OrderSubmission _buildSubmission({
+    required CartItem item,
+    required CheckoutDetails details,
+    required PaymentSummary summary,
+    String proofName = '',
+    String proofPath = '',
+  }) {
+    final discount = ref.read(cartProvider).discountFor(item.price);
+    final voucherCode =
+        discount > 0 ? ref.read(cartProvider).voucher?.code : null;
+
+    return OrderSubmission(
+      itemId: item.vendorId,
+      itemTitle: item.packageTitle,
+      isCustom: item.isCustom,
+      totalAmount: summary.contractTotal,
+      scheme: _scheme,
+      payAmount: summary.dueNow(_scheme),
+      bankAccountId: 'midtrans',
+      proofName: proofName,
+      proofPath: proofPath,
+      vendorIds: item.isCustom
+          ? ref
+              .read(cartProvider)
+              .customVendors
+              .map((vendor) => vendor.vendorId)
+              .toList()
+          : const [],
+      voucherCode: voucherCode,
+      checkout: details,
+      bookingId: _midtransSession?.bookingId,
+    );
+  }
+
+  Future<void> _openMidtrans({
+    required CartItem item,
+    required CheckoutDetails details,
+    required PaymentSummary summary,
+  }) async {
+    if (_openingMidtrans || _busy) return;
+    setState(() => _openingMidtrans = true);
+
+    final repository = ref.read(paymentsRepositoryProvider);
+    try {
+      final session = await repository.initiateMidtrans(
+        _buildSubmission(
+          item: item,
+          details: details,
+          summary: summary,
+        ),
+      );
+      if (!mounted) return;
+      setState(() => _midtransSession = session);
+
+      final uri = Uri.parse(session.redirectUrl);
+      var launched = await launchUrl(
+        uri,
+        mode: LaunchMode.inAppBrowserView,
+      );
+      if (!launched) {
+        launched = await launchUrl(
+          uri,
+          mode: LaunchMode.externalApplication,
+        );
+      }
+      if (!launched && mounted) {
+        _snack('Tidak dapat membuka halaman pembayaran Midtrans.');
+      }
+    } on ValidationException catch (e) {
+      if (!mounted) return;
+      _snack(e.message);
+    } on ServerException catch (e) {
+      if (!mounted) return;
+      _snack(e.message);
+    } catch (_) {
+      if (!mounted) return;
+      _snack(
+        'Gagal menyiapkan pembayaran Midtrans. Periksa koneksi lalu coba lagi.',
+      );
+    } finally {
+      if (mounted) setState(() => _openingMidtrans = false);
+    }
+  }
+
   Future<void> _submit({
     required CartItem item,
     required CheckoutDetails details,
     required PaymentSummary summary,
-    required List<BankAccount> banks,
   }) async {
-    if (_busy) return;
+    if (_busy || _openingMidtrans) return;
     final proof = _proof;
-    if (proof == null) {
-      setState(() => _proofError = true);
-      _snack('Unggah bukti transfer terlebih dahulu.');
-      final target = _proofKey.currentContext;
-      if (target != null) {
-        Scrollable.ensureVisible(
-          target,
-          duration: const Duration(milliseconds: 300),
-          alignment: 0.1,
-        );
-      }
+    if (_midtransSession == null && proof == null) {
+      _snack('Klik Bayar via Midtrans terlebih dahulu untuk melanjutkan.');
       return;
     }
 
     setState(() => _busy = true);
 
-    // Ambil dulu semua yang dibutuhkan: halaman ini hilang setelah go().
     final cart = ref.read(cartProvider.notifier);
     final checkout = ref.read(checkoutProvider.notifier);
     final receipts = ref.read(receiptProvider.notifier);
     final repository = ref.read(paymentsRepositoryProvider);
     final router = GoRouter.of(context);
     final messenger = ScaffoldMessenger.of(context);
-    final discount = ref.read(cartProvider).discountFor(item.price);
-    final voucherCode =
-        discount > 0 ? ref.read(cartProvider).voucher?.code : null;
-    final bankId = _bankId ?? banks.first.id;
 
     try {
       final receipt = await repository.submit(
-        OrderSubmission(
-          itemId: item.vendorId,
-          itemTitle: item.packageTitle,
-          isCustom: item.isCustom,
-          totalAmount: summary.contractTotal,
-          scheme: _scheme,
-          payAmount: summary.dueNow(_scheme),
-          bankAccountId: bankId,
-          proofName: proof.name,
-          proofPath: proof.path,
-          vendorIds: item.isCustom
-              ? ref
-                  .read(cartProvider)
-                  .customVendors
-                  .map((vendor) => vendor.vendorId)
-                  .toList()
-              : const [],
-          voucherCode: voucherCode,
-          checkout: details,
+        _buildSubmission(
+          item: item,
+          details: details,
+          summary: summary,
+          proofName: proof?.name ?? '',
+          proofPath: proof?.path ?? '',
         ),
       );
+      ref.invalidate(clientBookingsProvider);
       receipts.save(receipt);
       router.go(AppRoutes.orderSubmitted);
       cart.remove(details.vendorId);
-      cart.selectVoucher(null); // voucher habis dipakai
+      cart.selectVoucher(null);
       checkout.clear();
     } on ValidationException catch (e) {
       messenger
@@ -182,7 +240,6 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
   Widget build(BuildContext context) {
     final details = ref.watch(checkoutProvider);
     final cart = ref.watch(cartProvider);
-    final banks = ref.watch(bankAccountsProvider);
     final item = details == null ? null : cart.orderItemFor(details.vendorId);
 
     final appBar = AppBar(
@@ -219,15 +276,19 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
     }
 
     final base = item.price;
+    final discount = cart.discountFor(base);
+    final contractTotal = base - discount;
+    final dpAmount = AppConfig.useMockData
+        ? kDownPayment
+        : (contractTotal * 0.10).ceil();
     final summary = PaymentSummary(
       packagePrice: base,
       originalPrice: item.originalPrice,
-      couponDiscount: cart.discountFor(base),
-      deposit: kDownPayment,
+      couponDiscount: discount,
+      deposit: dpAmount,
     );
     final isDp = _scheme == PaymentScheme.downPayment;
     final due = summary.dueNow(_scheme);
-    final bankList = banks.value;
 
     return Scaffold(
       appBar: appBar,
@@ -236,7 +297,7 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
           const StepProgressHeader(
             step: 2,
             total: 2,
-            caption: 'Transfer & Bukti Pembayaran',
+            caption: 'Midtrans & Bukti Pembayaran',
           ),
           Expanded(
             child: ListView(
@@ -279,24 +340,17 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
                       setState(() => _scheme = PaymentScheme.fullPayment),
                 ),
                 const SizedBox(height: AppSpacing.lg),
-                if (banks.isLoading)
-                  const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 24),
-                    child: Center(child: CircularProgressIndicator()),
-                  )
-                else if (bankList == null || bankList.isEmpty)
-                  ErrorState(
-                    message: 'Rekening tujuan gagal dimuat.',
-                    onRetry: () => ref.invalidate(bankAccountsProvider),
-                  )
-                else
-                  BankAccountsCard(
-                    accounts: bankList,
-                    selectedId: _bankId ?? bankList.first.id,
-                    amount: due,
-                    onSelect: (id) => setState(() => _bankId = id),
-                    onCopy: _copy,
+                MidtransGatewayCard(
+                  amount: due,
+                  loading: _openingMidtrans,
+                  orderId: _midtransSession?.orderId,
+                  onCopy: _copy,
+                  onOpenMidtrans: () => _openMidtrans(
+                    item: item,
+                    details: details,
+                    summary: summary,
                   ),
+                ),
                 const SizedBox(height: AppSpacing.md),
                 KeyedSubtree(
                   key: _proofKey,
@@ -314,14 +368,15 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
                   packagePrice: summary.packagePrice,
                   couponDiscount: summary.couponDiscount,
                   dueLabel: isDp
-                      ? 'Total Transfer Sekarang (DP)'
-                      : 'Total Transfer Sekarang (Lunas)',
+                      ? 'Total Pembayaran Sekarang (DP)'
+                      : 'Total Pembayaran Sekarang (Lunas)',
                   dueNow: due,
                 ),
                 const SizedBox(height: 12),
                 const Text(
-                  'Pesananmu akan diperiksa admin. Pembayaran dinyatakan '
-                  'sah setelah bukti transfer diverifikasi.',
+                  'Selesaikan pembayaran melalui Midtrans Payment Gateway '
+                  '(status diverifikasi otomatis), lalu tekan Konfirmasi Pembayaran. '
+                  'Unggah foto bukti bersifat opsional.',
                   style: TextStyle(
                     color: AppColors.textSecondary,
                     fontSize: 12,
@@ -335,15 +390,14 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
       ),
       bottomNavigationBar: PaymentBar(
         dueNow: due,
-        buttonLabel: 'Kirim Pesanan',
+        buttonLabel: 'Konfirmasi Pembayaran',
         loading: _busy,
-        onPay: (_busy || bankList == null || bankList.isEmpty)
+        onPay: (_busy || _openingMidtrans)
             ? null
             : () => _submit(
                   item: item,
                   details: details,
                   summary: summary,
-                  banks: bankList,
                 ),
       ),
     );

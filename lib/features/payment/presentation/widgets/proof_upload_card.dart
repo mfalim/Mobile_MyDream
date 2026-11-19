@@ -42,7 +42,7 @@ class ProofUploadCard extends StatelessWidget {
               SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  'Bukti Transfer',
+                  'Foto Bukti Pembayaran (Opsional)',
                   style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
                 ),
               ),
@@ -50,8 +50,8 @@ class ProofUploadCard extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           const Text(
-            'Unggah foto atau tangkapan layar bukti transfer '
-            '(JPG, PNG, atau WEBP, maksimal 2 MB).',
+            'Tidak wajib. Jika ingin melampirkan tangkapan layar bukti Midtrans '
+            'sebagai arsip tambahan (JPG, PNG, atau WEBP, maksimal 2 MB).',
             style: TextStyle(
               color: AppColors.textSecondary,
               fontSize: 12,

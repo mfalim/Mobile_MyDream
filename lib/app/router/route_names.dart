@@ -10,6 +10,8 @@ abstract final class AppRoutes {
 
   // Wajib login
   static const myWedding = '/my-wedding';
+  static const clientBookings = '/my-bookings';
+  static const clientRundown = '/my-rundown';
   static const cart = '/cart';
 
   /// Keranjang dengan voucher yang langsung dipasang (tombol "Klaim Voucher").
@@ -20,6 +22,8 @@ abstract final class AppRoutes {
 
   static const protectedPaths = [
     myWedding,
+    clientBookings,
+    clientRundown,
     cart,
     checkout,
     payment,

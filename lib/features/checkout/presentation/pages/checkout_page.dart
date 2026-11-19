@@ -17,12 +17,10 @@ import 'package:w51/core/widgets/step_progress_header.dart';
 import 'package:w51/features/cart/domain/entities/cart_item.dart';
 import 'package:w51/features/cart/presentation/providers/cart_provider.dart';
 import 'package:w51/features/checkout/domain/entities/checkout_details.dart';
-import 'package:w51/features/checkout/domain/entities/checkout_options.dart';
 import 'package:w51/features/checkout/presentation/providers/checkout_provider.dart';
 import 'package:w51/features/checkout/presentation/widgets/checkout_bar.dart';
 import 'package:w51/features/checkout/presentation/widgets/checkout_package_card.dart';
 import 'package:w51/features/checkout/presentation/widgets/checkout_section.dart';
-import 'package:w51/features/checkout/presentation/widgets/concept_selector.dart';
 import 'package:w51/features/checkout/presentation/widgets/deal_protection_card.dart';
 import 'package:w51/features/my_wedding/presentation/providers/couple_provider.dart';
 
@@ -39,7 +37,6 @@ class CheckoutPage extends ConsumerStatefulWidget {
 class _CheckoutPageState extends ConsumerState<CheckoutPage> {
   final _formKey = GlobalKey<FormState>();
   final _dateKey = GlobalKey();
-  final _timeKey = GlobalKey();
 
   final _bride = TextEditingController();
   final _groom = TextEditingController();
@@ -48,17 +45,11 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
   final _venueCity = TextEditingController();
   final _venueMaps = TextEditingController();
   final _guests = TextEditingController();
-  final _pic = TextEditingController();
-  final _whatsapp = TextEditingController();
   final _notes = TextEditingController();
 
   DateTime? _date;
   bool _dateError = false;
-  bool _timeError = false;
-  TimeOfDay _ceremony = const TimeOfDay(hour: 15, minute: 30);
-  TimeOfDay _reception = const TimeOfDay(hour: 18, minute: 30);
   String? _province;
-  int _concept = 0;
 
   @override
   void initState() {
@@ -85,8 +76,6 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
       _venueCity,
       _venueMaps,
       _guests,
-      _pic,
-      _whatsapp,
       _notes,
     ]) {
       c.dispose();
@@ -126,24 +115,6 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
     }
   }
 
-  Future<void> _pickTime({required bool ceremony}) async {
-    final picked = await showTimePicker(
-      context: context,
-      initialTime: ceremony ? _ceremony : _reception,
-    );
-    if (picked == null) return;
-    setState(() {
-      _timeError = false;
-      if (ceremony) {
-        _ceremony = picked;
-      } else {
-        _reception = picked;
-      }
-    });
-  }
-
-  String _time(TimeOfDay t) => formatTimeWita(t.hour, t.minute);
-
   /// Menggulir ke isian bermasalah yang paling atas.
   void _scrollToFirstProblem() {
     final candidates = <BuildContext>[];
@@ -162,8 +133,6 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
 
     final dateContext = _dateKey.currentContext;
     if (_dateError && dateContext != null) candidates.add(dateContext);
-    final timeContext = _timeKey.currentContext;
-    if (_timeError && timeContext != null) candidates.add(timeContext);
     if (candidates.isEmpty) return;
 
     double top(BuildContext c) {
@@ -184,20 +153,12 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
     final date = _date;
     final province = _province;
     final guests = int.tryParse(_guests.text.trim());
-    final ceremony = _ceremony.hour * 60 + _ceremony.minute;
-    final reception = _reception.hour * 60 + _reception.minute;
-    final timeOk = reception > ceremony;
 
     setState(() {
       _dateError = date == null;
-      _timeError = !timeOk;
     });
 
-    if (!formOk ||
-        date == null ||
-        province == null ||
-        guests == null ||
-        !timeOk) {
+    if (!formOk || date == null || province == null || guests == null) {
       _snack('Periksa kembali isian yang ditandai merah.');
       WidgetsBinding.instance.addPostFrameCallback(
         (_) => _scrollToFirstProblem(),
@@ -212,17 +173,12 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
             brideName: _bride.text.trim(),
             groomName: _groom.text.trim(),
             eventDate: date,
-            ceremonyMinutes: ceremony,
-            receptionMinutes: reception,
             venueName: _venueName.text.trim(),
             venueAddress: _venueAddress.text.trim(),
             venueCity: _venueCity.text.trim(),
             venueProvince: province,
             venueMaps: maps.isEmpty ? null : maps,
             guestCount: guests,
-            concept: kWeddingConcepts[_concept],
-            picName: _pic.text.trim(),
-            whatsapp: '+62${_whatsapp.text.trim()}',
             notes: _notes.text.trim(),
           ),
         );
@@ -345,13 +301,14 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
             gap,
             CheckoutSection(
               icon: Icons.calendar_month_outlined,
-              title: 'Jadwal Acara & Waktu',
+              title: 'Waktu Acara',
+              subtitle:
+                  'Pilih tanggal pelaksanaan dan estimasi jumlah tamu undangan.',
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   PickerField(
                     key: _dateKey,
-                    label: 'Tanggal Pelaksanaan (Akad & Resepsi)',
+                    label: 'Tanggal Pelaksanaan',
                     required: true,
                     icon: Icons.calendar_today_outlined,
                     value: date == null ? 'Pilih tanggal' : formatDateId(date),
@@ -359,31 +316,17 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                     onTap: _pickDate,
                   ),
                   const SizedBox(height: 14),
-                  KeyedSubtree(
-                    key: _timeKey,
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: PickerField(
-                            label: 'Waktu Akad / Vow',
-                            icon: Icons.schedule,
-                            value: _time(_ceremony),
-                            onTap: () => _pickTime(ceremony: true),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: PickerField(
-                            label: 'Waktu Resepsi',
-                            icon: Icons.schedule,
-                            value: _time(_reception),
-                            errorText: _timeError ? 'Harus setelah akad' : null,
-                            onTap: () => _pickTime(ceremony: false),
-                          ),
-                        ),
-                      ],
-                    ),
+                  AppTextField(
+                    label: 'Perkiraan Jumlah Tamu',
+                    required: true,
+                    controller: _guests,
+                    hint: 'Contoh: 150',
+                    helperText: capacity == null
+                        ? 'Perkiraan jumlah tamu yang hadir.'
+                        : 'Kapasitas paket ini hingga $capacity tamu.',
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    validator: (v) => validateGuestCount(v, capacity: capacity),
                   ),
                 ],
               ),
@@ -448,69 +391,8 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
             ),
             gap,
             CheckoutSection(
-              icon: Icons.groups_outlined,
-              title: 'Jumlah Tamu',
-              subtitle: capacity == null
-                  ? 'Perkiraan jumlah tamu yang hadir.'
-                  : 'Kapasitas paket ini hingga $capacity tamu.',
-              child: AppTextField(
-                label: 'Perkiraan Jumlah Tamu',
-                required: true,
-                controller: _guests,
-                hint: 'Contoh: 150',
-                keyboardType: TextInputType.number,
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                validator: (v) => validateGuestCount(v, capacity: capacity),
-              ),
-            ),
-            gap,
-            CheckoutSection(
-              icon: Icons.palette_outlined,
-              title: 'Konsep & Nuansa Pernikahan',
-              subtitle: 'Pilih tema moodboard agar florist dan dekorator dapat '
-                  'mempersiapkan mock-up palet.',
-              child: ConceptSelector(
-                concepts: kWeddingConcepts,
-                selectedIndex: _concept,
-                onChanged: (i) => setState(() => _concept = i),
-              ),
-            ),
-            gap,
-            CheckoutSection(
-              icon: Icons.contact_phone_outlined,
-              title: 'Kontak Penanggung Jawab (PIC)',
-              child: Column(
-                children: [
-                  AppTextField(
-                    label: 'Nama Lengkap PIC / Keluarga',
-                    required: true,
-                    controller: _pic,
-                    hint: 'Nama penanggung jawab',
-                    textCapitalization: TextCapitalization.words,
-                    validator: (v) =>
-                        validateRequired(v, 'Nama PIC', minLength: 2),
-                  ),
-                  const SizedBox(height: 14),
-                  AppTextField(
-                    label: 'Nomor WhatsApp Aktif',
-                    required: true,
-                    controller: _whatsapp,
-                    hint: '812 9874 3210',
-                    prefixText: '+62  ',
-                    keyboardType: TextInputType.phone,
-                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    helperText:
-                        'Update timeline rundown & surat konfirmasi venue '
-                        'akan dikirim via nomor ini.',
-                    validator: validateIdMobile,
-                  ),
-                ],
-              ),
-            ),
-            gap,
-            CheckoutSection(
               icon: Icons.edit_note,
-              title: 'Catatan Khusus Vendor',
+              title: 'Catatan Khusus',
               trailing: const Text(
                 'Opsional',
                 style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
@@ -518,10 +400,9 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
               child: AppTextField(
                 label: 'Catatan',
                 controller: _notes,
-                maxLines: 5,
+                maxLines: 4,
                 textCapitalization: TextCapitalization.sentences,
-                hint: 'Contoh: mohon penyesuaian menu canapé untuk 15 tamu '
-                    'vegan dan preferensi warna bunga.',
+                hint: 'Contoh: catatan khusus untuk dekorasi atau susunan acara.',
               ),
             ),
             gap,

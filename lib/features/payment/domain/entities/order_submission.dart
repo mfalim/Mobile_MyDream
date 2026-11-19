@@ -29,6 +29,7 @@ class OrderSubmission {
     required this.checkout,
     this.vendorIds = const [],
     this.voucherCode,
+    this.bookingId,
   });
 
   final String itemId;
@@ -43,6 +44,22 @@ class OrderSubmission {
   final List<String> vendorIds;
   final String? voucherCode;
   final CheckoutDetails checkout;
+  final int? bookingId;
+}
+
+/// Sesi pembayaran Midtrans Snap untuk sebuah booking.
+class MidtransSnapSession {
+  const MidtransSnapSession({
+    required this.bookingId,
+    required this.snapToken,
+    required this.redirectUrl,
+    this.orderId,
+  });
+
+  final int bookingId;
+  final String snapToken;
+  final String redirectUrl;
+  final String? orderId;
 }
 
 /// Hasil pengiriman pesanan, untuk layar "Pesanan Terkirim".

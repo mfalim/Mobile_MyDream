@@ -20,6 +20,7 @@ import 'package:w51/features/my_wedding/presentation/widgets/profile_header_card
 import 'package:w51/features/my_wedding/presentation/widgets/settings_section.dart';
 import 'package:w51/features/my_wedding/presentation/widgets/vision_board_card.dart';
 import 'package:w51/features/payment/presentation/providers/payments_provider.dart';
+import 'package:w51/features/payment/presentation/widgets/dp_reminder_card.dart';
 import 'package:w51/features/vendors/presentation/providers/saved_vendors_provider.dart';
 import 'package:w51/core/media/photo_picker.dart';
 import 'package:w51/core/utils/image_rules.dart';
@@ -259,12 +260,27 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               case ProfileStat.saved:
                 context.push(AppRoutes.saved);
               case ProfileStat.boards:
-                _soon('Inspirasi board');
+                context.push(AppRoutes.clientBookings);
               case ProfileStat.vendors:
-                _soon('Riwayat vendor');
+                context.push(AppRoutes.clientRundown);
             }
           },
         ),
+        if (user != null && user.role != 'member')
+          ...ref
+              .watch(clientBookingsProvider)
+              .maybeWhen(
+                data: (bookings) {
+                  final active =
+                      bookings.where((b) => b.needsPayment).firstOrNull;
+                  if (active == null) return const <Widget>[];
+                  return <Widget>[
+                    const SizedBox(height: AppSpacing.md),
+                    DpReminderCard(booking: active),
+                  ];
+                },
+                orElse: () => const <Widget>[],
+              ),
         if (AppFeatures.visionBoard && p.boards.isNotEmpty) ...[
           const SizedBox(height: AppSpacing.md),
           VisionBoardCard(
@@ -280,6 +296,20 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         SettingsSection(
           title: 'Akun & Transaksi',
           children: [
+            if (user == null || user.role != 'member') ...[
+              SettingsTile(
+                icon: Icons.receipt_long_outlined,
+                title: 'Riwayat Pembelian & Tagihan',
+                subtitle: 'Invoice reservasi, status admin, & pelunasan Midtrans',
+                onTap: () => context.push(AppRoutes.clientBookings),
+              ),
+              SettingsTile(
+                icon: Icons.event_note_outlined,
+                title: 'Rundown & Kalender Acara',
+                subtitle: 'Jadwal jam pelaksanaan, PIC kru WO, kalender, & ulasan',
+                onTap: () => context.push(AppRoutes.clientRundown),
+              ),
+            ],
             SettingsTile(
               icon: Icons.manage_accounts_outlined,
               title: 'Pengaturan Akun & Profil',

@@ -10,7 +10,7 @@ class InspirationsRemoteDatasource implements InspirationsDatasource {
 
   @override
   Future<InspirationsData> fetch() async {
-    final items = await _api.getList('/articles');
+    final items = await _api.getList('/content/articles');
     if (items.isEmpty) return const InspirationsData(story: null, more: []);
     return InspirationsData(
       story: StoryModel.story(items.first),
@@ -20,7 +20,8 @@ class InspirationsRemoteDatasource implements InspirationsDatasource {
 
   @override
   Future<RealWeddingStory> fetchStory(String id) async {
-    final json = await _api.getObject('/articles/${Uri.encodeComponent(id)}');
+    final json =
+        await _api.getObject('/content/articles/${Uri.encodeComponent(id)}');
     return StoryModel.story(json);
   }
 }

@@ -12,10 +12,12 @@ class VendorsRemoteDatasource implements VendorsDatasource {
 
   @override
   Future<VendorsData> fetch() async {
-    final categoriesRequest = _api.getList('/categories');
-    final vendorsRequest = _api.getList('/vendors');
-    final categoriesJson = await categoriesRequest;
-    final vendorsJson = await vendorsRequest;
+    final results = await Future.wait([
+      _api.getList('/catalog/categories'),
+      _api.getList('/vendors'),
+    ]);
+    final categoriesJson = results[0];
+    final vendorsJson = results[1];
 
     final categories = <VendorCategory>[];
     for (final json in categoriesJson) {
@@ -25,7 +27,7 @@ class VendorsRemoteDatasource implements VendorsDatasource {
         VendorCategory(
           label: label,
           subtitle: jsonString(json['subtitle']) ?? '',
-          icon: iconFor(jsonString(json['icon']) ?? ''),
+          icon: iconFor(jsonString(json['icon']) ?? _inferIconKey(label)),
         ),
       );
     }
@@ -38,5 +40,21 @@ class VendorsRemoteDatasource implements VendorsDatasource {
         for (final json in vendorsJson) FeaturedVendorModel.fromJson(json),
       ],
     );
+  }
+
+  static String _inferIconKey(String name) {
+    final lower = name.toLowerCase();
+    if (lower.contains('foto') || lower.contains('photo')) return 'camera';
+    if (lower.contains('video')) return 'video';
+    if (lower.contains('catering') || lower.contains('katering') || lower.contains('kue') || lower.contains('cake')) {
+      return 'restaurant';
+    }
+    if (lower.contains('dekor') || lower.contains('decor')) return 'flower';
+    if (lower.contains('makeup') || lower.contains('rias') || lower.contains('hair')) return 'brush';
+    if (lower.contains('gaun') || lower.contains('busana') || lower.contains('dress')) return 'dress';
+    if (lower.contains('entertainment') || lower.contains('sound') || lower.contains('musik')) return 'music';
+    if (lower.contains('venue') || lower.contains('ballroom')) return 'ceremony';
+    if (lower.contains('organizer') || lower.contains('wo')) return 'event';
+    return 'sparkle';
   }
 }
