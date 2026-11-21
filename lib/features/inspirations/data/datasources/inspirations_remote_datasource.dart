@@ -11,10 +11,20 @@ class InspirationsRemoteDatasource implements InspirationsDatasource {
   @override
   Future<InspirationsData> fetch() async {
     final items = await _api.getList('/content/articles');
-    if (items.isEmpty) return const InspirationsData(story: null, more: []);
+    List<PublicEventItem> events = const [];
+    try {
+      final rawEvents = await _api.getList('/content/events');
+      events = [for (final e in rawEvents) StoryModel.publicEvent(e)];
+    } catch (_) {
+      events = const [];
+    }
+    if (items.isEmpty) {
+      return InspirationsData(story: null, more: const [], events: events);
+    }
     return InspirationsData(
       story: StoryModel.story(items.first),
       more: [for (final item in items.skip(1)) StoryModel.teaser(item)],
+      events: events,
     );
   }
 

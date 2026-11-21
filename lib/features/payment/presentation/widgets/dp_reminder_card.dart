@@ -101,15 +101,22 @@ class _DpReminderCardState extends ConsumerState<DpReminderCard> {
   @override
   Widget build(BuildContext context) {
     final b = widget.booking;
+    final isWarning = b.isOverdue || b.isUrgent;
     final accentColor = b.isOverdue
         ? AppColors.error
-        : (b.isDpPaid ? AppColors.primary : AppColors.gold);
+        : (b.isUrgent
+            ? const Color(0xFFD97706)
+            : (b.isDpPaid ? AppColors.primary : AppColors.gold));
 
-    final statusText = b.isDpPaid
-        ? 'Sedang Masa DP (${b.percentPaid}% Terbayar)'
-        : (b.paymentStatus == 'awaiting_verification'
-            ? 'Menunggu Verifikasi'
-            : 'Menunggu Pembayaran DP (${b.dpPercent}%)');
+    final statusText = b.isOverdue
+        ? 'Melewati Tenggat Pembayaran'
+        : b.isDpPaid
+            ? (b.isUrgent
+                ? 'Segera Jatuh Tempo H-14 (${b.percentPaid}% Terbayar)'
+                : 'Sedang Masa DP (${b.percentPaid}% Terbayar)')
+            : (b.paymentStatus == 'awaiting_verification'
+                ? 'Menunggu Verifikasi'
+                : 'Menunggu Pembayaran DP (${b.dpPercent}%)');
 
     String? deadlineLabel;
     if (b.deadline != null) {
@@ -119,7 +126,8 @@ class _DpReminderCardState extends ConsumerState<DpReminderCard> {
       } else if (b.daysToDeadline == 0) {
         deadlineLabel = 'Jatuh tempo hari ini ($dateStr)';
       } else if (b.daysToDeadline != null) {
-        final prefix = b.deadlineType == 'dp' ? 'Batas DP' : 'Tenggat lunas';
+        final prefix =
+            b.deadlineType == 'dp' ? 'Batas DP' : 'Tenggat lunas (H-14)';
         deadlineLabel = '$prefix: $dateStr (${b.daysToDeadline} hari lagi)';
       }
     }
@@ -218,18 +226,18 @@ class _DpReminderCardState extends ConsumerState<DpReminderCard> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               decoration: BoxDecoration(
-                color: (b.isOverdue ? AppColors.error : AppColors.gold)
+                color: (isWarning ? accentColor : AppColors.gold)
                     .withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
                 children: [
                   Icon(
-                    b.isOverdue
+                    isWarning
                         ? Icons.warning_amber_rounded
                         : Icons.event_available_outlined,
                     size: 15,
-                    color: b.isOverdue ? AppColors.error : AppColors.gold,
+                    color: isWarning ? accentColor : AppColors.gold,
                   ),
                   const SizedBox(width: 6),
                   Expanded(

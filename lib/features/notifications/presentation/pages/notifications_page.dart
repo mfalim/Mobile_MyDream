@@ -105,7 +105,21 @@ class NotificationsPage extends ConsumerWidget {
                         return;
                       }
                       final route = n.route;
-                      if (route != null) router.push(safeInternalPath(route));
+                      if (route != null) {
+                        final target = safeInternalPath(route);
+                        const shellPaths = [
+                          AppRoutes.home,
+                          AppRoutes.vendors,
+                          AppRoutes.events,
+                          AppRoutes.inspirations,
+                          AppRoutes.myWedding,
+                        ];
+                        if (shellPaths.contains(target)) {
+                          router.go(target);
+                        } else {
+                          router.push(target);
+                        }
+                      }
                     },
                   );
                 },

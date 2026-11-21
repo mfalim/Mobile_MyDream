@@ -29,6 +29,7 @@ abstract final class HomeComposer {
       vendorCategories: curated.vendorCategories,
       vendors: curated.vendors,
       articles: _articles(inspirations),
+      events: _events(inspirations),
     );
   }
 
@@ -127,14 +128,29 @@ abstract final class HomeComposer {
           category: story.category ?? 'Real Weddings',
           title: story.title,
           excerpt: story.excerpt ?? '',
+          photoUrl: story.photoUrl,
+          rating: story.rating,
         ),
       for (final t in data.more)
         InspirationArticle(
           id: t.id,
           category: t.category,
           title: t.title,
-          excerpt: t.dateLabel ?? '',
+          excerpt: (t.excerpt != null && t.excerpt!.isNotEmpty)
+              ? t.excerpt!
+              : (t.dateLabel ?? ''),
+          photoUrl: t.photoUrl,
+          rating: t.rating,
         ),
     ].take(maxArticles).toList();
+  }
+
+  static List<PublicEventItem> _events(InspirationsData? data) {
+    if (data == null || data.events.isEmpty) return const [];
+    final upcomingOrOngoing =
+        data.events.where((e) => !e.isFinished).take(3).toList();
+    return upcomingOrOngoing.isNotEmpty
+        ? upcomingOrOngoing
+        : data.events.take(3).toList();
   }
 }

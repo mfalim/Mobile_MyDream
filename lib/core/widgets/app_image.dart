@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:w51/core/config/app_config.dart';
 import 'package:w51/core/widgets/image_placeholder.dart';
 
 /// Gambar dari URL. Memakai placeholder bila URL kosong, sedang dimuat,
@@ -16,9 +17,25 @@ class AppImage extends StatelessWidget {
   final IconData icon;
   final BoxFit fit;
 
+  static String? resolveUrl(String? raw) {
+    final trimmed = raw?.trim();
+    if (trimmed == null || trimmed.isEmpty || trimmed.startsWith('data:')) {
+      return null;
+    }
+    if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+      return trimmed;
+    }
+    final base = AppConfig.apiBaseUrl.replaceFirst(RegExp(r'/api/?$'), '');
+    final rel = trimmed.replaceFirst(RegExp(r'^/+'), '');
+    if (rel.startsWith('storage/') || rel.startsWith('images/')) {
+      return '$base/$rel';
+    }
+    return '$base/storage/$rel';
+  }
+
   @override
   Widget build(BuildContext context) {
-    final u = url;
+    final u = resolveUrl(url);
     if (u == null || u.isEmpty) return ImagePlaceholder(icon: icon);
     return Image.network(
       u,

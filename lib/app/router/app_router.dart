@@ -6,6 +6,7 @@ import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/inspirations/presentation/pages/inspirations_page.dart';
+import '../../features/inspirations/presentation/pages/public_events_page.dart';
 import '../../features/my_wedding/presentation/pages/profile_page.dart';
 import '../../features/vendors/presentation/pages/vendor_page.dart';
 import '../../features/vendors/presentation/pages/vendor_detail_page.dart';
@@ -67,6 +68,12 @@ final routerProvider = Provider<GoRouter>((ref) {
             GoRoute(
               path: AppRoutes.vendors,
               builder: (context, state) => const VendorPage(),
+            ),
+          ]),
+          StatefulShellBranch(routes: [
+            GoRoute(
+              path: AppRoutes.events,
+              builder: (context, state) => const PublicEventsPage(),
             ),
           ]),
           StatefulShellBranch(routes: [

@@ -3,6 +3,7 @@ import 'package:w51/app/theme/app_colors.dart';
 import 'package:w51/app/theme/app_radius.dart';
 import 'package:w51/app/theme/app_spacing.dart';
 import 'package:w51/features/inspirations/domain/entities/inspiration_entities.dart';
+import 'package:w51/features/inspirations/presentation/widgets/more_stories_list.dart';
 import 'package:w51/features/inspirations/presentation/widgets/story_body.dart';
 import 'package:w51/features/inspirations/presentation/widgets/story_engagement.dart';
 import 'package:w51/features/inspirations/presentation/widgets/story_gallery.dart';
@@ -17,6 +18,7 @@ class StoryView extends StatelessWidget {
     required this.story,
     required this.onOpenVendor,
     this.onRelatedPackage,
+    this.onOpenRelatedStory,
     super.key,
   });
 
@@ -25,6 +27,7 @@ class StoryView extends StatelessWidget {
 
   /// Dipanggil dengan id paket terkait; null menyembunyikan kartu paket.
   final ValueChanged<String>? onRelatedPackage;
+  final ValueChanged<StoryTeaser>? onOpenRelatedStory;
 
   @override
   Widget build(BuildContext context) {
@@ -58,11 +61,24 @@ class StoryView extends StatelessWidget {
         ],
         if (packageId != null && onPackage != null) ...[
           gap,
-          _RelatedPackageCard(onOpen: () => onPackage(packageId)),
+          _RelatedPackageCard(
+            packageName: s.relatedPackageName,
+            onOpen: () => onPackage(packageId),
+          ),
         ],
         if (s.likes != null || s.reads != null) ...[
           const SizedBox(height: AppSpacing.md),
           StoryEngagement(likes: s.likes, reads: s.reads),
+        ],
+        if (s.related.isNotEmpty && onOpenRelatedStory != null) ...[
+          gap,
+          const Divider(color: AppColors.outline),
+          gap,
+          MoreStoriesList(
+            title: 'Artikel Terkait',
+            stories: s.related,
+            onOpen: onOpenRelatedStory!,
+          ),
         ],
       ],
     );
@@ -70,12 +86,14 @@ class StoryView extends StatelessWidget {
 }
 
 class _RelatedPackageCard extends StatelessWidget {
-  const _RelatedPackageCard({required this.onOpen});
+  const _RelatedPackageCard({required this.onOpen, this.packageName});
 
   final VoidCallback onOpen;
+  final String? packageName;
 
   @override
   Widget build(BuildContext context) {
+    final pkgName = packageName;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -86,17 +104,19 @@ class _RelatedPackageCard extends StatelessWidget {
         children: [
           const Icon(Icons.card_giftcard_outlined, color: AppColors.primary),
           const SizedBox(width: 12),
-          const Expanded(
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                const Text(
                   'Paket terkait',
                   style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
                 ),
                 Text(
-                  'Lihat paket pernikahan dari cerita ini.',
-                  style: TextStyle(
+                  pkgName != null && pkgName.isNotEmpty
+                      ? 'Lihat paket pernikahan: $pkgName'
+                      : 'Lihat paket pernikahan dari cerita ini.',
+                  style: const TextStyle(
                     color: AppColors.textSecondary,
                     fontSize: 13,
                   ),

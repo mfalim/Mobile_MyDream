@@ -21,7 +21,6 @@ class InspirationsPage extends ConsumerStatefulWidget {
 }
 
 class _InspirationsPageState extends ConsumerState<InspirationsPage> {
-  // Hanya di memori.
   String? _category;
 
   Future<void> _pickCategory(List<String> categories) async {
@@ -36,7 +35,7 @@ class _InspirationsPageState extends ConsumerState<InspirationsPage> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Filter Kategori Cerita', style: AppTypography.heading(20)),
+              Text('Filter Kategori Artikel', style: AppTypography.heading(20)),
               const SizedBox(height: 12),
               Wrap(
                 spacing: 8,
@@ -70,8 +69,8 @@ class _InspirationsPageState extends ConsumerState<InspirationsPage> {
       bottom: false,
       child: data.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, s) => ErrorState(
-          message: userMessage(e, fallback: 'Cerita gagal dimuat.'),
+        error: (e, _) => ErrorState(
+          message: userMessage(e, fallback: 'Artikel gagal dimuat.'),
           onRetry: () => ref.invalidate(inspirationsDataProvider),
         ),
         data: _buildContent,
@@ -81,48 +80,100 @@ class _InspirationsPageState extends ConsumerState<InspirationsPage> {
 
   Widget _buildContent(InspirationsData d) {
     const gap = SizedBox(height: AppSpacing.lg);
-    final more = _category == null
-        ? d.more
-        : d.more.where((s) => s.category == _category).toList();
     final story = d.story;
+    final filteredAll = _category == null
+        ? d.more
+        : d.allArticles.where((s) => s.category == _category).toList();
+    final showMainStory =
+        story != null && (_category == null || story.category == _category);
+    final listItems = (_category != null && showMainStory)
+        ? filteredAll.where((s) => s.id != story.id).toList()
+        : filteredAll;
 
     return Stack(
       children: [
-        ListView(
-          padding: const EdgeInsets.fromLTRB(
-            AppSpacing.screenPadding,
-            AppSpacing.md,
-            AppSpacing.screenPadding,
-            96,
-          ),
-          children: [
-            Text('Real Weddings', style: AppTypography.heading(28)),
-            const SizedBox(height: AppSpacing.md),
-            if (story != null)
-              StoryView(
-                key: ValueKey(story.id),
-                story: story,
-                onOpenVendor: (v) {
-                  final id = v.vendorId;
-                  if (id != null) context.push(AppRoutes.vendorDetailPath(id));
-                },
-                onRelatedPackage: (id) =>
-                    context.push(AppRoutes.packageDetailPath(id)),
-              )
-            else
-              const EmptyState(
-                message: 'Belum ada cerita.',
-                icon: Icons.menu_book_outlined,
-              ),
-            gap,
-            const Divider(color: AppColors.outline),
-            gap,
-            MoreStoriesList(
-              stories: more,
-              onOpen: (s) => context.push(AppRoutes.storyPath(s.id)),
-              onSeeAll: () => setState(() => _category = null),
+        RefreshIndicator(
+          onRefresh: () async {
+            ref.invalidate(inspirationsDataProvider);
+            await ref.read(inspirationsDataProvider.future);
+          },
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.screenPadding,
+              AppSpacing.md,
+              AppSpacing.screenPadding,
+              96,
             ),
-          ],
+            children: [
+              Text('CERITA & TIPS', style: AppTypography.eyebrow),
+              const SizedBox(height: 4),
+              Text('Artikel & Blog MyDream', style: AppTypography.heading(26)),
+              const SizedBox(height: 4),
+              const Text(
+                'Pengalaman client, panduan perencanaan, dan tips memilih vendor untuk hari istimewa Anda.',
+                style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+              ),
+              if (d.categories.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      for (final c in ['', ...d.categories])
+                        Padding(
+                          padding: const EdgeInsets.only(right: 8),
+                          child: ChoiceChip(
+                            label: Text(c.isEmpty ? 'Semua' : c),
+                            selected: (_category ?? '') == c,
+                            onSelected: (_) =>
+                                setState(() => _category = c.isEmpty ? null : c),
+                            selectedColor: AppColors.primary,
+                            labelStyle: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: (_category ?? '') == c
+                                  ? Colors.white
+                                  : AppColors.textPrimary,
+                            ),
+                            backgroundColor: AppColors.surfaceTint,
+                            side: BorderSide.none,
+                            shape: const StadiumBorder(),
+                            showCheckmark: false,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+              const SizedBox(height: AppSpacing.md),
+              if (showMainStory) ...[
+                StoryView(
+                  key: ValueKey(story.id),
+                  story: story,
+                  onOpenVendor: (v) {
+                    final id = v.vendorId;
+                    if (id != null) context.push(AppRoutes.vendorDetailPath(id));
+                  },
+                  onRelatedPackage: (id) =>
+                      context.push(AppRoutes.packageDetailPath(id)),
+                ),
+                gap,
+                const Divider(color: AppColors.outline),
+                gap,
+              ] else if (_category == null) ...[
+                const EmptyState(
+                  message: 'Belum ada artikel.',
+                  icon: Icons.menu_book_outlined,
+                ),
+                gap,
+              ],
+              MoreStoriesList(
+                stories: listItems,
+                onOpen: (s) => context.push(AppRoutes.storyPath(s.id)),
+                onSeeAll: () => setState(() => _category = null),
+              ),
+            ],
+          ),
         ),
         if (d.categories.isNotEmpty)
           Positioned(
@@ -135,7 +186,7 @@ class _InspirationsPageState extends ConsumerState<InspirationsPage> {
                 icon: const Icon(Icons.tune, size: 18),
                 label: Text(
                   _category == null
-                      ? 'Filter Kategori Cerita'
+                      ? 'Filter Kategori Artikel'
                       : 'Kategori: $_category',
                 ),
                 style: FilledButton.styleFrom(

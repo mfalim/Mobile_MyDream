@@ -61,6 +61,8 @@ class StoryPage extends ConsumerWidget {
             },
             onRelatedPackage: (id) =>
                 context.push(AppRoutes.packageDetailPath(id)),
+            onOpenRelatedStory: (rel) =>
+                context.push(AppRoutes.storyPath(rel.id)),
           ),
         ),
       ),

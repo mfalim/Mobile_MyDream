@@ -65,6 +65,30 @@ class StoryHeader extends StatelessWidget {
           const SizedBox(height: 12),
         ],
         Text(story.title, style: AppTypography.heading(26)),
+        if (story.rating != null && story.rating! > 0) ...[
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              for (int i = 1; i <= 5; i++)
+                Icon(
+                  i <= story.rating! ? Icons.star_rounded : Icons.star_border_rounded,
+                  size: 18,
+                  color: i <= story.rating!
+                      ? const Color(0xFFD97706)
+                      : AppColors.outline,
+                ),
+              const SizedBox(width: 6),
+              Text(
+                '${story.rating}/5',
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFFD97706),
+                ),
+              ),
+            ],
+          ),
+        ],
         if (excerpt != null) ...[
           const SizedBox(height: 10),
           Text(

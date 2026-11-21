@@ -340,17 +340,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               ),
           ],
         ),
-        gap,
-        SettingsSection(
-          title: 'Preferensi Aplikasi',
-          children: [
-            SettingsTile(
-              icon: Icons.notifications_none_rounded,
-              title: 'Preferensi Notifikasi',
-              subtitle: 'Jadwal konsultasi vendor, diskon eksklusif',
-              onTap: () => context.push(AppRoutes.notificationSettings),
-            ),
-            if (AppFeatures.languageSwitch)
+        if (AppFeatures.languageSwitch) ...[
+          gap,
+          SettingsSection(
+            title: 'Preferensi Aplikasi',
+            children: [
               SettingsTile(
                 icon: Icons.language,
                 title: 'Bahasa Tampilan',
@@ -380,8 +374,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   ),
                 ),
               ),
-          ],
-        ),
+            ],
+          ),
+        ],
         gap,
         SettingsSection(
           title: 'Layanan & Bantuan',

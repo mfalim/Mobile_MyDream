@@ -341,7 +341,6 @@ void main() {
     'Vendor Tersimpan': 'HALAMAN TERSIMPAN',
     'Vendor Disimpan': 'HALAMAN TERSIMPAN',
     'Laporkan Kendala Teknis': 'HALAMAN LAPOR',
-    'Preferensi Notifikasi': 'HALAMAN PREFERENSI',
     'Syarat & Ketentuan Layanan': 'INFO terms',
     'Kebijakan Privasi': 'INFO privacy',
     'Atur Tanggal': 'HALAMAN DATA PASANGAN',

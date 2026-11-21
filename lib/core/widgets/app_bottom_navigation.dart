@@ -16,11 +16,20 @@ class AppBottomNavigation extends StatelessWidget {
   List<(IconData, IconData, String)> get _items => [
         const (Icons.home_outlined, Icons.home_rounded, 'Home'),
         const (Icons.storefront_outlined, Icons.storefront_rounded, 'Vendors'),
-        const (Icons.auto_awesome_outlined, Icons.auto_awesome, 'Inspirations'),
+        const (
+          Icons.event_available_outlined,
+          Icons.event_available_rounded,
+          'Events'
+        ),
+        const (Icons.article_outlined, Icons.article_rounded, 'Artikel'),
         if (isMember)
           const (Icons.badge_outlined, Icons.badge_rounded, 'Workspace')
         else
-          const (Icons.favorite_border_rounded, Icons.favorite_rounded, 'My Wedding'),
+          const (
+            Icons.favorite_border_rounded,
+            Icons.favorite_rounded,
+            'My Wedding'
+          ),
       ];
 
   @override
@@ -51,7 +60,9 @@ class AppBottomNavigation extends StatelessWidget {
     final item = _items[index];
     final selected = selectedIndex == index;
     final color = selected
-        ? (isMember && index == 3 ? AppColors.primary : AppColors.coralDark)
+        ? (isMember && index == _items.length - 1
+            ? AppColors.primary
+            : AppColors.coralDark)
         : AppColors.muted;
 
     return Expanded(

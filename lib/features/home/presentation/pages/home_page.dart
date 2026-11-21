@@ -21,6 +21,7 @@ import 'package:w51/features/home/presentation/widgets/deals_section.dart';
 import 'package:w51/features/home/presentation/widgets/inspirations_section.dart';
 import 'package:w51/features/home/presentation/widgets/service_grid.dart';
 import 'package:w51/features/home/presentation/widgets/wedding_countdown_card.dart';
+import 'package:w51/features/inspirations/presentation/pages/public_events_page.dart';
 import 'package:w51/features/my_wedding/presentation/providers/couple_provider.dart';
 import 'package:w51/features/payment/presentation/providers/payments_provider.dart';
 import 'package:w51/features/payment/presentation/widgets/dp_reminder_card.dart';
@@ -146,6 +147,18 @@ class _HomeContent extends ConsumerWidget {
             onSeeAll: goVendors,
             onOpen: (v) => context.push(AppRoutes.vendorDetailPath(v.id)),
             onAsk: (v) => contactVendor(context, ref, v.id),
+          ),
+        ],
+        if (data.events.isNotEmpty) ...[
+          gap,
+          PublicEventsSection(
+            events: data.events,
+            onSeeAll: () => context.go(AppRoutes.events),
+            onOpen: (e) => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => PublicEventDetailPage(event: e),
+              ),
+            ),
           ),
         ],
         if (data.articles.isNotEmpty) ...[

@@ -10,17 +10,23 @@ import 'package:w51/features/inspirations/domain/entities/inspiration_entities.d
 abstract final class StoryModel {
   static RealWeddingStory story(Map<String, dynamic> json) {
     final paragraphs = _paragraphs(jsonString(json['content']));
+    final pkg = json['package'] is Map ? json['package'] as Map : null;
+    final evt = json['event'] is Map ? json['event'] as Map : null;
+    final rawRelated = json['related'];
     return RealWeddingStory(
       id: '${json['id']}',
       title: json['title'] as String,
       category: jsonString(json['category']),
       tag: jsonString(json['tag']),
       location: jsonString(json['location']),
-      excerpt: jsonString(json['excerpt']),
+      excerpt: jsonString(json['excerpt'] ?? json['summary']),
       authorName: jsonString(json['author']),
-      publishedLabel: _date(jsonString(json['published_at'])),
+      publishedLabel: _date(jsonString(json['published_at'])) ??
+          jsonString(json['date_label']),
       readMinutes: jsonInt(json['read_minutes']) ?? _readMinutes(paragraphs),
-      photoUrl: jsonString(json['photo']),
+      photoUrl: jsonString(json['photo']) ??
+          jsonString(evt?['photo']) ??
+          jsonString(pkg?['cover_photo'] ?? pkg?['photo']),
       heroCaption: jsonString(json['hero_caption']),
       stats: _stats(json['stats']),
       paragraphs: paragraphs,
@@ -32,18 +38,125 @@ abstract final class StoryModel {
       tips: _tips(json['tips']),
       likes: jsonInt(json['likes']),
       reads: jsonInt(json['reads']),
-      relatedPackageId: jsonString(json['package_id']),
+      relatedPackageId: jsonString(json['package_id']) ??
+          jsonString(pkg?['id'] ?? pkg?['slug']),
+      relatedPackageName: jsonString(pkg?['name']),
+      rating: jsonInt(json['rating']),
+      related: [
+        if (rawRelated is List)
+          for (final item in rawRelated.whereType<Map>())
+            teaser(Map<String, dynamic>.from(item)),
+      ],
     );
   }
 
-  static StoryTeaser teaser(Map<String, dynamic> json) => StoryTeaser(
-        id: '${json['id']}',
-        category: jsonString(json['category']) ?? 'Artikel',
-        title: json['title'] as String,
-        dateLabel: _date(jsonString(json['published_at'])),
-        reads: jsonInt(json['reads']),
-        photoUrl: jsonString(json['photo']),
+  static StoryTeaser teaser(Map<String, dynamic> json) {
+    final pkg = json['package'] is Map ? json['package'] as Map : null;
+    final evt = json['event'] is Map ? json['event'] as Map : null;
+    return StoryTeaser(
+      id: '${json['id']}',
+      category: jsonString(json['category']) ?? 'Artikel',
+      title: json['title'] as String,
+      dateLabel: _date(jsonString(json['published_at'])) ??
+          jsonString(json['date_label']),
+      reads: jsonInt(json['reads']),
+      photoUrl: jsonString(json['photo']) ??
+          jsonString(evt?['photo']) ??
+          jsonString(pkg?['cover_photo'] ?? pkg?['photo']),
+      excerpt: jsonString(json['summary'] ?? json['excerpt']),
+      authorName: jsonString(json['author']),
+      rating: jsonInt(json['rating']),
+    );
+  }
+
+  static PublicEventItem publicEvent(Map<String, dynamic> json) {
+    final startsOn = jsonString(json['starts_on']);
+    final endsOn = jsonString(json['ends_on']);
+    final rawStatus = jsonString(json['status']);
+    final status =
+        rawStatus ?? _computeEventStatus(startsOn: startsOn, endsOn: endsOn);
+    return PublicEventItem(
+      id: '${json['id']}',
+      slug: jsonString(json['slug']) ?? '${json['id']}',
+      title: jsonString(json['title']) ?? 'Event MyDream',
+      description: jsonString(json['description']),
+      photoUrl: jsonString(json['photo']),
+      status: status,
+      dateLabel: jsonString(json['date_label']) ??
+          _formatEventDates(startsOn: startsOn, endsOn: endsOn),
+      timeLabel: jsonString(json['time_label']) ??
+          _formatEventTimes(
+            startTime: jsonString(json['start_time']),
+            endTime: jsonString(json['end_time']),
+          ),
+      location: jsonString(json['location']),
+      vendors: _eventVendors(json['vendors']),
+    );
+  }
+
+  static String _computeEventStatus({String? startsOn, String? endsOn}) {
+    final start = startsOn != null ? DateTime.tryParse(startsOn) : null;
+    if (start == null) return 'upcoming';
+    final end = (endsOn != null ? DateTime.tryParse(endsOn) : null) ?? start;
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final startDay = DateTime(start.year, start.month, start.day);
+    final endDay = DateTime(end.year, end.month, end.day);
+    if (endDay.isBefore(today)) return 'finished';
+    if (startDay.isAfter(today)) return 'upcoming';
+    return 'ongoing';
+  }
+
+  static String? _formatEventDates({String? startsOn, String? endsOn}) {
+    final start = startsOn != null ? DateTime.tryParse(startsOn) : null;
+    if (start == null) return startsOn;
+    final end = (endsOn != null ? DateTime.tryParse(endsOn) : null) ?? start;
+    if (start.year == end.year &&
+        start.month == end.month &&
+        start.day == end.day) {
+      return formatDateId(start);
+    }
+    return '${formatDateShortId(start)} - ${formatDateId(end)}';
+  }
+
+  static String? _formatEventTimes({String? startTime, String? endTime}) {
+    if (startTime == null || startTime.isEmpty) return null;
+    String fmt(String t) =>
+        (t.length >= 5 ? t.substring(0, 5) : t).replaceAll(':', '.');
+    final start = fmt(startTime);
+    final end =
+        (endTime != null && endTime.isNotEmpty) ? ' - ${fmt(endTime)}' : '';
+    return '$start$end WIB';
+  }
+
+  static List<StoryVendor> _eventVendors(Object? raw) {
+    if (raw is! List) return const [];
+    final vendors = <StoryVendor>[];
+    for (final v in raw) {
+      if (v is! Map) continue;
+      final name = jsonString(v['name']);
+      if (name == null) continue;
+      final categoryName = jsonNameOf(v['category']);
+      final city = jsonString(v['city']);
+      final roleParts = [
+        if (categoryName != null) categoryName,
+        if (city != null) city,
+      ];
+      vendors.add(
+        StoryVendor(
+          name: name,
+          vendorId: jsonString(v['id'] ?? v['vendor_id'] ?? v['slug']),
+          role: roleParts.isNotEmpty
+              ? roleParts.join(' • ')
+              : (jsonString(v['role']) ?? 'Vendor Rekanan'),
+          kind: _kind(jsonString(v['kind'])),
+          rating: jsonDouble(v['rating']),
+          reviewCount: jsonInt(v['review_count']),
+        ),
       );
+    }
+    return vendors;
+  }
 
   /// Tanggal ISO menjadi "5 Okt 2026"; teks lain dipakai apa adanya.
   static String? _date(String? raw) {

@@ -11,6 +11,7 @@ class InspirationsMockDatasource implements InspirationsDatasource {
   Future<InspirationsData> fetch() async => InspirationsData(
         story: StoryModel.story(_stories.first),
         more: [for (final json in _stories.skip(1)) StoryModel.teaser(json)],
+        events: [for (final e in _events) StoryModel.publicEvent(e)],
       );
 
   @override
@@ -163,6 +164,53 @@ class InspirationsMockDatasource implements InspirationsDatasource {
       'published_at': '2026-09-21',
       'reads': 1400,
       'package_id': 'pkg-garden-jakarta',
+    },
+  ];
+
+  static final List<Map<String, dynamic>> _events = [
+    {
+      'id': 'event-expo-jember',
+      'slug': 'wedding-expo-jember',
+      'title': 'MyDream Wedding Expo',
+      'description':
+          'Pameran tahunan MyDream yang menghadirkan vendor rekanan dalam satu tempat: konsultasi paket, penawaran khusus, dan tanya jawab langsung dengan wedding planner.',
+      'status': 'upcoming',
+      'date_label': '20 - 21 Desember 2026',
+      'time_label': '10.00 - 20.00 WIB',
+      'location': 'Jember',
+      'vendors': [
+        {
+          'id': 'vendor-mattana',
+          'name': 'Mattana Wedding Planner',
+          'role': 'Wedding Organizer • Bali',
+          'kind': 'planner',
+        },
+        {
+          'id': 'vendor-vivaldi',
+          'name': 'Vivaldi Floral & Scenery',
+          'role': 'Floral & Space Design',
+          'kind': 'decor',
+        },
+      ],
+    },
+    {
+      'id': 'event-open-house',
+      'slug': 'open-house-grand-ballroom',
+      'title': 'Open House Grand Ballroom',
+      'description':
+          'Kunjungi venue bersama tim MyDream, lengkap dengan simulasi dekorasi dan tasting menu katering.',
+      'status': 'ongoing',
+      'date_label': 'Hari Ini',
+      'time_label': '13.00 - 17.00 WIB',
+      'location': 'Surabaya',
+      'vendors': [
+        {
+          'id': 'vendor-sora',
+          'name': 'Sora Visual Stories',
+          'role': 'Dokumentasi & Cinematic Film',
+          'kind': 'photographer',
+        },
+      ],
     },
   ];
 }

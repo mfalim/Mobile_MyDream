@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:w51/features/inspirations/domain/entities/inspiration_entities.dart';
 
 /// Kemajuan persiapan pernikahan. Belum ada sumbernya di database, jadi
 /// kedua isinya opsional dan disembunyikan di layar bila kosong.
@@ -100,12 +101,16 @@ class InspirationArticle {
     required this.category,
     required this.title,
     required this.excerpt,
+    this.photoUrl,
+    this.rating,
   });
 
   final String id;
   final String category;
   final String title;
   final String excerpt;
+  final String? photoUrl;
+  final int? rating;
 }
 
 class HomeData {
@@ -115,6 +120,7 @@ class HomeData {
     required this.vendorCategories,
     required this.vendors,
     required this.articles,
+    this.events = const [],
     this.countdown,
   });
 
@@ -126,4 +132,5 @@ class HomeData {
   final List<String> vendorCategories;
   final List<CuratedVendor> vendors;
   final List<InspirationArticle> articles;
+  final List<PublicEventItem> events;
 }

@@ -22,7 +22,7 @@ class AppShell extends ConsumerWidget {
         selectedIndex: navigationShell.currentIndex,
         isMember: isMember,
         onItemSelected: (index) {
-          if (isMember && index == 3) {
+          if (isMember && index == 4) {
             context.go(AppRoutes.memberDashboard);
             return;
           }

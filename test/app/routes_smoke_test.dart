@@ -14,6 +14,7 @@ void main() {
   const publicPaths = [
     '/home',
     '/vendors',
+    '/events',
     '/inspirations',
     '/packages',
     '/package/pkg-intimate-bali',

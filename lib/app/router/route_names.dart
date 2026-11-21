@@ -2,6 +2,7 @@ abstract final class AppRoutes {
   // Publik
   static const home = '/home';
   static const vendors = '/vendors';
+  static const events = '/events';
   static const inspirations = '/inspirations';
   static const vendorDetail = '/vendor/:id';
   static String vendorDetailPath(String id) => '/vendor/$id';

@@ -10,21 +10,27 @@ class MoreStoriesList extends StatelessWidget {
   const MoreStoriesList({
     required this.stories,
     required this.onOpen,
-    required this.onSeeAll,
+    this.onSeeAll,
+    this.title = 'Cerita & Inspirasi Lainnya',
+    this.subtitle = 'Kisah nyata penuh romansa, tips, dan panduan dari MyDream',
     super.key,
   });
 
   final List<StoryTeaser> stories;
   final ValueChanged<StoryTeaser> onOpen;
-  final VoidCallback onSeeAll;
+  final VoidCallback? onSeeAll;
+  final String title;
+  final String subtitle;
 
   String _reads(int n) =>
       n >= 1000 ? '${(n / 1000).toStringAsFixed(1)}k' : '$n';
 
   String? _meta(StoryTeaser s) {
+    final author = s.authorName;
     final date = s.dateLabel;
     final reads = s.reads;
     final parts = [
+      if (author != null && author.isNotEmpty) 'Oleh $author',
       if (date != null) date,
       if (reads != null) '${_reads(reads)} dibaca',
     ];
@@ -41,22 +47,23 @@ class MoreStoriesList extends StatelessWidget {
           children: [
             Expanded(
               child: Text(
-                'Cerita & Inspirasi Lainnya',
+                title,
                 style: AppTypography.heading(20),
               ),
             ),
-            TextButton(
-              onPressed: onSeeAll,
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [Text('Semua'), Icon(Icons.chevron_right, size: 18)],
+            if (onSeeAll != null)
+              TextButton(
+                onPressed: onSeeAll,
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [Text('Semua'), Icon(Icons.chevron_right, size: 18)],
+                ),
               ),
-            ),
           ],
         ),
-        const Text(
-          'Kisah nyata penuh romansa dari para pengantin MyDream',
-          style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+        Text(
+          subtitle,
+          style: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
         ),
         const SizedBox(height: 12),
         if (stories.isEmpty)
@@ -80,8 +87,8 @@ class MoreStoriesList extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         SizedBox(
-                          width: 88,
-                          height: 88,
+                          width: 96,
+                          height: 96,
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(AppRadius.sm),
                             child: AppImage(url: s.photoUrl),
@@ -92,16 +99,35 @@ class MoreStoriesList extends StatelessWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                s.category.toUpperCase(),
-                                style: AppTypography.eyebrow.copyWith(
-                                  fontSize: 10,
-                                ),
+                              Row(
+                                children: [
+                                  Flexible(
+                                    child: Text(
+                                      s.category.toUpperCase(),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: AppTypography.eyebrow.copyWith(
+                                        fontSize: 10,
+                                      ),
+                                    ),
+                                  ),
+                                  if (s.rating != null && s.rating! > 0) ...[
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      '★ ${s.rating}/5',
+                                      style: const TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w700,
+                                        color: Color(0xFFD97706),
+                                      ),
+                                    ),
+                                  ],
+                                ],
                               ),
                               const SizedBox(height: 4),
                               Text(
                                 s.title,
-                                maxLines: 3,
+                                maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
                                 style: const TextStyle(
                                   fontWeight: FontWeight.w700,
@@ -109,13 +135,27 @@ class MoreStoriesList extends StatelessWidget {
                                   height: 1.3,
                                 ),
                               ),
+                              if (s.excerpt != null &&
+                                  s.excerpt!.isNotEmpty) ...[
+                                const SizedBox(height: 4),
+                                Text(
+                                  s.excerpt!,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    color: AppColors.textSecondary,
+                                    fontSize: 12,
+                                    height: 1.35,
+                                  ),
+                                ),
+                              ],
                               if (_meta(s) != null) ...[
                                 const SizedBox(height: 4),
                                 Text(
                                   _meta(s)!,
                                   style: const TextStyle(
                                     color: AppColors.textSecondary,
-                                    fontSize: 12,
+                                    fontSize: 11.5,
                                   ),
                                 ),
                               ],

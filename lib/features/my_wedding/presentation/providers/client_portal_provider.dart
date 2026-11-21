@@ -2,6 +2,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:w51/app/providers/api_providers.dart';
 import 'package:w51/core/config/app_config.dart';
 import 'package:w51/features/auth/presentation/providers/auth_provider.dart';
+import 'package:w51/features/home/presentation/providers/home_provider.dart';
+import 'package:w51/features/inspirations/presentation/providers/inspirations_provider.dart';
 import 'package:w51/features/my_wedding/domain/entities/client_portal_models.dart';
 import 'package:w51/features/payment/presentation/providers/payments_provider.dart';
 
@@ -79,4 +81,6 @@ Future<void> submitClientReview(
         'comment': comment.trim(),
     },
   );
+  ref.invalidate(inspirationsDataProvider);
+  ref.invalidate(homeDataProvider);
 }
